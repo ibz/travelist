@@ -1,4 +1,10 @@
+from django.contrib.auth.models import User
 from django.contrib.gis.db import models
+
+class UserProfile(models.Model):
+    user = models.OneToOneField(User)
+    activation_key = models.CharField(max_length=40)
+    key_expires = models.DateTimeField()
 
 class Location(models.Model):
     name = models.CharField(max_length=100)
