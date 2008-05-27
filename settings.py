@@ -21,8 +21,8 @@ TIME_ZONE = 'America/Chicago'
 LANGUAGE_CODE = 'en-us'
 USE_I18N = True
 
-MEDIA_ROOT = ''
-MEDIA_URL = ''
+MEDIA_ROOT = '/home/ionut/work/kashgar/media/'
+MEDIA_URL = '/media/'
 ADMIN_MEDIA_PREFIX = '/admin-media/'
 
 SECRET_KEY = '@2s!oe3(g2w(sifra4t+=!whk79-b-3p8gr4o!fw#a_x4deht3'
@@ -52,7 +52,8 @@ MIDDLEWARE_CLASSES = (
 ROOT_URLCONF = 'urls'
 
 TEMPLATE_DIRS = (
-    "/home/ionut/work/kashgar/templates"
+    "/home/ionut/work/kashgar/templates",
+    "/home/ionut/work/kashgar/templates/web"
 )
 
 INSTALLED_APPS = (

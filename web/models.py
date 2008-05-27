@@ -1,14 +1,17 @@
 from django.contrib.auth.models import User
 from django.contrib.gis.db import models
 
+class Location(models.Model):
+    name = models.CharField(max_length=100)
+    coords = models.PointField()
+
 class UserProfile(models.Model):
     user = models.OneToOneField(User)
     activation_key = models.CharField(max_length=40)
     key_expires = models.DateTimeField()
-
-class Location(models.Model):
-    name = models.CharField(max_length=100)
-    coords = models.PointField()
+    name = models.CharField(max_length=50)
+    current_location = models.ForeignKey(Location)
+    about = models.TextField()
 
 class Trip(models.Model):
     title = models.CharField(max_length=200)

@@ -1,9 +1,18 @@
 from django.conf.urls.defaults import *
 
-urlpatterns = patterns('',
-    (r'^admin/', include('django.contrib.admin.urls')),
+import settings
 
-    (r"^/", 'web.views.index'),
-    (r"^accounts/register/", 'web.views.register'),
-    (r"^accounts/confirm/(?P<activation_key>\w+)", 'web.views.confirm')
+urlpatterns = patterns('',
+    (r"^admin/",
+      include('django.contrib.admin.urls')),
+    (r'^media/(?P<path>.*)$',
+      'django.views.static.serve',
+     {'document_root': settings.MEDIA_ROOT}),
+    (r"^$", 'web.views.index'),
+    (r"^account/register/$",
+      'web.views.account_register'),
+    (r"^account/confirm/(?P<activation_key>\w+)/$",
+      'web.views.account_confirm'),
+    (r"^account/details/$",
+      'web.views.account_details'),
 )

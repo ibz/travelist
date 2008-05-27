@@ -10,17 +10,25 @@ from django.shortcuts import get_object_or_404
 from django.core.mail import send_mail
 from django.contrib.auth.models import User
 from django.db import transaction
+from django.contrib.auth.decorators import login_required
 
 from web.models import UserProfile
-from web.forms import RegistrationForm
+from web.forms import AccountDetailsForm
+from web.forms import AccountRegistrationForm
 
 import settings
 
+def render(template, context=None):
+    if not context:
+        context = {}
+    context['settings'] = settings
+    return render_to_response(template, context)
+
 def index(request):
-    return render_to_response("web/index.html")
+    return render("web/index.html")
 
 @transaction.commit_on_success
-def register(request):
+def account_register(request):
     if request.user.is_authenticated():
         return HttpResponseRedirect("/")
     if request.POST:
@@ -47,18 +55,27 @@ def register(request):
                       email_body,
                       settings.CUSTOMER_EMAIL,
                       [user.email])
-            return render_to_response("web/register.html", {'created': True})
+            return render("web/account_register.html", {'created': True})
     else:
         form = RegistrationForm()
-    return render_to_response("web/register.html", {'form': form})
+    return render("web/account_register.html", {'form': form})
 
-def confirm(request, activation_key):
+def account_confirm(request, activation_key):
     if request.user.is_authenticated():
         return HttpResponseRedirect("/")
     user_profile = get_object_or_404(UserProfile, activation_key=activation_key)
     if user_profile.key_expires < datetime.today():
-        return render_to_response("web/confirm.html", {'expired': True})
+        return render("web/account_confirm.html", {'expired': True})
     user = user_profile.user
     user.is_active = True
     user.save()
-    return render_to_response("web/confirm.html", {'success': True})
+    return render("web/account_confirm.html", {'success': True})
+
+@login_required
+def account_details(request):
+    if request.POST:
+        form = AccountDetailsForm(request.POST)
+    else:
+        form = AccountDetailsForm()
+
+    return render("web/account_details.html", {'form': form})
