@@ -5,6 +5,7 @@ from random import random
 
 from django import newforms as forms
 from django.http import HttpResponseRedirect
+from django.http import HttpResponse
 from django.shortcuts import render_to_response
 from django.shortcuts import get_object_or_404
 from django.core.mail import send_mail
@@ -12,6 +13,7 @@ from django.contrib.auth.models import User
 from django.db import transaction
 from django.contrib.auth.decorators import login_required
 
+from web.models import Location
 from web.models import UserProfile
 from web.forms import AccountDetailsForm
 from web.forms import AccountRegistrationForm
@@ -75,7 +77,14 @@ def account_confirm(request, activation_key):
 def account_details(request):
     if request.POST:
         form = AccountDetailsForm(request.POST)
+        print form.is_valid()
+        print form.cleaned_data
     else:
         form = AccountDetailsForm()
 
     return render("web/account_details.html", {'form': form})
+
+def location(request):
+    if request.GET:
+        res = Location.objects.filter(name__icontains=request.GET['q'])[:5]
+        return HttpResponse("\n".join(["%s|%s" % (l.name, l.id) for l in res]))

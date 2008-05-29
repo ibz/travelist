@@ -12,18 +12,26 @@ class LocationInput(forms.widgets.Widget):
         else:
             loc_id, loc_name = "", ""
         return (
-"""<input type=\"text\" value="%(loc_name)s" onkeydown="javascript:autoCompleteLocation('id_%(name)s');"%(attrs)s />
-<input type="hidden" value="%(loc_id)s" name="%(name)s"%(attrs)s />"""
+"""<input type=\"text\" value="%(loc_name)s" id="id_%(name)s_name" />
+<input type="hidden" value="%(loc_id)s" name="%(name)s"%(attrs)s />
+<script type="text/javascript">
+$("#id_%(name)s_name").autocomplete("/location/",
+    {minChars: 2,
+     onItemSelect: function(li) { $("#id_%(name)s").attr('value', li.extra[0]); }});
+</script>
+"""
             % {'loc_name': loc_name,
                'loc_id': loc_id,
                'name': name,
                'attrs': forms.util.flatatt(attrs)})
+
 
 class LocationChoiceField(forms.fields.Field):
     widget=LocationInput
 
     def clean(self, value):
         super(LocationChoiceField, self).clean(value)
+        return int(value)
 
 class AccountDetailsForm(forms.ModelForm):
     name = forms.CharField()

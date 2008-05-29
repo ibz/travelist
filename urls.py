@@ -15,4 +15,6 @@ urlpatterns = patterns('',
       'web.views.account_confirm'),
     (r"^account/details/$",
       'web.views.account_details'),
+    (r"^location/$",
+      'web.views.location'),
 )
