@@ -17,4 +17,8 @@ urlpatterns = patterns('',
       'web.views.account_details'),
     (r"^location/$",
       'web.views.location'),
+    (r"^point/(?P<point_id>\d+)/annotation/list/$",
+      'web.views.annotation_list'),
+    (r"^segment/(?P<segment_id>\d+)/annotation/list/$",
+      'web.views.annotation_list')
 )

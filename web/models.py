@@ -32,11 +32,8 @@ class Segment(models.Model):
     transportation = models.IntegerField()
 
 class Annotation(object):
+    CONTENT_TYPES = ()
+    point = models.ForeignKey(Point, null=True)
+    segment = models.ForeignKey(Segment, null=True)
     content_type = models.IntegerField()
     content = models.TextField()
-
-class PointAnnotation(models.Model, Annotation):
-    point = models.ForeignKey(Point)
-
-class SegmentAnnotation(models.Model, Annotation):
-    segment = models.ForeignKey(Segment)
