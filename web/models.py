@@ -5,6 +5,12 @@ class Location(models.Model):
     name = models.CharField(max_length=100)
     coords = models.PointField()
 
+    class Admin:
+        pass
+
+    def __unicode__(self):
+        return self.name
+
 class UserProfile(models.Model):
     user = models.OneToOneField(User)
     activation_key = models.CharField(max_length=40)
@@ -13,21 +19,34 @@ class UserProfile(models.Model):
     current_location = models.ForeignKey(Location)
     about = models.TextField()
 
+    class Admin:
+        pass
+
+    def __unicode__(self):
+        return self.user.username
+
 class Trip(models.Model):
-    title = models.CharField(max_length=200)
-    start_date = models.DateTimeField()
-    end_date = models.DateTimeField()
+    user = models.ForeignKey(User)
+    name = models.CharField(max_length=200)
+    start_date = models.DateField()
+    end_date = models.DateField()
+
+    class Admin:
+        pass
+
+    def __unicode__(self):
+        return self.name
 
 class Point(models.Model):
     location = models.ForeignKey(Location, null=True)
     coords = models.PointField()
     trip = models.ForeignKey(Trip)
-    arrival_date = models.DateTimeField()
-    departure_date = models.DateTimeField()
 
 class Segment(models.Model):
     p1 = models.ForeignKey(Point, related_name="segments_out")
     p2 = models.ForeignKey(Point, related_name="segments_in")
+    start_date = models.DateTimeField()
+    end_date = models.DateTimeField()
     trip = models.ForeignKey(Trip)
     transportation = models.IntegerField()
 

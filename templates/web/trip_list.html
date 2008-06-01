@@ -1,0 +1,11 @@
+{% extends "base.html" %}
+{% block body %}
+<table>
+{% for trip in trips %}
+    <tr>
+        <td><a href="/trip/{{ trip.id }}/">{{ trip.name }}</a></td>
+        <td>{{ trip.start_date }} - {{ trip.end_date }}</td>
+    </tr>
+{% endfor %}
+</table>
+{% endblock %}

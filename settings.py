@@ -38,6 +38,8 @@ EMAIL_SUBJECT_PREFIX = "[Kashgar project] "
 
 APPEND_SLASH = True
 
+AUTH_PROFILE_MODULE = 'web.UserProfile'
+
 TEMPLATE_LOADERS = (
     'django.template.loaders.filesystem.load_template_source',
     'django.template.loaders.app_directories.load_template_source')

@@ -14,9 +14,13 @@ from django.db import transaction
 from django.contrib.auth.decorators import login_required
 
 from web.models import Location
+from web.models import Trip
+from web.models import Point
+from web.models import Segment
 from web.models import UserProfile
 from web.forms import AccountDetailsForm
 from web.forms import AccountRegistrationForm
+from web.forms import TripForm
 
 import settings
 
@@ -48,11 +52,14 @@ def account_register(request):
             profile.save()
 
             email_subject = "Your new %s account confirmation" % settings.SITE_NAME
-            email_body = "Hello, %s, and thanks for signing up for an %s account!\n\nTo activate your account, click this link within 48 hours:\n\n%s/account/confirm/%s" % (
+            email_body = (
+"""Hello, %s, and thanks for signing up for an %s account!
+To activate your account, click this link within 48 hours:
+%s/account/confirm/%s""" % (
                 user.username,
                 settings.SITE_NAME,
                 settings.SITE_URL,
-                profile.activation_key)
+                profile.activation_key))
             send_mail(email_subject,
                       email_body,
                       settings.CUSTOMER_EMAIL,
@@ -76,13 +83,36 @@ def account_confirm(request, activation_key):
 @login_required
 def account_details(request):
     if request.POST:
-        form = AccountDetailsForm(request.POST)
-        print form.is_valid()
-        print form.cleaned_data
+        form = AccountDetailsForm(request.POST, instance=request.user.get_profile())
+        if form.is_valid():
+            form.save()
+            return HttpResponseRedirect("/account/details/")
     else:
-        form = AccountDetailsForm()
+        form = AccountDetailsForm(instance=request.user.get_profile())
 
     return render("web/account_details.html", {'form': form})
+
+@login_required
+def trip_list(request):
+    trips = Trip.objects.filter(user=request.user).order_by('start_date')
+    return render("web/trip_list.html", {'trips': trips})
+
+@login_required
+def trip_details(request, id):
+    if id:
+        trip = get_object_or_404(Trip, id=id, user=request.user)
+    else:
+        trip = Trip()
+    if request.POST:
+        form = TripForm(request.POST, instance=trip)
+        if form.is_valid():
+            form.save()
+            return HttpResponseRedirect("/trip/list/")
+    else:
+        form = TripForm(instance=trip)
+    return render("web/trip_details.html",
+                  {'trip': trip,
+                   'form': form})
 
 def location(request):
     if request.GET:
