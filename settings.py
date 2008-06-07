@@ -44,6 +44,10 @@ TEMPLATE_LOADERS = (
     'django.template.loaders.filesystem.load_template_source',
     'django.template.loaders.app_directories.load_template_source')
 
+TEMPLATE_CONTEXT_PROCESSORS = (
+'django.core.context_processors.auth',
+'django.core.context_processors.media')
+
 MIDDLEWARE_CLASSES = (
     'django.middleware.common.CommonMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',

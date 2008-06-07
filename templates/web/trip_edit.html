@@ -6,5 +6,6 @@
 {{ form }}
 </table>
 <input type="submit" />
+<a href="{% if trip.id %}/trip/{{ trip.id }}/{% else %}/trip/list/{% endif %}">Cancel</a>
 </form>
 {% endblock %}

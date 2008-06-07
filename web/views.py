@@ -12,26 +12,28 @@ from django.core.mail import send_mail
 from django.contrib.auth.models import User
 from django.db import transaction
 from django.contrib.auth.decorators import login_required
+from django.template import RequestContext
 
 from web.models import Location
 from web.models import Trip
 from web.models import Point
 from web.models import Segment
 from web.models import UserProfile
+from web.forms import SegmentInput
 from web.forms import AccountDetailsForm
 from web.forms import AccountRegistrationForm
-from web.forms import TripForm
+from web.forms import TripEditForm
 
 import settings
 
-def render(template, context=None):
+def render(template, request, context=None):
     if not context:
         context = {}
     context['settings'] = settings
-    return render_to_response(template, context)
+    return render_to_response(template, context, context_instance=RequestContext(request))
 
 def index(request):
-    return render("web/index.html")
+    return render("web/index.html", request)
 
 @transaction.commit_on_success
 def account_register(request):
@@ -64,21 +66,21 @@ To activate your account, click this link within 48 hours:
                       email_body,
                       settings.CUSTOMER_EMAIL,
                       [user.email])
-            return render("web/account_register.html", {'created': True})
+            return render("web/account_register.html", request, {'created': True})
     else:
         form = RegistrationForm()
-    return render("web/account_register.html", {'form': form})
+    return render("web/account_register.html", request, {'form': form})
 
 def account_confirm(request, activation_key):
     if request.user.is_authenticated():
         return HttpResponseRedirect("/")
     user_profile = get_object_or_404(UserProfile, activation_key=activation_key)
     if user_profile.key_expires < datetime.today():
-        return render("web/account_confirm.html", {'expired': True})
+        return render("web/account_confirm.html", request, {'expired': True})
     user = user_profile.user
     user.is_active = True
     user.save()
-    return render("web/account_confirm.html", {'success': True})
+    return render("web/account_confirm.html", request, {'success': True})
 
 @login_required
 def account_details(request):
@@ -90,31 +92,45 @@ def account_details(request):
     else:
         form = AccountDetailsForm(instance=request.user.get_profile())
 
-    return render("web/account_details.html", {'form': form})
+    return render("web/account_details.html", request, {'form': form})
 
 @login_required
 def trip_list(request):
     trips = Trip.objects.filter(user=request.user).order_by('start_date')
-    return render("web/trip_list.html", {'trips': trips})
+    return render("web/trip_list.html", request, {'trips': trips})
+
+def trip_view(request, id):
+    trip = get_object_or_404(Trip, id=id)
+    return render("web/trip_view.html", request, {'trip': trip})
 
 @login_required
-def trip_details(request, id):
+def trip_edit(request, id):
     if id:
         trip = get_object_or_404(Trip, id=id, user=request.user)
     else:
-        trip = Trip()
+        trip = Trip(user=request.user)
     if request.POST:
-        form = TripForm(request.POST, instance=trip)
+        form = TripEditForm(request.POST, instance=trip)
         if form.is_valid():
-            form.save()
-            return HttpResponseRedirect("/trip/list/")
+            trip = form.save()
+            return HttpResponseRedirect("/trip/%s/" % trip.id)
     else:
-        form = TripForm(instance=trip)
-    return render("web/trip_details.html",
+        form = TripEditForm(instance=trip)
+    return render("web/trip_edit.html", request,
                   {'trip': trip,
                    'form': form})
 
-def location(request):
+@login_required
+def widget_segment_input(request):
+    if request.GET:
+        return HttpResponse(SegmentInput().render(request.GET['name'], None))
+
+@login_required
+def location_search(request):
     if request.GET:
         res = Location.objects.filter(name__icontains=request.GET['q'])[:5]
         return HttpResponse("\n".join(["%s|%s" % (l.name, l.id) for l in res]))
+
+@login_required
+def annotation_list(request):
+    pass

@@ -15,9 +15,9 @@ class UserProfile(models.Model):
     user = models.OneToOneField(User)
     activation_key = models.CharField(max_length=40)
     key_expires = models.DateTimeField()
-    name = models.CharField(max_length=50)
-    current_location = models.ForeignKey(Location)
-    about = models.TextField()
+    name = models.CharField(max_length=50, blank=True)
+    current_location = models.ForeignKey(Location, blank=True, null=True)
+    about = models.TextField(blank=True)
 
     class Admin:
         pass
@@ -38,21 +38,37 @@ class Trip(models.Model):
         return self.name
 
 class Point(models.Model):
-    location = models.ForeignKey(Location, null=True)
-    coords = models.PointField()
     trip = models.ForeignKey(Trip)
+    location = models.ForeignKey(Location, null=True)
+    name = models.CharField(max_length=100)
+    coords = models.PointField()
+
+    def __unicode__(self):
+        return str(self.coords)
+
+TRANSPORTATION_METHODS = ((0, "Unspecified"),
+                          (1, "Train"),
+                          (2, "Airplane"),
+                          (3, "Walk"),
+                          (4, "Bike"),
+                          (5, "Car"))
 
 class Segment(models.Model):
+    trip = models.ForeignKey(Trip)
     p1 = models.ForeignKey(Point, related_name="segments_out")
     p2 = models.ForeignKey(Point, related_name="segments_in")
-    start_date = models.DateTimeField()
-    end_date = models.DateTimeField()
-    trip = models.ForeignKey(Trip)
-    transportation = models.IntegerField()
+    start_date = models.DateTimeField(blank=True, null=True)
+    end_date = models.DateTimeField(blank=True, null=True)
+    transportation_metod = models.IntegerField(choices=TRANSPORTATION_METHODS)
+
+TEXT = 1
+CONTENT_TYPES = ((TEXT, "Text"))
 
 class Annotation(object):
-    CONTENT_TYPES = ()
     point = models.ForeignKey(Point, null=True)
     segment = models.ForeignKey(Segment, null=True)
-    content_type = models.IntegerField()
+    content_type = models.IntegerField(choices=CONTENT_TYPES)
     content = models.TextField()
+
+    def __unicode__(self):
+        return self.content

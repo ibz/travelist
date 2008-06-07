@@ -1,0 +1,16 @@
+{% extends "base.html" %}
+
+{% block body %}
+{{ trip.name }}
+{{ trip.start_date }}
+{{ trip.end_date }}
+
+{{user.id}}
+
+{% ifequal trip.user_id user.id %}
+<a href="/trip/{{ trip.id }}/edit/">Edit</a>
+{% endifequal %}
+
+<a href="/trip/list">List</a>
+
+{% endblock %}
