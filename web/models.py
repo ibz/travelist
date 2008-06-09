@@ -1,6 +1,8 @@
 from django.contrib.auth.models import User
 from django.contrib.gis.db import models
 
+from lib.mock import Mock
+
 class Location(models.Model):
     name = models.CharField(max_length=100)
     coords = models.PointField()
@@ -59,7 +61,16 @@ class Segment(models.Model):
     p2 = models.ForeignKey(Point, related_name="segments_in")
     start_date = models.DateTimeField(blank=True, null=True)
     end_date = models.DateTimeField(blank=True, null=True)
-    transportation_metod = models.IntegerField(choices=TRANSPORTATION_METHODS)
+    transportation_method = models.IntegerField(choices=TRANSPORTATION_METHODS)
+
+    def __cmp__(self, other):
+        return cmp(self.start_date, other.start_date)
+
+    def locations_equal(self, other):
+        if isinstance(other, tuple):
+            return (self.p1.location_id, self.p2.location_id) == other
+        else:
+            return self.locations_equal((other.p1.location_id, other.p2.location_id))
 
 TEXT = 1
 CONTENT_TYPES = ((TEXT, "Text"))

@@ -13,6 +13,8 @@ from web.models import Segment
 from web.models import Trip
 from web.models import UserProfile
 from web.models import TRANSPORTATION_METHODS
+from web.utils import group_items
+from web.utils import find
 
 class LocationInput(forms.widgets.Widget):
     def render(self, name, value, attrs=None):
@@ -49,7 +51,7 @@ class LocationChoiceField(fields.ChoiceField):
         except Location.DoesNotExist:
             raise ValidationError(self.error_messages['invalid_choice'])
 
-class SegmentInput(forms.widgets.Widget):
+class SegmentInput(widgets.Widget):
     def render(self, name, value, attrs=None):
         location = LocationInput()
         date = widgets.DateTimeInput()
@@ -103,32 +105,22 @@ class PathField(fields.Field):
                  help_text=None, *args, **kwargs):
         fields.Field.__init__(self, False, widget, label, initial, help_text, *args, **kwargs)
 
-    def _get_point(self, points, location_id):
-        for point in points:
-            if point.location_id == location_id:
-                return point
-        point = Point(location_id=location_id)
-        points.append(point)
-        return point
-
     def clean(self, value):
         datetime_field = fields.DateTimeField(required=False)
         choice_field = fields.ChoiceField(choices=TRANSPORTATION_METHODS, required=False)
-        segments, points = [], []
-        for data in value:
-            segment = Segment()
-            p1_location = int(data['p1_location'])
-            p2_location = int(data['p2_location'])
-            start_date = datetime_field.clean(data['start_date'])
-            end_date = datetime_field.clean(data['end_date'])
-            transportation_method = choice_field.clean(data['transportation_method'])
-            segment.p1 = self._get_point(points, p1_location)
-            segment.p2 = self._get_point(points, p2_location)
-            segment.start_date = start_date
-            segment.end_date = end_date
-            segment.transportation_method = transportation_method
+        segments, locations = [], []
+        for segment_data in value:
+            segment = {'p1_location': int(segment_data['p1_location']),
+                       'p2_location': int(segment_data['p2_location']),
+                       'start_date': datetime_field.clean(segment_data['start_date']),
+                       'end_date': datetime_field.clean(segment_data['end_date']),
+                       'transportation_method':
+                           int(choice_field.clean(segment_data['transportation_method']))}
             segments.append(segment)
-        return segments, points
+            for l in [segment['p1_location'], segment['p2_location']]:
+                if not l in locations:
+                    locations.append(l)
+        return segments, locations
 
 class AccountDetailsForm(forms.ModelForm):
     name = forms.CharField(required=False)
@@ -163,9 +155,80 @@ class TripEditForm(forms.ModelForm):
         model = Trip
         fields = ('name', 'start_date', 'end_date', 'path')
 
-    def save(self, commit=True):
-        trip = super(TripEditForm, self).save(False)
-        segments, points = trip.segments, trip.points
-        new_segments, new_points = self.cleaned_data['path']
-        
+    def _get_locations(self, segment_data):
+        return (segment_data['p1_location'], segment_data['p2_location'])
+
+    def _create_point(self, trip, location_id):
+        location = Location.objects.get(id=location_id)
+        point = Point(trip=trip, location=location)
+        point.name=location.name
+        point.coords=location.coords
+        point.save()
+
+    def _create_segment(self, trip, data):
+        segment = Segment(trip=trip)
+        segment.p1 = Point.objects.get(trip=trip, location__id=data['p1_location'])
+        segment.p2 = Point.objects.get(trip=trip, location__id=data['p2_location'])
+        segment.start_date=data['start_date']
+        segment.end_date=data['end_date']
+        segment.transportation_method = data['transportation_method']
+        segment.save()
+
+    def save(self):
+        trip = super(TripEditForm, self).save()
+
+        segments = list(trip.segment_set.all())
+        points = list(trip.point_set.all())
+        new_segments_data, new_points_data = self.cleaned_data['path']
+
+        # delete points
+        for point in points:
+            if point.location_id not in new_points_data:
+                # TODO: check for annotations
+                point.delete()
+
+        # add points
+        for new_point_data in new_points_data:
+            if not find(points, lambda p: p.location_id == new_point_data):
+                self._create_point(trip, new_point_data)
+
+        # delete segments
+        for segment in segments:
+            if not find(new_segments_data,
+                        lambda s: segment.locations_equal(self._get_locations(s))):
+                # TODO: check for annotations
+                segment.delete()
+
+        # add / edit segments
+        segments_grouped = group_items(segments, Segment.locations_equal)
+        new_segments_data_grouped = \
+            group_items(new_segments_data,
+                        lambda a, b: self._get_locations(a) == self._get_locations(b))
+
+        for new_group in new_segments_data_grouped:
+            match = lambda g: g[0].locations_equal(self._get_locations(new_group[0]))
+            existing_group = find(segments_grouped, match)
+
+            if existing_group:
+                new_group.sort(lambda a, b: cmp(a['start_date'], b['start_date']))
+                existing_group.sort()
+
+                # delete segments
+                for segment in existing_group[len(new_group):]:
+                    # TODO: check annotations
+                    segment.delete()
+
+                # modify segments
+                for i in range(min(len(new_group), len(existing_group))):
+                    existing_group[i].start_date = new_group[i]['start_date']
+                    existing_group[i].end_date = new_group[i]['end_date']
+                    existing_group[i].transportation_method = new_group[i]['transportation_method']
+                    existing_group[i].save()
+
+                # add segments
+                for data in new_group[len(existing_group):]:
+                    self._create_segment(trip, data)
+            else: # add all segments in this group
+                for data in new_group:
+                    self._create_segment(trip, data)
         return trip
