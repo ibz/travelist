@@ -308,6 +308,7 @@ class TestTripEditForm(TestCase):
         points = list(trip.point_set.all())
 
         segments.sort()
+        self.assertEquals(len(segments), 2)
         self._assert_segment_data_equals(segments[0],
                                          *(1, 2, datetime(2007, 3, 1), datetime(2007, 3, 5), 2))
         self._assert_segment_data_equals(segments[1],
@@ -319,18 +320,73 @@ class TestTripEditForm(TestCase):
 
         self._edit_trip(trip, "New name", "2007-03-01", "2007-03-10",
                         [(0, 1, 2, "2007-03-01", "2007-03-05", 2),
-                         (1, 2, 3, "2007-03-05", "2007-03-10", 1),
-                         (3, 3, 0, "2007-03-10", "2007-03-15", 1)])
+                         (1, 2, 3, "2007-03-05", "2007-03-07", 1),
+                         (3, 3, 0, "2007-03-07", "2007-03-10", 1)])
 
         segments = list(trip.segment_set.all())
         points = list(trip.point_set.all())
 
         segments.sort()
+        self.assertEquals(len(segments), 3)
         self._assert_segment_data_equals(segments[0],
                                          *(1, 2, datetime(2007, 3, 1), datetime(2007, 3, 5), 2))
         self._assert_segment_data_equals(segments[1],
-                                         *(2, 3, datetime(2007, 3, 5), datetime(2007, 3, 10), 1))
+                                         *(2, 3, datetime(2007, 3, 5), datetime(2007, 3, 7), 1))
         self._assert_segment_data_equals(segments[2],
-                                         *(3, 0, datetime(2007, 3, 10), datetime(2007, 3, 15), 1))
+                                         *(3, 0, datetime(2007, 3, 7), datetime(2007, 3, 10), 1))
 
         self.assertEquals(sorted([p.location_id for p in points]), [0, 1, 2, 3])
+
+        # edit / delete segment
+
+        self._edit_trip(trip, "New name", "2007-03-01", "2007-03-10",
+                        [(0, 1, 2, "2007-03-01", "2007-03-05", 2),
+                         (4, 2, 1, "2007-03-05", "2007-03-10", 1)])
+
+        segments = list(trip.segment_set.all())
+        points = list(trip.point_set.all())
+
+        segments.sort()
+        self.assertEquals(len(segments), 2)
+        self._assert_segment_data_equals(segments[0], *(1, 2, datetime(2007, 3, 1), datetime(2007, 3, 5), 2))
+        self._assert_segment_data_equals(segments[1], *(2, 1, datetime(2007, 3, 5), datetime(2007, 3, 10), 1))
+
+        self.assertEquals(sorted([p.location_id for p in points]), [1, 2])
+
+        # add multiple segments between same points
+
+        self._edit_trip(trip, "New name", "2007-03-01", "2007-03-10",
+                        [(0, 1, 2, "2007-03-01", "2007-03-05", 2),
+                         (4, 2, 1, "2007-03-05", "2007-03-06", 1),
+                         (5, 1, 2, "2007-03-06", "2007-03-08", 2),
+                         (1, 2, 1, "2007-03-09", "2007-03-10", 1)])
+
+        segments = list(trip.segment_set.all())
+        points = list(trip.point_set.all())
+
+        segments.sort()
+        self.assertEquals(len(segments), 4)
+        self._assert_segment_data_equals(segments[0], *(1, 2, datetime(2007, 3, 1), datetime(2007, 3, 5), 2))
+        self._assert_segment_data_equals(segments[1], *(2, 1, datetime(2007, 3, 5), datetime(2007, 3, 6), 1))
+        self._assert_segment_data_equals(segments[2], *(1, 2, datetime(2007, 3, 6), datetime(2007, 3, 8), 2))
+        self._assert_segment_data_equals(segments[3], *(2, 1, datetime(2007, 3, 9), datetime(2007, 3, 10), 1))
+
+        self.assertEquals(sorted([p.location_id for p in points]), [1, 2])
+
+        # deleting one of the doubled segments
+
+        self._edit_trip(trip, "New name", "2007-03-01", "2007-03-10",
+                        [(0, 1, 2, "2007-03-01", "2007-03-05", 2),
+                         (4, 2, 1, "2007-03-05", "2007-03-06", 1),
+                         (5, 1, 2, "2007-03-06", "2007-03-08", 2)])
+
+        segments = list(trip.segment_set.all())
+        points = list(trip.point_set.all())
+
+        segments.sort()
+        self.assertEquals(len(segments), 3)
+        self._assert_segment_data_equals(segments[0], *(1, 2, datetime(2007, 3, 1), datetime(2007, 3, 5), 2))
+        self._assert_segment_data_equals(segments[1], *(2, 1, datetime(2007, 3, 5), datetime(2007, 3, 6), 1))
+        self._assert_segment_data_equals(segments[2], *(1, 2, datetime(2007, 3, 6), datetime(2007, 3, 8), 2))
+
+        self.assertEquals(sorted([p.location_id for p in points]), [1, 2])

@@ -45,7 +45,7 @@ class LocationChoiceField(fields.ChoiceField):
     def clean(self, value):
         fields.Field.clean(self, value)
         if value in fields.EMPTY_VALUES:
-            return None 
+            return None
         try:
             return Location.objects.get(pk=value)
         except Location.DoesNotExist:
@@ -56,13 +56,18 @@ class SegmentInput(widgets.Widget):
         location = LocationInput()
         date = widgets.DateTimeInput()
         transportation = widgets.Select(choices=TRANSPORTATION_METHODS)
-        return (location.render("%s_p1_location" % name, None,
-                                   {'id': "id_%s_p1_location" % name})
-              + date.render("%s_start_date" % name, None)
-              + location.render("%s_p2_location" % name, None,
-                                   {'id': "id_%s_p2_location" % name})
-              + date.render("%s_end_date" % name, None)
-              + transportation.render("%s_transportation_method" % name, None))
+        return (location.render("%s_p1_location" % name,
+                                value and value.p1.location_id,
+                                {'id': "id_%s_p1_location" % name})
+              + date.render("%s_start_date" % name,
+                            value and value.start_date)
+              + location.render("%s_p2_location" % name,
+                                value and value.p2.location_id,
+                                {'id': "id_%s_p2_location" % name})
+              + date.render("%s_end_date" % name,
+                            value and value.end_date)
+              + transportation.render("%s_transportation_method" % name,
+                                      value and value.transportation_method))
 
     def value_from_datadict(self, data, files, name):
         segment = {}
@@ -72,9 +77,13 @@ class SegmentInput(widgets.Widget):
 
 class PathInput(forms.widgets.Widget):
     def render(self, name, value, attrs=None):
+        segment_input = SegmentInput()
+        render_segment = lambda i: segment_input.render("%s_%s" % (name, i), value[i], attrs)
+        segments = "".join(["<li>%s</li>" % render_segment(i)
+                            for i in range(len(value))])
         return (
 """
-<li id="path_%(name)s">%(items)s</li>
+<ul id="path_%(name)s">%(items)s</ul>
 <a href="javascript:newSegment();">More</a>
 <script type="text/javascript">
 function newSegment()
@@ -86,7 +95,7 @@ function newSegment()
 </script>
 """
             % {'name': name,
-               'items': ""})
+               'items': segments})
 
     def value_from_datadict(self, data, files, name):
         input_re = re.compile(
@@ -110,6 +119,8 @@ class PathField(fields.Field):
         choice_field = fields.ChoiceField(choices=TRANSPORTATION_METHODS, required=False)
         segments, locations = [], []
         for segment_data in value:
+            if not segment_data['p1_location'] or not segment_data['p2_location']:
+                continue
             segment = {'p1_location': int(segment_data['p1_location']),
                        'p2_location': int(segment_data['p2_location']),
                        'start_date': datetime_field.clean(segment_data['start_date']),
@@ -155,6 +166,15 @@ class TripEditForm(forms.ModelForm):
         model = Trip
         fields = ('name', 'start_date', 'end_date', 'path')
 
+    def __init__(self, *args, **kwargs):
+        super(forms.ModelForm, self).__init__(*args, **kwargs)
+        self._populate_path()
+
+    def _populate_path(self):
+        segments = list(self.instance.segment_set.all())
+        segments.sort()
+        self.initial['path'] = segments
+
     def _get_locations(self, segment_data):
         return (segment_data['p1_location'], segment_data['p2_location'])
 
@@ -181,23 +201,10 @@ class TripEditForm(forms.ModelForm):
         points = list(trip.point_set.all())
         new_segments_data, new_points_data = self.cleaned_data['path']
 
-        # delete points
-        for point in points:
-            if point.location_id not in new_points_data:
-                # TODO: check for annotations
-                point.delete()
-
         # add points
         for new_point_data in new_points_data:
             if not find(points, lambda p: p.location_id == new_point_data):
                 self._create_point(trip, new_point_data)
-
-        # delete segments
-        for segment in segments:
-            if not find(new_segments_data,
-                        lambda s: segment.locations_equal(self._get_locations(s))):
-                # TODO: check for annotations
-                segment.delete()
 
         # add / edit segments
         segments_grouped = group_items(segments, Segment.locations_equal)
@@ -231,4 +238,18 @@ class TripEditForm(forms.ModelForm):
             else: # add all segments in this group
                 for data in new_group:
                     self._create_segment(trip, data)
+
+        # delete segments
+        for segment in segments:
+            if not find(new_segments_data,
+                        lambda s: segment.locations_equal(self._get_locations(s))):
+                # TODO: check for annotations
+                segment.delete()
+
+        # delete points
+        for point in points:
+            if point.location_id not in new_points_data:
+                # TODO: check for annotations
+                point.delete()
+
         return trip
