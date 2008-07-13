@@ -13,8 +13,8 @@ urlpatterns = patterns('',
 
     (r"^account/register/$",
       'web.views.account_register'),
-    (r"^account/confirm/(?P<activation_key>\w+)/$",
-      'web.views.account_confirm'),
+    (r"^account/activate/(?P<activation_key>\w+)/$",
+      'web.views.account_activate'),
     (r"^account/details/$",
       'web.views.account_details'),
 

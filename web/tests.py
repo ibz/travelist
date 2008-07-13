@@ -61,7 +61,7 @@ class TestUrls(TestCase):
                 ("/media/css/main.css", 200),
                 ("/", 200),
                 ("/account/register/", 200),
-                ("/accounts/confirm/XXX/", 404),
+                ("/accounts/activate/XXX/", 404),
                 ("/account/details/", 302),
                 ("/trip/list/", 302),
                 ("/trip/1/", 200),
@@ -74,7 +74,7 @@ class TestUrls(TestCase):
     def test_urls_login(self):
         urls = [("/", 200),
                 ("/account/register/", 302),
-                ("/accounts/confirm/XXX/", 404),
+                ("/accounts/activate/XXX/", 404),
                 ("/account/details/", 200),
                 ("/trip/list/", 200),
                 ("/trip/1/", 200),
@@ -112,11 +112,11 @@ class TestAccountRegistration(TestCase):
         self.assertEquals(user.userprofile.key_expires.date(),
                           (datetime.today() + timedelta(2)).date())
         self.assertEquals(len(mail.outbox), 1)
-        activation_link = "/account/confirm/%s/" % self.activation_key
+        activation_link = "/account/activate/%s/" % self.activation_key
         self.assert_(activation_link in mail.outbox[0].body)
 
-    def test_account_confirm(self):
-        views.account_confirm(get_request(), self.activation_key)
+    def test_account_activate(self):
+        views.account_activate(get_request(), self.activation_key)
 
         user = User.objects.get(username="new_user")
 

@@ -58,7 +58,7 @@ def account_register(request):
             email_body = (
 """Hello %s and thanks for signing up for a backpacked.it account!
 To activate your account click this link within 48 hours:
-http://backpacked.it/account/confirm/%s/""" % (
+http://backpacked.it/account/activate/%s/""" % (
                 user.username,
                 profile.activation_key))
             send_mail(email_subject,
@@ -70,14 +70,14 @@ http://backpacked.it/account/confirm/%s/""" % (
         form = AccountRegistrationForm()
     return render("web/account_register.html", request, {'form': form})
 
-def account_confirm(request, activation_key):
+def account_activate(request, activation_key):
     user_profile = get_object_or_404(UserProfile, activation_key=activation_key)
     if user_profile.key_expires < datetime.today():
-        return render("web/account_confirm.html", request, {'expired': True})
+        return render("web/account_activate.html", request, {'expired': True})
     user = user_profile.user
     user.is_active = True
     user.save()
-    return render("web/account_confirm.html", request, {'success': True})
+    return render("web/account_activate.html", request, {'success': True})
 
 @login_required
 def account_details(request):
