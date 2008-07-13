@@ -13,12 +13,12 @@
 {"pk": 1, "model": "web.trip",
           "fields": {"user": 2, "name": "Traveler's trip 1", "start_date": "2008-01-01", "end_date": "2008-01-31"}},
 
-{"pk": 0, "model": "web.location",
+{"pk": 0, "model": "web.place",
           "fields": {"coords": "POINT(0 0)", "name": "North Pole"}},
-{"pk": 1, "model": "web.location",
+{"pk": 1, "model": "web.place",
           "fields": {"coords": "POINT(39.5420 116.2329)", "name": "Beijing"}},
-{"pk": 2, "model": "web.location",
-          "fields": {"coords": "POINT(0 0)", "name": "Kashgar"}},
-{"pk": 3, "model": "web.location",
+{"pk": 2, "model": "web.place",
+          "fields": {"coords": "POINT(39.28 76.03)", "name": "Kashgar"}},
+{"pk": 3, "model": "web.place",
           "fields": {"coords": "POINT(46.46 23.35)", "name": "Cluj-Napoca"}}
 ]

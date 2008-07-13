@@ -3,7 +3,7 @@ from django.contrib.gis.db import models
 
 from lib.mock import Mock
 
-class Location(models.Model):
+class Place(models.Model):
     name = models.CharField(max_length=100)
     coords = models.PointField()
 
@@ -18,7 +18,7 @@ class UserProfile(models.Model):
     activation_key = models.CharField(max_length=40)
     key_expires = models.DateTimeField()
     name = models.CharField(max_length=50, blank=True)
-    current_location = models.ForeignKey(Location, blank=True, null=True)
+    current_location = models.ForeignKey(Place, blank=True, null=True)
     about = models.TextField(blank=True)
 
     class Admin:
@@ -41,7 +41,7 @@ class Trip(models.Model):
 
 class Point(models.Model):
     trip = models.ForeignKey(Trip)
-    location = models.ForeignKey(Location, null=True)
+    place = models.ForeignKey(Place, null=True)
     name = models.CharField(max_length=100)
     coords = models.PointField()
 
@@ -63,14 +63,17 @@ class Segment(models.Model):
     end_date = models.DateTimeField(blank=True, null=True)
     transportation_method = models.IntegerField(choices=TRANSPORTATION_METHODS)
 
+    def __unicode__(self):
+        return "%s - %s" % (self.p1, self.p2)
+
     def __cmp__(self, other):
         return cmp(self.start_date, other.start_date)
 
-    def locations_equal(self, other):
+    def places_equal(self, other):
         if isinstance(other, tuple):
-            return (self.p1.location_id, self.p2.location_id) == other
+            return (self.p1.place_id, self.p2.place_id) == other
         else:
-            return self.locations_equal((other.p1.location_id, other.p2.location_id))
+            return self.places_equal((other.p1.place_id, other.p2.place_id))
 
 TEXT = 1
 CONTENT_TYPES = ((TEXT, "Text"))

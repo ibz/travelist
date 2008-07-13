@@ -15,7 +15,7 @@ from django.db import transaction
 from django.contrib.auth.decorators import login_required
 from django.template import RequestContext
 
-from web.models import Location
+from web.models import Place
 from web.models import Trip
 from web.models import Point
 from web.models import Segment
@@ -125,9 +125,9 @@ def widget_segment_input(request):
     else:
         return HttpResponseBadRequest()
 
-def location_search(request):
+def place_search(request):
     if request.GET:
-        res = Location.objects.filter(name__icontains=request.GET['q'])[:5]
+        res = Place.objects.filter(name__icontains=request.GET['q'])[:5]
         return HttpResponse("\n".join(["%s|%s" % (l.name, l.id) for l in res]))
     else:
         return HttpResponseBadRequest()

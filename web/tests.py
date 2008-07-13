@@ -126,15 +126,15 @@ class TestSegmentInput(TestCase):
     def test_value_from_datadict(self):
         widget = forms.SegmentInput()
 
-        data = {'xxx_p1_location': "AAA",
-                'xxx_p2_location': "BBB",
+        data = {'xxx_p1_place': "AAA",
+                'xxx_p2_place': "BBB",
                 'xxx_start_date': "CCC",
                 'xxx_end_date': "DDD",
                 'xxx_transportation_method': "EEE",
                 "some_other_data": "XXX"}
 
-        expected_result = {'p1_location': "AAA",
-                           'p2_location': "BBB",
+        expected_result = {'p1_place': "AAA",
+                           'p2_place': "BBB",
                            'start_date': "CCC",
                            'end_date': "DDD",
                            'transportation_method': "EEE"}
@@ -148,25 +148,25 @@ class TestPathInput(TestCase):
         widget = forms.PathInput()
         segment_widget = forms.SegmentInput()
 
-        data = {'xxx_0_p1_location': "AAA0",
-                'xxx_0_p2_location': "BBB0",
+        data = {'xxx_0_p1_place': "AAA0",
+                'xxx_0_p2_place': "BBB0",
                 'xxx_0_start_date': "CCC0",
                 'xxx_0_end_date': "DDD0",
                 'xxx_0_transportation_method': "EEE0",
-                'xxx_3_p1_location': "AAA3",
-                'xxx_3_p2_location': "BBB3",
+                'xxx_3_p1_place': "AAA3",
+                'xxx_3_p2_place': "BBB3",
                 'xxx_3_start_date': "CCC3",
                 'xxx_3_end_date': "DDD3",
                 'xxx_3_transportation_method': "EEE3",
                 "some_other_data": "XXX"}
 
-        expected_result = [{'xxx_0_p1_location': "AAA0",
-                            'xxx_0_p2_location': "BBB0",
+        expected_result = [{'xxx_0_p1_place': "AAA0",
+                            'xxx_0_p2_place': "BBB0",
                             'xxx_0_start_date': "CCC0",
                             'xxx_0_end_date': "DDD0",
                             'xxx_0_transportation_method': "EEE0"},
-                           {'xxx_3_p1_location': "AAA3",
-                            'xxx_3_p2_location': "BBB3",
+                           {'xxx_3_p1_place': "AAA3",
+                            'xxx_3_p2_place': "BBB3",
                             'xxx_3_start_date': "CCC3",
                             'xxx_3_end_date': "DDD3",
                             'xxx_3_transportation_method': "EEE3"}]
@@ -182,33 +182,33 @@ class TestPathField(TestCase):
     def test_clean(self):
         field = forms.PathField()
 
-        data = [{'p1_location': "1",
-                 'p2_location': "2",
+        data = [{'p1_place': "1",
+                 'p2_place': "2",
                  'start_date': "2007-01-01",
                  'end_date': "2007-01-03",
                  'transportation_method': "1"},
-                {'p1_location': "2",
-                 'p2_location': "3",
+                {'p1_place': "2",
+                 'p2_place': "3",
                  'start_date': "2007-01-05",
                  'end_date': "2007-01-07",
                  'transportation_method': "2"}]
 
-        expected_segments = [{'p1_location': 1,
-                              'p2_location': 2,
+        expected_segments = [{'p1_place': 1,
+                              'p2_place': 2,
                               'start_date': datetime(2007, 1, 1, 0, 0),
                               'end_date': datetime(2007, 1, 3, 0, 0),
                               'transportation_method': 1},
-                             {'p1_location': 2,
-                              'p2_location': 3,
+                             {'p1_place': 2,
+                              'p2_place': 3,
                               'start_date': datetime(2007, 1, 5, 0, 0),
                               'end_date': datetime(2007, 1, 7, 0, 0),
                               'transportation_method': 2}]
-        expected_locations = [1, 2, 3]
+        expected_places = [1, 2, 3]
 
-        segments, locations = field.clean(data)
+        segments, places = field.clean(data)
 
         self.assertEquals(segments, expected_segments)
-        self.assertEquals(locations, expected_locations)
+        self.assertEquals(places, expected_places)
 
 class TestTripEditForm(TestCase):
     def _get_trip_data(self, name, start_date, end_date):
@@ -217,11 +217,11 @@ class TestTripEditForm(TestCase):
                 'end_date': end_date}
 
     def _get_segment_data(self, i,
-                          p1_location, p2_location,
+                          p1_place, p2_place,
                           start_date, end_date,
                           transportation_method):
-        return {"path_%s_p1_location" % i: p1_location,
-                "path_%s_p2_location" % i: p2_location,
+        return {"path_%s_p1_place" % i: p1_place,
+                "path_%s_p2_place" % i: p2_place,
                 "path_%s_start_date" % i: start_date,
                 "path_%s_end_date" % i: end_date,
                 "path_%s_transportation_method" % i: transportation_method}
@@ -241,12 +241,12 @@ class TestTripEditForm(TestCase):
         return trip.id
 
     def _assert_segment_data_equals(self, segment,
-                                    p1_location, p2_location,
+                                    p1_place, p2_place,
                                     start_date, end_date,
                                     transportation_method):
 
-        self.assertEquals(segment.p1.location_id, p1_location)
-        self.assertEquals(segment.p2.location_id, p2_location)
+        self.assertEquals(segment.p1.place_id, p1_place)
+        self.assertEquals(segment.p2.place_id, p2_place)
         self.assertEquals(segment.start_date, start_date)
         self.assertEquals(segment.end_date, end_date)
         self.assertEquals(segment.transportation_method, transportation_method)
@@ -282,7 +282,7 @@ class TestTripEditForm(TestCase):
         self._assert_segment_data_equals(segments[1],
                                          *(2, 3, datetime(2007, 2, 5), datetime(2007, 2, 10), 2))
 
-        self.assertEquals(sorted([p.location_id for p in points]), [1, 2, 3])
+        self.assertEquals(sorted([p.place_id for p in points]), [1, 2, 3])
 
     def test_edit_trip(self):
         trip_id = self._create_trip("Some test trip", "2007-02-01", "2007-02-10",
@@ -314,7 +314,7 @@ class TestTripEditForm(TestCase):
         self._assert_segment_data_equals(segments[1],
                                          *(2, 3, datetime(2007, 3, 5), datetime(2007, 3, 10), 1))
 
-        self.assertEquals(sorted([p.location_id for p in points]), [1, 2, 3])
+        self.assertEquals(sorted([p.place_id for p in points]), [1, 2, 3])
 
         # add segment
 
@@ -335,7 +335,7 @@ class TestTripEditForm(TestCase):
         self._assert_segment_data_equals(segments[2],
                                          *(3, 0, datetime(2007, 3, 7), datetime(2007, 3, 10), 1))
 
-        self.assertEquals(sorted([p.location_id for p in points]), [0, 1, 2, 3])
+        self.assertEquals(sorted([p.place_id for p in points]), [0, 1, 2, 3])
 
         # edit / delete segment
 
@@ -351,7 +351,7 @@ class TestTripEditForm(TestCase):
         self._assert_segment_data_equals(segments[0], *(1, 2, datetime(2007, 3, 1), datetime(2007, 3, 5), 2))
         self._assert_segment_data_equals(segments[1], *(2, 1, datetime(2007, 3, 5), datetime(2007, 3, 10), 1))
 
-        self.assertEquals(sorted([p.location_id for p in points]), [1, 2])
+        self.assertEquals(sorted([p.place_id for p in points]), [1, 2])
 
         # add multiple segments between same points
 
@@ -371,7 +371,7 @@ class TestTripEditForm(TestCase):
         self._assert_segment_data_equals(segments[2], *(1, 2, datetime(2007, 3, 6), datetime(2007, 3, 8), 2))
         self._assert_segment_data_equals(segments[3], *(2, 1, datetime(2007, 3, 9), datetime(2007, 3, 10), 1))
 
-        self.assertEquals(sorted([p.location_id for p in points]), [1, 2])
+        self.assertEquals(sorted([p.place_id for p in points]), [1, 2])
 
         # deleting one of the doubled segments
 
@@ -389,4 +389,4 @@ class TestTripEditForm(TestCase):
         self._assert_segment_data_equals(segments[1], *(2, 1, datetime(2007, 3, 5), datetime(2007, 3, 6), 1))
         self._assert_segment_data_equals(segments[2], *(1, 2, datetime(2007, 3, 6), datetime(2007, 3, 8), 2))
 
-        self.assertEquals(sorted([p.location_id for p in points]), [1, 2])
+        self.assertEquals(sorted([p.place_id for p in points]), [1, 2])

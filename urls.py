@@ -25,8 +25,8 @@ urlpatterns = patterns('',
     (r"^trip/((?P<id>\d+)/)?edit/$",
       'web.views.trip_edit'),
 
-    (r"^location/search/$",
-      'web.views.location_search'),
+    (r"^place/search/$",
+      'web.views.place_search'),
 
     (r"^widget/segment_input/$",
       'web.views.widget_segment_input'),
