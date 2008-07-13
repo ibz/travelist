@@ -15,15 +15,15 @@ from django.db import transaction
 from django.contrib.auth.decorators import login_required
 from django.template import RequestContext
 
-from web.models import Place
-from web.models import Trip
-from web.models import Point
-from web.models import Segment
-from web.models import UserProfile
-from web.forms import SegmentInput
-from web.forms import AccountDetailsForm
-from web.forms import AccountRegistrationForm
-from web.forms import TripEditForm
+from backpacked.models import Place
+from backpacked.models import Trip
+from backpacked.models import Point
+from backpacked.models import Segment
+from backpacked.models import UserProfile
+from backpacked.forms import SegmentInput
+from backpacked.forms import AccountDetailsForm
+from backpacked.forms import AccountRegistrationForm
+from backpacked.forms import TripEditForm
 
 import settings
 
@@ -34,7 +34,7 @@ def render(template, request, context=None):
     return render_to_response(template, context, context_instance=RequestContext(request))
 
 def index(request):
-    return render("web/index.html", request)
+    return render("index.html", request)
 
 @transaction.commit_on_success
 def account_register(request):
@@ -65,19 +65,19 @@ http://backpacked.it/account/activate/%s/""" % (
                       email_body,
                       settings.CUSTOMER_EMAIL,
                       [user.email])
-            return render("web/account_register.html", request, {'created': True})
+            return render("account_register.html", request, {'created': True})
     else:
         form = AccountRegistrationForm()
-    return render("web/account_register.html", request, {'form': form})
+    return render("account_register.html", request, {'form': form})
 
 def account_activate(request, activation_key):
     user_profile = get_object_or_404(UserProfile, activation_key=activation_key)
     if user_profile.key_expires < datetime.today():
-        return render("web/account_activate.html", request, {'expired': True})
+        return render("account_activate.html", request, {'expired': True})
     user = user_profile.user
     user.is_active = True
     user.save()
-    return render("web/account_activate.html", request, {'success': True})
+    return render("account_activate.html", request, {'success': True})
 
 @login_required
 def account_details(request):
@@ -89,16 +89,16 @@ def account_details(request):
     else:
         form = AccountDetailsForm(instance=request.user.get_profile())
 
-    return render("web/account_details.html", request, {'form': form})
+    return render("account_details.html", request, {'form': form})
 
 @login_required
 def trip_list(request):
     trips = Trip.objects.filter(user=request.user).order_by('start_date')
-    return render("web/trip_list.html", request, {'trips': trips})
+    return render("trip_list.html", request, {'trips': trips})
 
 def trip_view(request, id):
     trip = get_object_or_404(Trip, id=id)
-    return render("web/trip_view.html", request, {'trip': trip})
+    return render("trip_view.html", request, {'trip': trip})
 
 @login_required
 def trip_edit(request, id):
@@ -113,7 +113,7 @@ def trip_edit(request, id):
             return HttpResponseRedirect("/trip/%s/" % trip.id)
     else:
         form = TripEditForm(instance=trip)
-    return render("web/trip_edit.html", request,
+    return render("trip_edit.html", request,
                   {'trip': trip,
                    'form': form})
 

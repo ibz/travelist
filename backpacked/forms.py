@@ -7,14 +7,14 @@ from django.core import validators
 from django.contrib.auth.models import User
 from django.newforms.util import ValidationError
 
-from web.models import Place
-from web.models import Point
-from web.models import Segment
-from web.models import Trip
-from web.models import UserProfile
-from web.models import TRANSPORTATION_METHODS
-from web.utils import group_items
-from web.utils import find
+from backpacked.models import Place
+from backpacked.models import Point
+from backpacked.models import Segment
+from backpacked.models import Trip
+from backpacked.models import UserProfile
+from backpacked.models import TRANSPORTATION_METHODS
+from backpacked.utils import group_items
+from backpacked.utils import find
 
 class PlaceInput(forms.widgets.Widget):
     def render(self, name, value, attrs=None):

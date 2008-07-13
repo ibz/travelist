@@ -42,7 +42,7 @@ EMAIL_SUBJECT_PREFIX = "[backpacked.it] "
 
 APPEND_SLASH = True
 
-AUTH_PROFILE_MODULE = 'web.UserProfile'
+AUTH_PROFILE_MODULE = 'backpacked.UserProfile'
 
 TEMPLATE_LOADERS = (
     'django.template.loaders.filesystem.load_template_source',
@@ -62,13 +62,12 @@ MIDDLEWARE_CLASSES = (
 
 ROOT_URLCONF = 'urls'
 
-TEMPLATE_DIRS = (
-    os.path.join(os.path.dirname(__file__), "templates"),
-    os.path.join(os.path.dirname(__file__), "templates/web")
-)
+TEMPLATE_DIRS = [
+    os.path.join(os.path.dirname(__file__), "templates")
+]
 
 INSTALLED_APPS = (
-    'web',
+    'backpacked',
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',

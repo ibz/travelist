@@ -9,11 +9,11 @@ from django.core import mail
 from django.http import HttpRequest
 from django.test.client import Client
 
-from web import views
-from web import forms
-from web import utils
-from web.models import Trip
-from web.models import UserProfile
+from backpacked import views
+from backpacked import forms
+from backpacked import utils
+from backpacked.models import Trip
+from backpacked.models import UserProfile
 
 def get_user(username):
     return User.objects.get(username=username)

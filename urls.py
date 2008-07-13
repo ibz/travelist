@@ -9,30 +9,30 @@ urlpatterns = patterns('',
       'django.views.static.serve',
      {'document_root': settings.MEDIA_ROOT}),
 
-    (r"^$", 'web.views.index'),
+    (r"^$", 'backpacked.views.index'),
 
     (r"^account/register/$",
-      'web.views.account_register'),
+      'backpacked.views.account_register'),
     (r"^account/activate/(?P<activation_key>\w+)/$",
-      'web.views.account_activate'),
+      'backpacked.views.account_activate'),
     (r"^account/details/$",
-      'web.views.account_details'),
+      'backpacked.views.account_details'),
 
     (r"^trip/list/$",
-      'web.views.trip_list'),
+      'backpacked.views.trip_list'),
     (r"^trip/(?P<id>\d+)/$",
-      'web.views.trip_view'),
+      'backpacked.views.trip_view'),
     (r"^trip/((?P<id>\d+)/)?edit/$",
-      'web.views.trip_edit'),
+      'backpacked.views.trip_edit'),
 
     (r"^place/search/$",
-      'web.views.place_search'),
+      'backpacked.views.place_search'),
 
     (r"^widget/segment_input/$",
-      'web.views.widget_segment_input'),
+      'backpacked.views.widget_segment_input'),
 
     (r"^point/(?P<point_id>\d+)/annotation/list/$",
-      'web.views.annotation_list'),
+      'backpacked.views.annotation_list'),
     (r"^segment/(?P<segment_id>\d+)/annotation/list/$",
-      'web.views.annotation_list')
+      'backpacked.views.annotation_list')
 )
