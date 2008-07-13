@@ -54,14 +54,12 @@ def account_register(request):
                                   key_expires=key_expires)
             profile.save()
 
-            email_subject = "Your new %s account confirmation" % settings.SITE_NAME
+            email_subject = "Your new backpacked.it account confirmation"
             email_body = (
-"""Hello, %s, and thanks for signing up for an %s account!
-To activate your account, click this link within 48 hours:
-%s/account/confirm/%s/""" % (
+"""Hello %s and thanks for signing up for a backpacked.it account!
+To activate your account click this link within 48 hours:
+http://backpacked.it/account/confirm/%s/""" % (
                 user.username,
-                settings.SITE_NAME,
-                settings.SITE_URL,
                 profile.activation_key))
             send_mail(email_subject,
                       email_body,

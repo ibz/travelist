@@ -1,5 +1,4 @@
-SITE_NAME = "backpacked.it"
-SITE_URL = "http://backpacked.it"
+import os
 
 DEBUG = True
 TEMPLATE_DEBUG = DEBUG
@@ -26,7 +25,7 @@ TIME_ZONE = 'America/Chicago'
 LANGUAGE_CODE = 'en-us'
 USE_I18N = True
 
-MEDIA_ROOT = '/home/ionut/work/kashgar/media/'
+MEDIA_ROOT = os.path.join(os.path.dirname(__file__), "media")
 MEDIA_URL = '/media/'
 ADMIN_MEDIA_PREFIX = '/admin-media/'
 
@@ -39,7 +38,7 @@ EMAIL_PORT = 587
 EMAIL_HOST_USER = ""
 EMAIL_HOST_PASSWORD = ""
 EMAIL_USE_TLS = True
-EMAIL_SUBJECT_PREFIX = "[Kashgar project] "
+EMAIL_SUBJECT_PREFIX = "[backpacked.it] "
 
 APPEND_SLASH = True
 
@@ -64,8 +63,8 @@ MIDDLEWARE_CLASSES = (
 ROOT_URLCONF = 'urls'
 
 TEMPLATE_DIRS = (
-    "/home/ionut/work/kashgar/templates",
-    "/home/ionut/work/kashgar/templates/web"
+    os.path.join(os.path.dirname(__file__), "templates"),
+    os.path.join(os.path.dirname(__file__), "templates/web")
 )
 
 INSTALLED_APPS = (
