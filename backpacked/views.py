@@ -15,11 +15,15 @@ from django.db import transaction
 from django.contrib.auth.decorators import login_required
 from django.template import RequestContext
 
+from backpacked.models import Annotation
 from backpacked.models import Place
 from backpacked.models import Trip
 from backpacked.models import Point
 from backpacked.models import Segment
 from backpacked.models import UserProfile
+from backpacked.forms import AnnotationEditForm
+from backpacked.forms import AnnotationNewForm
+from backpacked.forms import ContentInput
 from backpacked.forms import SegmentInput
 from backpacked.forms import AccountDetailsForm
 from backpacked.forms import AccountRegistrationForm
@@ -101,7 +105,7 @@ def trip_view(request, id):
     return render("trip_view.html", request, {'trip': trip})
 
 @login_required
-def trip_edit(request, id):
+def trip_edit(request, id=None):
     if id:
         trip = get_object_or_404(Trip, id=id, user=request.user)
     else:
@@ -123,6 +127,14 @@ def widget_segment_input(request):
     else:
         return HttpResponseBadRequest()
 
+def widget_content_input(request):
+    if request.GET:
+        content_type = int(request.GET['content_type'])
+        name = request.GET['name']
+        return HttpResponse(ContentInput(content_type).render(name, None))
+    else:
+        return HttpResponseBadRequest()
+
 def place_search(request):
     if request.GET:
         res = Place.objects.filter(name__icontains=request.GET['q'])[:5]
@@ -130,6 +142,44 @@ def place_search(request):
     else:
         return HttpResponseBadRequest()
 
+def annotation_list(request, trip_id, entity, entity_id):
+    if entity not in ['point', 'segment']:
+        return HttpResponseBadRequest()
+    filter = {str("%s__id" % entity): str(entity_id)}
+    annotations = Annotation.objects.filter(**filter)
+    return render("annotation_list.html", request,
+                  {'trip_id': trip_id,
+                   'annotations': annotations,
+                   'entity': entity,
+                   'entity_id': entity_id})
+
+def annotation_view(request, trip_id, entity, entity_id, id):
+    annotation = get_object_or_404(Annotation, id=id)
+    return render("annotation_view.html", request,
+                  {'annotation': annotation})
+
 @login_required
-def annotation_list(request):
-    return HttpResponseBadRequest()
+def annotation_edit(request, trip_id, entity, entity_id, id=None):
+    form_class = id and AnnotationEditForm or AnnotationNewForm
+    if id:
+        annotation = get_object_or_404(Annotation, id=id)
+    else:
+        annotation = Annotation()
+        if entity == 'point':
+            annotation.point_id = entity_id
+        elif entity == 'segment':
+            annotation.segment_id = entity_id
+        else:
+            return HttpResponseBadRequest()
+    if request.POST:
+        form = form_class(request.POST, instance=annotation)
+        if form.is_valid():
+            annotation = form.save()
+            return HttpResponseRedirect("/trip/%s/%s/%s/annotation/list/"
+                                        % (trip_id, entity, entity_id))
+    else:
+        form = form_class(instance=annotation)
+    return render("annotation_edit.html", request,
+                  {'trip_id': trip_id,
+                   'annotation': annotation,
+                   'form': form})

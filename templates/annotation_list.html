@@ -1,0 +1,11 @@
+{% extends "base.html" %}
+{% block body %}
+<ul>
+{% for annotation in annotations %}
+    <li>{{ annotation.render_short }} <a href="/trip/{{ trip_id }}/{{ entity }}/{{ entity_id }}/annotation/{{ annotation.id }}/edit/">Edit</a></li>
+{% endfor %}
+</ul>
+<a href="/trip/{{ trip_id }}/{{ entity }}/{{ entity_id }}/annotation/new/">New</a>
+<a href="/trip/{{ trip_id }}/">Back to trip</a>
+{{annotation.id}}
+{% endblock %}

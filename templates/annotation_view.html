@@ -1,0 +1,11 @@
+{% extends "base.html" %}
+
+{% block body %}
+
+<div>
+{{ annotation.render }}
+</div>
+
+<a href="/trip/{{ annotation.trip.id }}/{{ annotation.entity }}/{{ annotation.entity_id }}/annotation/list/">List</a>
+
+{% endblock %}

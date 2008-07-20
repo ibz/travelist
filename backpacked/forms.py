@@ -7,6 +7,8 @@ from django.core import validators
 from django.contrib.auth.models import User
 from django.newforms.util import ValidationError
 
+from backpacked import models
+from backpacked.models import Annotation
 from backpacked.models import Place
 from backpacked.models import Point
 from backpacked.models import Segment
@@ -50,6 +52,19 @@ class PlaceChoiceField(fields.ChoiceField):
             return Place.objects.get(pk=value)
         except Place.DoesNotExist:
             raise ValidationError(self.error_messages['invalid_choice'])
+
+class ContentInput(widgets.Widget):
+    def __init__(self, content_type, attrs=None):
+        super(ContentInput, self).__init__(attrs)
+        self.content_type = content_type
+
+    def render(self, name, value, attrs=None):
+        if self.content_type == models.TEXT:
+            widget_class = widgets.Textarea
+        elif self.content_type == models.URL:
+            widget_class = widgets.TextInput
+        widget = widget_class()
+        return widget.render(name, value, attrs)
 
 class SegmentInput(widgets.Widget):
     def render(self, name, value, attrs=None):
@@ -164,7 +179,7 @@ class TripEditForm(forms.ModelForm):
 
     class Meta:
         model = Trip
-        fields = ('name', 'start_date', 'end_date', 'path')
+        fields = ('name', 'start_date', 'end_date', 'visibility', 'path')
 
     def __init__(self, *args, **kwargs):
         super(forms.ModelForm, self).__init__(*args, **kwargs)
@@ -253,3 +268,23 @@ class TripEditForm(forms.ModelForm):
                 point.delete()
 
         return trip
+
+class AnnotationNewForm(forms.ModelForm):
+    class Meta:
+        model = Annotation
+        fields = ('date', 'title', 'visibility', 'content_type', 'content')
+
+    def clean_content(self):
+        content_type = self.cleaned_data.has_key('content_type') \
+            and int(self.cleaned_data['content_type']) \
+            or self.instance.content_type
+        if content_type == models.TEXT:
+            return self.cleaned_data['content']
+        elif content_type == models.URL:
+            return fields.URLField().clean(self.cleaned_data['content'])
+
+class AnnotationEditForm(AnnotationNewForm):
+    class Meta:
+        model = Annotation
+        fields = tuple([f for f in AnnotationNewForm.Meta.fields
+                        if f != 'content_type'])

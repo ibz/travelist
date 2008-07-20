@@ -12,6 +12,7 @@ from django.test.client import Client
 from backpacked import views
 from backpacked import forms
 from backpacked import utils
+from backpacked import models
 from backpacked.models import Trip
 from backpacked.models import UserProfile
 
@@ -211,10 +212,11 @@ class TestPathField(TestCase):
         self.assertEquals(places, expected_places)
 
 class TestTripEditForm(TestCase):
-    def _get_trip_data(self, name, start_date, end_date):
+    def _get_trip_data(self, name, start_date, end_date, visibility):
         return {'name': name,
                 'start_date': start_date,
-                'end_date': end_date}
+                'end_date': end_date,
+                'visibility': visibility}
 
     def _get_segment_data(self, i,
                           p1_place, p2_place,
@@ -231,8 +233,8 @@ class TestTripEditForm(TestCase):
         self._edit_trip(trip, *args)
         return trip.id
 
-    def _edit_trip(self, trip, name, start_date, end_date, segments=[]):
-        data = self._get_trip_data(name, start_date, end_date)
+    def _edit_trip(self, trip, name, start_date, end_date, segments=[], visibility=models.PUBLIC):
+        data = self._get_trip_data(name, start_date, end_date, visibility)
         for segment in segments:
             data.update(self._get_segment_data(*segment))
         form = forms.TripEditForm(data, instance=trip)

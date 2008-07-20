@@ -1,0 +1,11 @@
+{% extends "base.html" %}
+
+{% block body %}
+<form method="POST" action="">
+<table>
+{{ form }}
+</table>
+<input type="submit" />
+<a href="/trip/{{ trip_id }}/{{ annotation.entity }}/{{ annotation.entity_id }}/annotation/list/">Cancel</a>
+</form>
+{% endblock %}

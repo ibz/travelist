@@ -11,7 +11,7 @@
           "fields": {"about": "", "name": "", "key_expires": "2100-01-01 00:00:00", "activation_key": "ACTIVATION_KEY_TRAVELER", "user": 2, "current_location": null}},
 
 {"pk": 1, "model": "backpacked.trip",
-          "fields": {"user": 2, "name": "Traveler's trip 1", "start_date": "2008-01-01", "end_date": "2008-01-31"}},
+          "fields": {"user": 2, "name": "Traveler's trip 1", "start_date": "2008-01-01", "end_date": "2008-01-31", "visibility": 1}},
 
 {"pk": 0, "model": "backpacked.place",
           "fields": {"coords": "POINT(0 0)", "name": "North Pole"}},
