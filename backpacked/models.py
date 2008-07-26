@@ -91,6 +91,7 @@ CONTENT_TYPES = ((TEXT, "Text"),
                  (URL, "URL"))
 
 class Annotation(models.Model):
+    trip = models.ForeignKey(Trip)
     point = models.ForeignKey(Point, null=True)
     segment = models.ForeignKey(Segment, null=True)
     date = models.DateTimeField()
@@ -98,10 +99,6 @@ class Annotation(models.Model):
     content_type = models.IntegerField(choices=CONTENT_TYPES)
     content = models.TextField()
     visibility = models.IntegerField(choices=VISIBILITIES, default=PUBLIC)
-
-    @property
-    def trip(self):
-        return getattr(self, self.entity).trip
 
     @property
     def entity(self):
@@ -117,7 +114,7 @@ class Annotation(models.Model):
     @property
     def url(self):
         return ("/trip/%s/%s/%s/annotation/%s/"
-                % (self.trip.id, self.entity, self.entity_id, self.id))
+                % (self.trip_id, self.entity, self.entity_id, self.id))
 
     def __unicode__(self):
         return self.title

@@ -121,6 +121,12 @@ def trip_edit(request, id=None):
                   {'trip': trip,
                    'form': form})
 
+@login_required
+def trip_delete(request, id):
+    trip = get_object_or_404(Trip, id=id, user=request.user)
+    trip.delete()
+    return HttpResponseRedirect("/trip/list/")
+
 def widget_segment_input(request):
     if request.GET:
         return HttpResponse(SegmentInput().render(request.GET['name'], None))
@@ -166,7 +172,7 @@ def annotation_edit(request, trip_id, entity, entity_id, id=None):
     if id:
         annotation = get_object_or_404(Annotation, id=id)
     else:
-        annotation = Annotation()
+        annotation = Annotation(trip_id=trip_id)
         if entity == 'point':
             annotation.point_id = entity_id
         elif entity == 'segment':
@@ -185,3 +191,11 @@ def annotation_edit(request, trip_id, entity, entity_id, id=None):
                   {'trip_id': trip_id,
                    'annotation': annotation,
                    'form': form})
+
+@login_required
+def annotation_delete(request, trip_id, entity, entity_id, id):
+    annotation = get_object_or_404(Annotation, id=id, trip__user=request.user)
+
+    annotation.delete()
+    return HttpResponseRedirect("/trip/%s/%s/%s/annotation/list/"
+                                % (trip_id, entity, entity_id))

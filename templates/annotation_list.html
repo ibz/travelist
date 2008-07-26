@@ -1,10 +1,22 @@
 {% extends "base.html" %}
 {% block body %}
-<ul>
+<table>
 {% for annotation in annotations %}
-    <li>{{ annotation.render_short }} <a href="/trip/{{ trip_id }}/{{ entity }}/{{ entity_id }}/annotation/{{ annotation.id }}/edit/">Edit</a></li>
+    <tr>
+        <td>{{ annotation.render_short }}</td>
+        <td>
+            {% ifequal annotation.trip.user_id user.id %}
+            <a href="/trip/{{ trip_id }}/{{ entity }}/{{ entity_id }}/annotation/{{ annotation.id }}/edit/">Edit</a>
+            {% endifequal %}
+        </td>
+        <td>
+            {% ifequal annotation.trip.user_id user.id %}
+            <a href="/trip/{{ trip_id }}/{{ entity }}/{{ entity_id }}/annotation/{{ annotation.id }}/delete/">Delete</a>
+            {% endifequal %}
+        </td>
+    </tr>
 {% endfor %}
-</ul>
+</table>
 <a href="/trip/{{ trip_id }}/{{ entity }}/{{ entity_id }}/annotation/new/">New</a>
 <a href="/trip/{{ trip_id }}/">Back to trip</a>
 {{annotation.id}}

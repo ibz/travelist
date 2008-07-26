@@ -5,6 +5,11 @@
     <tr>
         <td><a href="/trip/{{ trip.id }}/">{{ trip.name }}</a></td>
         <td>{{ trip.start_date }} - {{ trip.end_date }}</td>
+        <td>
+            {% ifequal trip.user_id user.id %}
+            <a href="/trip/{{ trip.id }}/delete/">Delete</a>
+            {% endifequal %}
+        </td>
     </tr>
 {% endfor %}
 </table>
