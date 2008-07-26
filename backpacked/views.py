@@ -10,6 +10,9 @@ from django.http import HttpResponse
 from django.shortcuts import render_to_response
 from django.shortcuts import get_object_or_404
 from django.core.mail import send_mail
+from django.contrib.auth import authenticate
+from django.contrib.auth import login
+from django.contrib.auth import logout
 from django.contrib.auth.models import User
 from django.db import transaction
 from django.contrib.auth.decorators import login_required
@@ -25,6 +28,7 @@ from backpacked.forms import AnnotationEditForm
 from backpacked.forms import AnnotationNewForm
 from backpacked.forms import ContentInput
 from backpacked.forms import SegmentInput
+from backpacked.forms import AccountLoginForm
 from backpacked.forms import AccountDetailsForm
 from backpacked.forms import AccountRegistrationForm
 from backpacked.forms import TripEditForm
@@ -38,7 +42,22 @@ def render(template, request, context=None):
     return render_to_response(template, context, context_instance=RequestContext(request))
 
 def index(request):
-    return render("index.html", request)
+    if request.user.is_authenticated():
+        return HttpResponseRedirect("/trip/list/")
+    else:
+        return render("index.html", request,
+                      {'login_form': AccountLoginForm()})
+
+def account_login(request):
+    if request.POST:
+        user = authenticate(username=request.POST['username'],
+                            password=request.POST['password'])
+        login(request, user)
+        return HttpResponseRedirect("/")
+
+def account_logout(request):
+    logout(request)
+    return HttpResponseRedirect("/")
 
 @transaction.commit_on_success
 def account_register(request):

@@ -164,6 +164,10 @@ class PathField(fields.Field):
                     places.append(l)
         return segments, places
 
+class AccountLoginForm(forms.Form):
+    username = forms.CharField()
+    password = forms.CharField(widget=forms.PasswordInput)
+
 class AccountDetailsForm(forms.ModelForm):
     name = forms.CharField(required=False)
     current_location = PlaceChoiceField(required=False)

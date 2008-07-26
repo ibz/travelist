@@ -11,6 +11,10 @@ urlpatterns = patterns('',
 
     (r"^$", 'backpacked.views.index'),
 
+    (r"^account/login/$",
+      'backpacked.views.account_login'),
+    (r"^account/logout/$",
+      'backpacked.views.account_logout'),
     (r"^account/register/$",
       'backpacked.views.account_register'),
     (r"^account/activate/(?P<activation_key>\w+)/$",
