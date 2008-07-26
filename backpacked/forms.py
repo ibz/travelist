@@ -54,17 +54,33 @@ class PlaceChoiceField(fields.ChoiceField):
             raise ValidationError(self.error_messages['invalid_choice'])
 
 class ContentInput(widgets.Widget):
-    def __init__(self, content_type, attrs=None):
+    def __init__(self, content_type, content_type_selector, top_level=False,
+                 attrs=None):
         super(ContentInput, self).__init__(attrs)
         self.content_type = content_type
+        self.content_type_selector = content_type_selector
+        self.top_level = top_level
 
     def render(self, name, value, attrs=None):
         if self.content_type == models.TEXT:
-            widget_class = widgets.Textarea
+            widget = widgets.Textarea()
         elif self.content_type == models.URL:
-            widget_class = widgets.TextInput
-        widget = widget_class()
-        return widget.render(name, value, attrs)
+            widget = widgets.TextInput()
+        else:
+            widget = None
+
+        widget = widget and widget.render(name, value, attrs) or ""
+
+        if not self.top_level:
+            return widget
+
+        return ("<div id=\"%(name)s\">%(widget)s</div>"
+                "<script type=\"text/javascript\">"
+                "registerContentTypeEvent('%(selector)s', '%(name)s');"
+                "</script>"
+                % {'name': name,
+                   'widget': widget,
+                   'selector': self.content_type_selector})
 
 class SegmentInput(widgets.Widget):
     def render(self, name, value, attrs=None):
@@ -270,6 +286,8 @@ class TripEditForm(forms.ModelForm):
         return trip
 
 class AnnotationNewForm(forms.ModelForm):
+    content = fields.CharField(widget=ContentInput(None, 'content_type', True))
+
     class Meta:
         model = Annotation
         fields = ('date', 'title', 'visibility', 'content_type', 'content')
@@ -284,6 +302,11 @@ class AnnotationNewForm(forms.ModelForm):
             return fields.URLField().clean(self.cleaned_data['content'])
 
 class AnnotationEditForm(AnnotationNewForm):
+    def __init__(self, data=None, files=None, instance=None):
+        super(AnnotationEditForm, self).__init__(data, files,
+                                                 instance=instance)
+        self.fields['content'].widget.content_type = instance.content_type
+
     class Meta:
         model = Annotation
         fields = tuple([f for f in AnnotationNewForm.Meta.fields

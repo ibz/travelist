@@ -9,3 +9,21 @@ function addListItem(id, url)
                 list.appendChild(item);
             });
 }
+
+function registerContentTypeEvent(selector, name)
+{
+    $("#id_" + selector).change(
+            function()
+            {
+                var content_type = $("#id_" + selector + " option:selected").eq(0).val();
+                if(content_type == "")
+                {
+                    document.getElementById(name).innerHTML = "";
+                }
+                $.get("/widget/content_input/?content_type=" + content_type + "&content_type_selector=" + selector + "&name=" + name, null,
+                        function(data, status)
+                        {
+                            document.getElementById(name).innerHTML = data;
+                        });
+            });
+}

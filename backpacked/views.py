@@ -130,8 +130,10 @@ def widget_segment_input(request):
 def widget_content_input(request):
     if request.GET:
         content_type = int(request.GET['content_type'])
+        content_type_selector = request.GET['content_type_selector']
         name = request.GET['name']
-        return HttpResponse(ContentInput(content_type).render(name, None))
+        input = ContentInput(content_type, content_type_selector)
+        return HttpResponse(input.render(name, None))
     else:
         return HttpResponseBadRequest()
 
