@@ -193,6 +193,7 @@ class AccountRegistrationForm(forms.ModelForm):
     username = forms.CharField(help_text="Use letters, digits and underscores for this.")
     email = forms.EmailField()
     password = forms.CharField(widget=forms.PasswordInput)
+    alpha_code = forms.CharField()
 
     class Meta:
         model = User
@@ -204,7 +205,11 @@ class AccountRegistrationForm(forms.ModelForm):
             User.objects.get(username=username)
         except User.DoesNotExist:
             return username
-        raise validators.ValidationError("The username \"%s\" is already taken." % username)
+        raise ValidationError("The username \"%s\" is already taken." % username)
+
+    def clean_alpha_code(self):
+        if self.cleaned_data['alpha_code'] != "i want the alpha!":
+            raise ValidationError("The alpha code is invalid.")
 
 class TripEditForm(forms.ModelForm):
     path = PathField()
