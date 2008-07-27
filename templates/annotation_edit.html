@@ -5,7 +5,7 @@
 <table>
 {{ form }}
 </table>
-<input type="submit" />
+<input type="submit" class="button" value="{% if annotation.id %}Save{% else %}Create{% endif %}" />
 <a href="/trip/{{ trip_id }}/{{ annotation.entity }}/{{ annotation.entity_id }}/annotation/list/">Cancel</a>
 </form>
 {% endblock %}

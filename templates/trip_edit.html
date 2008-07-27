@@ -5,7 +5,7 @@
 <table>
 {{ form }}
 </table>
-<input type="submit" />
-<a href="{% if trip.id %}/trip/{{ trip.id }}/{% else %}/trip/list/{% endif %}">Cancel</a>
+<input type="submit" class="button" value="{% if trip.id %}Save{% else %}Create{% endif %}" />
+<a class="navigation" href="{% if trip.id %}/trip/{{ trip.id }}/{% else %}/trip/list/{% endif %}">Cancel</a>
 </form>
 {% endblock %}

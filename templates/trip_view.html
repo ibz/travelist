@@ -2,41 +2,40 @@
 
 {% block content %}
 
-<div>
+<div class="trip-details">
 
 {{ trip.name }}
 {{ trip.start_date }}
 {{ trip.end_date }}
 
 {% ifequal user.id trip.user_id %}
-<span>my</span>
+<a class="navigation" href="/trip/{{ trip.id }}/edit/">Edit</a>
 {% else %}
 <span>{{ trip.user.username }}</span>
 {% endifequal %}
 
-{% ifequal trip.user_id user.id %}
-<a href="/trip/{{ trip.id }}/edit/">Edit</a>
-{% endifequal %}
 </div>
 
-<div>
-Points:
-<ul>
-{% for point in trip.point_set.all %}
-    <li>{{ point.name }} <a href="/trip/{{ trip.id }}/point/{{ point.id }}/annotation/list/">Annotations</a></li>
-{% endfor %}
-</ul>
-</div>
+<br />
 
-<div>
+<div class="trip-details">
 Segments:
-<ul>
+<ul class="plain-list">
 {% for segment in trip.segment_set.all %}
-    <li>{{ segment.p1.name }} - {{ segment.p2.name }} <a href="/trip/{{ trip.id }}/segment/{{ segment.id }}/annotation/list/">Annotations</a></li>
+    <li><a href="/trip/{{ trip.id }}/segment/{{ segment.id }}/annotation/list/">{{ segment.p1.name }} - {{ segment.p2.name }}</a></li>
 {% endfor %}
 </ul>
 </div>
 
-<a href="/trip/list">List</a>
+<div class="trip-details">
+Stopped in:
+<ul class="plain-list">
+{% for point in trip.point_set.all %}
+    <li><a href="/trip/{{ trip.id }}/point/{{ point.id }}/annotation/list/">{{ point.name }}</a></li>
+{% endfor %}
+</ul>
+</div>
+
+<a class="navigation" href="/trip/list">List</a>
 
 {% endblock %}

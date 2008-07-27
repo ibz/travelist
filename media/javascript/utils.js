@@ -1,12 +1,19 @@
-function addListItem(id, url)
+function addTableRow(id, url)
 {
     $.get(url, null,
             function(data, status)
             {
-                var list = document.getElementById(id);
-                var item = document.createElement("li");
-                item.innerHTML = "<li>" + data + "</li>";
-                list.appendChild(item);
+                var table = document.getElementById(id);
+                var tbody = table.getElementsByTagName("tbody")[0];
+                var row = document.createElement("tr");
+                var columns = data.split("|");
+                for (var i=0; i < columns.length; i++)
+                {
+                    var column = document.createElement("td");
+                    column.innerHTML = "<td>" + columns[i] + "</td>";
+                    row.appendChild(column);
+                }
+                tbody.appendChild(row);
             });
 }
 

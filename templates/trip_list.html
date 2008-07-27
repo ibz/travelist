@@ -1,17 +1,22 @@
 {% extends "base.html" %}
 {% block content %}
-<table>
+<br />
+<table class="trip-list">
+{% if trips %}
 {% for trip in trips %}
-    <tr>
+    <tr class="trip">
         <td><a href="/trip/{{ trip.id }}/">{{ trip.name }}</a></td>
         <td>{{ trip.start_date }} - {{ trip.end_date }}</td>
         <td>
             {% ifequal trip.user_id user.id %}
-            <a href="/trip/{{ trip.id }}/delete/">Delete</a>
+            <a href="/trip/{{ trip.id }}/delete/" onclick="javascript:return confirm('Really delete the trip {{ trip.name }}?');">Delete</a>
             {% endifequal %}
         </td>
     </tr>
 {% endfor %}
+{% else %}
+<span>You have no trips.</span>
+{% endif %}
 </table>
-<a href="/trip/new/">New</a>
+<a class="navigation" href="/trip/new/">Add trip</a>
 {% endblock %}

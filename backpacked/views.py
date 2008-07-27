@@ -108,7 +108,7 @@ def account_details(request):
         form = AccountDetailsForm(request.POST, instance=request.user.get_profile())
         if form.is_valid():
             form.save()
-            return HttpResponseRedirect("/account/details/")
+            return HttpResponseRedirect("/")
     else:
         form = AccountDetailsForm(instance=request.user.get_profile())
 

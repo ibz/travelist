@@ -87,18 +87,19 @@ class SegmentInput(widgets.Widget):
         place = PlaceInput()
         date = widgets.DateTimeInput()
         transportation = widgets.Select(choices=TRANSPORTATION_METHODS)
-        return (place.render("%s_p1_place" % name,
-                                value and value.p1.place_id,
-                                {'id': "id_%s_p1_place" % name})
-              + date.render("%s_start_date" % name,
-                            value and value.start_date)
-              + place.render("%s_p2_place" % name,
-                                value and value.p2.place_id,
-                                {'id': "id_%s_p2_place" % name})
-              + date.render("%s_end_date" % name,
-                            value and value.end_date)
-              + transportation.render("%s_transportation_method" % name,
-                                      value and value.transportation_method))
+        return ("%s|%s|%s|%s|%s"
+                % (place.render("%s_p1_place" % name,
+                                value and value.p1_id and value.p1.place_id,
+                                {'id': "id_%s_p1_place" % name}),
+                   date.render("%s_start_date" % name,
+                               value and value.start_date),
+                   place.render("%s_p2_place" % name,
+                                value and value.p2_id and value.p2.place_id,
+                                {'id': "id_%s_p2_place" % name}),
+                   date.render("%s_end_date" % name,
+                               value and value.end_date),
+                   transportation.render("%s_transportation_method" % name,
+                                         value and value.transportation_method)))
 
     def value_from_datadict(self, data, files, name):
         segment = {}
@@ -109,18 +110,29 @@ class SegmentInput(widgets.Widget):
 class PathInput(forms.widgets.Widget):
     def render(self, name, value, attrs=None):
         segment_input = SegmentInput()
-        render_segment = lambda i: segment_input.render("%s_%s" % (name, i), value[i], attrs)
-        segments = "".join(["<li>%s</li>" % render_segment(i)
+        render_segment = lambda i: segment_input.render("%s_%s" % (name, i), value[i], attrs).replace("|", "</td><td>")
+        if value == []:
+            value = [Segment()]
+        segments = "".join(["<tr><td>%s</td></tr>" % render_segment(i)
                             for i in range(len(value))])
         return (
 """
-<ul id="path_%(name)s">%(items)s</ul>
-<a href="javascript:newSegment();">More</a>
+<table id="path_%(name)s">
+<thead>
+    <td>From</td>
+    <td>Start date</td>
+    <td>To</td>
+    <td>End date</td>
+    <td>Transportation method</td>
+</thead>
+<tbody>%(items)s</tbody>
+</table>
+<a class="navigation" href="javascript:newSegment();">Add segment</a>
 <script type="text/javascript">
 function newSegment()
 {
     var index = document.getElementById("path_%(name)s").childNodes.length;
-    addListItem("path_%(name)s",
+    addTableRow("path_%(name)s",
                 "/widget/segment_input/?name=%(name)s_" + index);
 }
 </script>
