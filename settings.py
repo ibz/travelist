@@ -9,11 +9,11 @@ ADMINS = (
 MANAGERS = ADMINS
 
 DATABASE_ENGINE = 'postgresql_psycopg2'
-DATABASE_NAME = 'kashgar'
-DATABASE_USER = 'kashgar'
+DATABASE_NAME = 'bit'
+DATABASE_USER = 'bit'
 DATABASE_PASSWORD = ''
 DATABASE_HOST = ''
-DATABASE_PORT = ''
+DATABASE_PORT = '5432'
 
 FIXTURE_DIRS = ("fixtures",)
 

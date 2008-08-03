@@ -22,7 +22,7 @@
 Segments:
 <ul class="plain-list">
 {% for segment in trip.segment_set.all %}
-    <li><a href="/trip/{{ trip.id }}/segment/{{ segment.id }}/annotation/list/">{{ segment.p1.name }} - {{ segment.p2.name }}</a></li>
+    <li>{{ forloop.counter }}. <a href="/trip/{{ trip.id }}/segment/{{ segment.id }}/annotation/list/">{{ segment.p1.name }} - {{ segment.p2.name }}</a></li>
 {% endfor %}
 </ul>
 </div>

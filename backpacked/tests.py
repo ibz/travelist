@@ -13,6 +13,7 @@ from backpacked import views
 from backpacked import forms
 from backpacked import utils
 from backpacked import models
+from backpacked.models import Place
 from backpacked.models import Trip
 from backpacked.models import UserProfile
 
@@ -73,7 +74,7 @@ class TestUrls(TestCase):
             self._test_url(url, status_code)
 
     def test_urls_login(self):
-        urls = [("/", 200),
+        urls = [("/", 302),
                 ("/account/register/", 302),
                 ("/accounts/activate/XXX/", 404),
                 ("/account/details/", 200),
@@ -95,7 +96,8 @@ class TestAccountRegistration(TestCase):
     def setUp(self):
         request = get_request(post={'username': "new_user",
                                     'email': "new_user@example.com",
-                                    'password': "new_user_password"})
+                                    'password': "new_user_password",
+                                    'alpha_code': "i want the alpha!"})
         views.account_register(request)
         user = User.objects.get(username="new_user")
         self.activation_key = user.userprofile.activation_key
@@ -392,3 +394,37 @@ class TestTripEditForm(TestCase):
         self._assert_segment_data_equals(segments[2], *(1, 2, datetime(2007, 3, 6), datetime(2007, 3, 8), 2))
 
         self.assertEquals(sorted([p.place_id for p in points]), [1, 2])
+
+    def test_create_complex_trip(self):
+        place_names = ["Beijing",
+                       "Slyudyanka",
+                       "Listvyanka",
+                       "Irkutsk",
+                       "Khuzhir",
+                       "Moscow",
+                       "Suceava"]
+        places = [Place.objects.get(name=name) for name in place_names]
+
+        trip_id = self._create_trip("Trans-Siberian 2008", "2008-08-06", "2008-08-22",
+                          [(0, places[0].id, places[1].id,
+                            "2008-08-06", "2008-08-08", 1),
+                           (1, places[1].id, places[2].id,
+                            "2008-08-08", "2008-08-08", 1),
+                           (2, places[2].id, places[3].id,
+                            "2008-08-09", "2008-08-09", 6),
+                           (3, places[3].id, places[4].id,
+                            "2008-08-10", "2008-08-10", 6),
+                           (4, places[4].id, places[3].id,
+                            "2008-08-13", "2008-08-13", 6),
+                           (5, places[3].id, places[5].id,
+                            "2008-08-14", "2008-08-18", 1),
+                           (6, places[5].id, places[6].id,
+                            "2008-08-21", "2008-08-22", 6)])
+
+        trip = Trip.objects.get(id=trip_id)
+
+        segments = list(trip.segment_set.all())
+        points = list(trip.point_set.all())
+
+        self.assertEquals(len(segments), 7)
+        self.assertEquals(len(points), 7)

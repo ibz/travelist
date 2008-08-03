@@ -63,7 +63,8 @@ TRANSPORTATION_METHODS = ((0, "Unspecified"),
                           (2, "Airplane"),
                           (3, "Walk"),
                           (4, "Bike"),
-                          (5, "Car"))
+                          (5, "Car"),
+                          (6, "Bus"))
 
 class Segment(models.Model):
     trip = models.ForeignKey(Trip)

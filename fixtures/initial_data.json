@@ -18,7 +18,15 @@
 {"pk": 1, "model": "backpacked.place",
           "fields": {"coords": "POINT(39.5420 116.2329)", "name": "Beijing"}},
 {"pk": 2, "model": "backpacked.place",
-          "fields": {"coords": "POINT(39.28 76.03)", "name": "Kashgar"}},
+          "fields": {"coords": "POINT(0 0)", "name": "Slyudyanka"}},
 {"pk": 3, "model": "backpacked.place",
-          "fields": {"coords": "POINT(46.46 23.35)", "name": "Cluj-Napoca"}}
+          "fields": {"coords": "POINT(0 0)", "name": "Listvyanka"}},
+{"pk": 4, "model": "backpacked.place",
+          "fields": {"coords": "POINT(0 0)", "name": "Irkutsk"}},
+{"pk": 5, "model": "backpacked.place",
+          "fields": {"coords": "POINT(0 0)", "name": "Khuzhir"}},
+{"pk": 6, "model": "backpacked.place",
+          "fields": {"coords": "POINT(0 0)", "name": "Moscow"}},
+{"pk": 7, "model": "backpacked.place",
+          "fields": {"coords": "POINT(0 0)", "name": "Suceava"}}
 ]

@@ -30,7 +30,7 @@ class PlaceInput(forms.widgets.Widget):
 <input type="hidden" value="%(loc_id)s" name="%(name)s"%(attrs)s />
 <script type="text/javascript">
 $("#id_%(name)s_name").autocomplete("/place/search/",
-    {minChars: 2,
+    {minChars: 2, matchSubset: false,
      onItemSelect: function(li) { $("#id_%(name)s").attr('value', li.extra[0]); }});
 </script>
 """
@@ -131,7 +131,7 @@ class PathInput(forms.widgets.Widget):
 <script type="text/javascript">
 function newSegment()
 {
-    var index = document.getElementById("path_%(name)s").childNodes.length;
+    var index = document.getElementById("path_%(name)s").getElementsByTagName("tbody")[0].childNodes.length;
     addTableRow("path_%(name)s",
                 "/widget/segment_input/?name=%(name)s_" + index);
 }
