@@ -73,3 +73,5 @@ INSTALLED_APPS = (
     'django.contrib.contenttypes',
     'django.contrib.sessions',
 )
+
+GOOGLE_MAPS_API_KEY = "ABQIAAAAq_mjC_qAMFZ-7Y07h8CbfxRKR2kFp3iqjCq4a6HN9rHMOG-QDRRCAx73IYXNGFNtbDRPrqsSVloaWQ"

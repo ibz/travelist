@@ -34,3 +34,30 @@ function registerContentTypeEvent(selector, name)
                         });
             });
 }
+
+function initTripMap(id, point_data)
+{
+    var markers = [];
+    for(var i = 0; i < point_data.length; i++)
+    {
+        var lat = point_data[i][0];
+        var lng = point_data[i][1];
+        var title = point_data[i][2];
+        markers.push(new GMarker(new GLatLng(lat, lng), {title: title}));
+    }
+    if (GBrowserIsCompatible()) {
+        map = new GMap2(document.getElementById(id));
+        map.addControl(new GLargeMapControl());
+        map.setCenter(markers[0].getPoint(), 4);
+        setTimeout(function() {
+                       var mgr = new MarkerManager(map);
+                       mgr.addMarkers(markers, 1);
+                       mgr.refresh();
+                   }, 0);
+    }
+}
+
+function cleanupMap()
+{
+    GUnload();
+}
