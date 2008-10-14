@@ -3,7 +3,7 @@ from datetime import datetime
 from datetime import timedelta
 from random import random
 
-from django import newforms as forms
+from django import forms
 from django.http import HttpResponseRedirect
 from django.http import HttpResponseBadRequest
 from django.http import HttpResponse

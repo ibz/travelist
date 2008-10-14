@@ -1,10 +1,10 @@
 from django.conf.urls.defaults import *
+from django.contrib import admin
 
 import settings
 
 urlpatterns = patterns('',
-    (r"^admin/",
-      include('django.contrib.admin.urls')),
+    (r"^admin/", admin.site.root),
     (r'^media/(?P<path>.*)$',
       'django.views.static.serve',
      {'document_root': settings.MEDIA_ROOT}),

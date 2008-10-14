@@ -1,11 +1,10 @@
 import re
 
-from django import newforms as forms
-from django.newforms import fields
-from django.newforms import widgets
-from django.core import validators
+from django import forms
+from django.forms import fields
+from django.forms import widgets
 from django.contrib.auth.models import User
-from django.newforms.util import ValidationError
+from django.forms.util import ValidationError
 
 from backpacked import models
 from backpacked.models import Annotation
