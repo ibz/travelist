@@ -59,8 +59,7 @@ class TestUrls(TestCase):
             (url, resp.status_code, status_code))
 
     def test_urls_nologin(self):
-        urls = [("/admin/", 200),
-                ("/media/css/main.css", 200),
+        urls = [("/media/css/main.css", 200),
                 ("/", 200),
                 ("/account/register/", 200),
                 ("/accounts/activate/XXX/", 404),
