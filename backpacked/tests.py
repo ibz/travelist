@@ -1,12 +1,12 @@
 from datetime import date
 from datetime import datetime
 from datetime import timedelta
-from unittest import TestCase
 
 from django.contrib.auth.models import AnonymousUser
 from django.contrib.auth.models import User
 from django.core import mail
 from django.http import HttpRequest
+from django.test import TestCase
 from django.test.client import Client
 
 from backpacked import views
@@ -31,6 +31,8 @@ def get_request(get=None, post=None, username=None):
     return request
 
 class TestLogin(TestCase):
+    fixtures = ['test_data']
+
     def test_login(self):
         c = Client()
 
@@ -47,6 +49,8 @@ class TestUtils(TestCase):
         self.assertEquals(utils.find([1, 2, 3, 4], lambda a: a == 5), None)
 
 class TestUrls(TestCase):
+    fixtures = ['test_data']
+
     def setUp(self):
         self.c = Client()
 
@@ -213,6 +217,8 @@ class TestPathField(TestCase):
         self.assertEquals(places, expected_places)
 
 class TestTripEditForm(TestCase):
+    fixtures = ['test_data']
+
     def _get_trip_data(self, name, start_date, end_date, visibility):
         return {'name': name,
                 'start_date': start_date,

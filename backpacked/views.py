@@ -165,7 +165,7 @@ def widget_content_input(request):
 def place_search(request):
     if request.GET:
         res = Place.objects.filter(name__istartswith=request.GET['q'])[:10]
-        return HttpResponse("\n".join(["%s|%s" % (l.name, l.id) for l in res]))
+        return HttpResponse("\n".join(["%s|%s" % (l.display_name, l.id) for l in res]))
     else:
         return HttpResponseBadRequest()
 

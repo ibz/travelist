@@ -5,8 +5,35 @@ from django.utils.safestring import mark_safe
 
 from lib.mock import Mock
 
-class Place(models.Model):
+class Country(models.Model):
+    code = models.CharField(max_length=2)
     name = models.CharField(max_length=100)
+
+    class Admin:
+        pass
+
+    def __unicode__(self):
+        return self.name
+
+class AdministrativeDivision(models.Model):
+    code = models.CharField(max_length=20)
+    name = models.CharField(max_length=100)
+    country = models.ForeignKey(Country)
+
+    class Meta:
+        unique_together = (('country', 'code'),)
+
+    class Admin:
+        pass
+
+    def __unicode__(self):
+        return self.name
+
+class Place(models.Model):
+    code = models.IntegerField()
+    name = models.CharField(max_length=100)
+    country = models.ForeignKey(Country)
+    administrative_division = models.ForeignKey(AdministrativeDivision, null=True)
     coords = models.PointField()
 
     class Admin:
@@ -14,6 +41,14 @@ class Place(models.Model):
 
     def __unicode__(self):
         return self.name
+
+    @property
+    def display_name(self):
+        name = self.name
+        if self.administrative_division:
+            name += ", %s" % self.administrative_division.name
+        name += ", %s" % self.country.name
+        return name
 
 class UserProfile(models.Model):
     user = models.OneToOneField(User)
@@ -32,9 +67,9 @@ class UserProfile(models.Model):
 PUBLIC = 1
 PROTECTED = 2
 PRIVATE = 3
-VISIBILITIES = ((PUBLIC, "Public"),
-               (PROTECTED, "Protected"),
-               (PRIVATE, "Private"))
+VISIBILITIES = ((PUBLIC, "Everyone"),
+               (PROTECTED, "Friends only"),
+               (PRIVATE, "Myself only"))
 
 class Trip(models.Model):
     user = models.ForeignKey(User)
@@ -64,7 +99,9 @@ TRANSPORTATION_METHODS = ((0, "Unspecified"),
                           (3, "Walk"),
                           (4, "Bike"),
                           (5, "Car"),
-                          (6, "Bus"))
+                          (6, "Bus"),
+                          (7, "Boat"),
+                          (8, "Motorcycle"))
 
 class Segment(models.Model):
     trip = models.ForeignKey(Trip)
