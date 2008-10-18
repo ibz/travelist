@@ -31,12 +31,12 @@ ADMIN_MEDIA_PREFIX = '/admin-media/'
 
 SECRET_KEY = '@2s!oe3(g2w(sifra4t+=!whk79-b-3p8gr4o!fw#a_x4deht3'
 
-SERVER_EMAIL = ""
-CUSTOMER_EMAIL = ""
+SERVER_EMAIL = "contact@backpacked.it"
+CUSTOMER_EMAIL = "contact@backpacked.it"
 EMAIL_HOST = "smtp.gmail.com"
 EMAIL_PORT = 587
-EMAIL_HOST_USER = ""
-EMAIL_HOST_PASSWORD = ""
+EMAIL_HOST_USER = "contact@backpacked.it"
+EMAIL_HOST_PASSWORD = "39L423"
 EMAIL_USE_TLS = True
 EMAIL_SUBJECT_PREFIX = "[backpacked.it] "
 
