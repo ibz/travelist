@@ -210,6 +210,13 @@ class AccountRegistrationForm(forms.ModelForm):
         if self.cleaned_data['alpha_code'] != "i want the alpha!":
             raise ValidationError("The alpha code is invalid.")
 
+    def save(self, commit=True):
+        user = super(forms.ModelForm, self).save(commit=False)
+        user.set_password(self.cleaned_data["password"])
+        if commit:
+            user.save()
+        return user
+
 class TripEditForm(forms.ModelForm):
     path = PathField()
 
