@@ -109,19 +109,14 @@ class Segment(models.Model):
     p2 = models.ForeignKey(Point, related_name="segments_in")
     start_date = models.DateTimeField(blank=True, null=True)
     end_date = models.DateTimeField(blank=True, null=True)
-    transportation_method = models.IntegerField(choices=TRANSPORTATION_METHODS)
+    transportation_method = models.IntegerField(choices=TRANSPORTATION_METHODS, default=0)
+    order_rank = models.IntegerField()
 
     def __unicode__(self):
         return "%s - %s" % (self.p1, self.p2)
 
     def __cmp__(self, other):
-        return cmp(self.start_date, other.start_date)
-
-    def places_equal(self, other):
-        if isinstance(other, tuple):
-            return (self.p1.place_id, self.p2.place_id) == other
-        else:
-            return self.places_equal((other.p1.place_id, other.p2.place_id))
+        return cmp(self.order_rank, other.order_rank)
 
 TEXT = 1
 URL = 2

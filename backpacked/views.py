@@ -121,7 +121,17 @@ def trip_list(request):
 
 def trip_view(request, id):
     trip = get_object_or_404(Trip, id=id)
-    return render("trip_view.html", request, {'trip': trip})
+    segments = sorted(list(trip.segment_set.all()))
+    points = []
+    for segment in segments:
+        if segment.p1 not in points:
+            points.append(segment.p1)
+        if segment.p2 not in points:
+            points.append(segment.p2)
+    return render("trip_view.html", request,
+                  {'trip': trip,
+                   'segments': segments,
+                   'points': points})
 
 @login_required
 def trip_edit(request, id=None):
@@ -133,12 +143,38 @@ def trip_edit(request, id=None):
         form = TripEditForm(request.POST, instance=trip)
         if form.is_valid():
             trip = form.save()
-            return HttpResponseRedirect("/trip/%s/" % trip.id)
+            if id:
+                return HttpResponseRedirect("/trip/%s/" % trip.id)
+            else:
+                return HttpResponseRedirect("/trip/%s/edit/create-segments/" % trip.id)
     else:
         form = TripEditForm(instance=trip)
     return render("trip_edit.html", request,
                   {'trip': trip,
                    'form': form})
+
+@login_required
+def trip_create_segments(request, id):
+    trip = get_object_or_404(Trip, id=id, user=request.user)
+    assert len(list(trip.segment_set.all())) == 0
+    assert len(list(trip.point_set.all())) == 0
+    if request.method == 'GET':
+        return render("trip_create_segments.html", request)
+    elif request.method == 'POST':
+        place_ids = [int(request.POST[unicode(pid)])
+                     for pid in sorted([int(pid)
+                                        for pid in request.POST.keys()])]
+        points = []
+        for place_id in place_ids:
+            place = Place.objects.get(id=place_id)
+            point = Point(trip=trip, place=place, name=place.name, coords=place.coords)
+            point.save()
+            points.append(point)
+        for i in range(len(points) - 1):
+            p1, p2 = points[i], points[i + 1]
+            segment = Segment(trip=trip, p1=p1, p2=p2, order_rank=i)
+            segment.save()
+        return HttpResponseRedirect("/trip/%s/" % trip.id)
 
 @login_required
 def trip_delete(request, id):

@@ -30,6 +30,8 @@ urlpatterns = patterns('',
       'backpacked.views.trip_edit'),
     (r"^trip/(?P<id>\d+)/edit/$",
       'backpacked.views.trip_edit'),
+    (r"^trip/(?P<id>\d+)/edit/create-segments/$",
+      'backpacked.views.trip_create_segments'),
     (r"^trip/(?P<id>\d+)/delete/$",
       'backpacked.views.trip_delete'),
 

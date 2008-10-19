@@ -37,24 +37,82 @@ function registerContentTypeEvent(selector, name)
 
 function initTripMap(id, point_data)
 {
-    var markers = [];
-    for(var i = 0; i < point_data.length; i++)
+    if (!GBrowserIsCompatible())
+    {
+        return;
+    }
+
+    var initialZoom = 16;
+
+    var map = new GMap2(document.getElementById(id));
+    map.addControl(new GLargeMapControl());
+    map.setCenter(new GLatLng(0, 0), initialZoom);
+
+    var baseWidth = Math.abs(map.getBounds().getNorthEast().x) * 2;
+    var baseHeight = Math.abs(map.getBounds().getNorthEast().y) * 2;
+
+    var points = [];
+    var titles = [];
+
+    var minLat = 99999999;
+    var minLng = 99999999;
+    var maxLat = -99999999;
+    var maxLng = -99999999;
+
+    var i;
+
+    for(i = 0; i < point_data.length; i++)
     {
         var lat = point_data[i][0];
         var lng = point_data[i][1];
         var title = point_data[i][2];
-        markers.push(new GMarker(new GLatLng(lat, lng), {title: title}));
+
+        points.push(new GLatLng(lat, lng));
+        titles.push(title);
+
+        if(lat < minLat) minLat = lat;
+        if(lat > maxLat) maxLat = lat;
+        if(lng < minLng) minLng = lng;
+        if(lng > maxLng) maxLng = lng;
     }
-    if (GBrowserIsCompatible()) {
-        map = new GMap2(document.getElementById(id));
-        map.addControl(new GLargeMapControl());
-        map.setCenter(markers[0].getPoint(), 4);
-        setTimeout(function() {
-                       var mgr = new MarkerManager(map);
-                       mgr.addMarkers(markers, 1);
-                       mgr.refresh();
-                   }, 0);
+
+    var wZoom;
+    var w = Math.abs(maxLng - minLng);
+    for(wZoom = initialZoom; wZoom >= 0; wZoom--)
+    {
+        if(baseWidth > w)
+        {
+            break;
+        }
+        baseWidth *= 2;
     }
+
+    var hZoom;
+    var h = Math.abs(maxLat - minLat);
+    for(hZoom = initialZoom; hZoom >= 0; hZoom--)
+    {
+        if(baseHeight > h)
+        {
+            break;
+        }
+        baseHeight *= 2;
+    }
+
+    map.setCenter(new GLatLng((minLat + maxLat) / 2, (minLng + maxLng) / 2),
+                  (Math.min(wZoom, hZoom)));
+
+    markers = [];
+    for(i = 0; i < points.length; i++)
+    {
+        markers.push(new GMarker(points[i], {title: titles[i]}));
+    }
+
+    setTimeout(function() {
+                   var mgr = new MarkerManager(map);
+                   mgr.addMarkers(markers, 1);
+                   mgr.refresh();
+                   map.addOverlay(new GPolyline(points, "#ff0000", 10));
+               }, 0);
 }
 
 function cleanupMap()

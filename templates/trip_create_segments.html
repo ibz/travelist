@@ -1,0 +1,47 @@
+{% extends "base.html" %}
+
+{% block content %}
+<script type="text/javascript">
+function add_place() {
+    var place_name_input = document.getElementById("new_place_name");
+    var place_id_input = document.getElementById("new_place_id");
+    var place_name = place_name_input.value;
+    var place_id = place_id_input.value;
+    place_name_input.value = place_id_input.value = "";
+
+    var tbody = document.getElementById('places').getElementsByTagName("tbody")[0];
+    var row = document.createElement("tr");
+    var column = document.createElement("td");
+
+    var hidden = document.createElement("input");
+    hidden.type = "hidden";
+    hidden.name = tbody.rows.length;
+    hidden.value = place_id;
+    var span = document.createElement("span");
+    span.innerHTML = "<span>" + place_name + "</span>";
+
+    column.appendChild(hidden);
+    column.appendChild(span);
+    row.appendChild(column);
+    tbody.appendChild(row);
+}
+</script>
+
+<form method="POST" action="">
+
+<table id="places"><tbody></tbody></table>
+
+<input type="text" id="new_place_name" />
+<input type="hidden" id="new_place_id" />
+<input type="button" class="button" value="Add" onclick="javascript:add_place();" />
+<script type="text/javascript">
+$("#new_place_name").autocomplete("/place/search/",
+    {minChars: 2, matchSubset: false,
+     onItemSelect: function(li) { $("#new_place_id").attr('value', li.extra[0]); }});
+</script>
+
+<br />
+
+<input type="submit" class="button" value="Save" />
+</form>
+{% endblock %}
