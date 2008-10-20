@@ -27,11 +27,11 @@ from backpacked.models import UserProfile
 from backpacked.forms import AnnotationEditForm
 from backpacked.forms import AnnotationNewForm
 from backpacked.forms import ContentInput
-from backpacked.forms import SegmentInput
 from backpacked.forms import AccountLoginForm
 from backpacked.forms import AccountDetailsForm
 from backpacked.forms import AccountRegistrationForm
 from backpacked.forms import TripEditForm
+from backpacked.forms import SegmentEditForm
 
 import settings
 
@@ -182,11 +182,20 @@ def trip_delete(request, id):
     trip.delete()
     return HttpResponseRedirect("/trip/list/")
 
-def widget_segment_input(request):
-    if request.GET:
-        return HttpResponse(SegmentInput().render(request.GET['name'], None))
+@login_required
+def segment_edit(request, trip_id, id):
+    segment = get_object_or_404(Segment, id=id, trip__user=request.user)
+    if request.POST:
+        form = SegmentEditForm(request.POST, instance=segment)
+        if form.is_valid():
+            form.save()
+            return HttpResponseRedirect("/trip/%s/" % trip_id)
     else:
-        return HttpResponseBadRequest()
+        form = SegmentEditForm(instance=segment)
+    return render("segment_edit.html", request,
+                  {'trip_id': trip_id,
+                   'segment': segment,
+                   'form': form})
 
 def widget_content_input(request):
     if request.GET:
@@ -204,17 +213,6 @@ def place_search(request):
         return HttpResponse("\n".join(["%s|%s" % (l.display_name, l.id) for l in res]))
     else:
         return HttpResponseBadRequest()
-
-def annotation_list(request, trip_id, entity, entity_id):
-    if entity not in ['point', 'segment']:
-        return HttpResponseBadRequest()
-    filter = {str("%s__id" % entity): str(entity_id)}
-    annotations = Annotation.objects.filter(**filter)
-    return render("annotation_list.html", request,
-                  {'trip_id': trip_id,
-                   'annotations': annotations,
-                   'entity': entity,
-                   'entity_id': entity_id})
 
 def annotation_view(request, trip_id, entity, entity_id, id):
     annotation = get_object_or_404(Annotation, id=id)
@@ -238,8 +236,7 @@ def annotation_edit(request, trip_id, entity, entity_id, id=None):
         form = form_class(request.POST, instance=annotation)
         if form.is_valid():
             annotation = form.save()
-            return HttpResponseRedirect("/trip/%s/%s/%s/annotation/list/"
-                                        % (trip_id, entity, entity_id))
+            return HttpResponseRedirect("/trip/%s/" % trip_id)
     else:
         form = form_class(instance=annotation)
     return render("annotation_edit.html", request,

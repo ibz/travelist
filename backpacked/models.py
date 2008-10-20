@@ -3,6 +3,8 @@ from django.contrib.gis.db import models
 from django.utils import html
 from django.utils.safestring import mark_safe
 
+from geopy.distance import distance
+
 from lib.mock import Mock
 
 class Country(models.Model):
@@ -93,6 +95,7 @@ class Point(models.Model):
     def __unicode__(self):
         return str(self.coords)
 
+
 TRANSPORTATION_METHODS = ((0, "Unspecified"),
                           (1, "Train"),
                           (2, "Airplane"),
@@ -118,6 +121,14 @@ class Segment(models.Model):
     def __cmp__(self, other):
         return cmp(self.order_rank, other.order_rank)
 
+    @property
+    def transportation_method_str(self):
+        return [t for t in TRANSPORTATION_METHODS if t[0] == self.transportation_method][0][1]
+
+    @property
+    def length(self):
+        return distance(self.p1.coords.coords, self.p2.coords.coords).km
+
 TEXT = 1
 URL = 2
 CONTENT_TYPES = ((TEXT, "Text"),
@@ -127,7 +138,7 @@ class Annotation(models.Model):
     trip = models.ForeignKey(Trip)
     point = models.ForeignKey(Point, null=True)
     segment = models.ForeignKey(Segment, null=True)
-    date = models.DateTimeField()
+    date = models.DateTimeField(blank=True, null=True)
     title = models.CharField(max_length=30)
     content_type = models.IntegerField(choices=CONTENT_TYPES)
     content = models.TextField()

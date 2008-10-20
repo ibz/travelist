@@ -81,100 +81,6 @@ class ContentInput(widgets.Widget):
                    'widget': widget,
                    'selector': self.content_type_selector})
 
-class SegmentInput(widgets.Widget):
-    def render(self, name, value, attrs=None):
-        place = PlaceInput()
-        date = widgets.DateTimeInput()
-        transportation = widgets.Select(choices=TRANSPORTATION_METHODS)
-        return ("%s|%s|%s|%s|%s"
-                % (place.render("%s_p1_place" % name,
-                                value and value.p1_id and value.p1.place_id,
-                                {'id': "id_%s_p1_place" % name}),
-                   date.render("%s_start_date" % name,
-                               value and value.start_date),
-                   place.render("%s_p2_place" % name,
-                                value and value.p2_id and value.p2.place_id,
-                                {'id': "id_%s_p2_place" % name}),
-                   date.render("%s_end_date" % name,
-                               value and value.end_date),
-                   transportation.render("%s_transportation_method" % name,
-                                         value and value.transportation_method)))
-
-    def value_from_datadict(self, data, files, name):
-        segment = {}
-        for member in ['p1_place', 'p2_place', 'start_date', 'end_date', 'transportation_method']:
-            segment[member] = data["%s_%s" % (name, member)]
-        return segment
-
-class PathInput(forms.widgets.Widget):
-    def render(self, name, value, attrs=None):
-        segment_input = SegmentInput()
-        render_segment = lambda i: segment_input.render("%s_%s" % (name, i), value[i], attrs).replace("|", "</td><td>")
-        if value == []:
-            value = [Segment()]
-        segments = "".join(["<tr><td>%s</td></tr>" % render_segment(i)
-                            for i in range(len(value))])
-        return (
-"""
-<table id="path_%(name)s">
-<thead>
-    <td>From</td>
-    <td>Start date</td>
-    <td>To</td>
-    <td>End date</td>
-    <td>Transportation method</td>
-</thead>
-<tbody>%(items)s</tbody>
-</table>
-<a class="navigation" href="javascript:newSegment();">Add segment</a>
-<script type="text/javascript">
-function newSegment()
-{
-    var index = document.getElementById("path_%(name)s").getElementsByTagName("tbody")[0].childNodes.length;
-    addTableRow("path_%(name)s",
-                "/widget/segment_input/?name=%(name)s_" + index);
-}
-</script>
-"""
-            % {'name': name,
-               'items': segments})
-
-    def value_from_datadict(self, data, files, name):
-        input_re = re.compile(
-            # inputs look like path_0_p1_place, path_0_start_date, ...
-            r"^%s_(?P<i>\d+)_(p[12]_place|(start|end)_date|transportation_method)$" % name)
-        indices = [int(m.group('i'))
-                   for m in [input_re.match(k)
-                             for k in data.keys()]
-                   if m]
-        segment_input = SegmentInput()
-        return [segment_input.value_from_datadict(data, files, "%s_%s" % (name, i))
-                for i in set(indices)]
-
-class PathField(fields.Field):
-    def __init__(self, widget=PathInput, label=None, initial=None,
-                 help_text=None, *args, **kwargs):
-        fields.Field.__init__(self, False, widget, label, initial, help_text, *args, **kwargs)
-
-    def clean(self, value):
-        datetime_field = fields.DateTimeField(required=False)
-        choice_field = fields.ChoiceField(choices=TRANSPORTATION_METHODS, required=False)
-        segments, places = [], []
-        for segment_data in value:
-            if segment_data['p1_place'] is None or segment_data['p2_place'] is None:
-                continue
-            segment = {'p1_place': int(segment_data['p1_place']),
-                       'p2_place': int(segment_data['p2_place']),
-                       'start_date': datetime_field.clean(segment_data['start_date']),
-                       'end_date': datetime_field.clean(segment_data['end_date']),
-                       'transportation_method':
-                           int(choice_field.clean(segment_data['transportation_method']))}
-            segments.append(segment)
-            for l in [segment['p1_place'], segment['p2_place']]:
-                if not l in places:
-                    places.append(l)
-        return segments, places
-
 class AccountLoginForm(forms.Form):
     username = forms.CharField()
     password = forms.CharField(widget=forms.PasswordInput)
@@ -248,3 +154,8 @@ class AnnotationEditForm(AnnotationNewForm):
         model = Annotation
         fields = tuple([f for f in AnnotationNewForm.Meta.fields
                         if f != 'content_type'])
+
+class SegmentEditForm(forms.ModelForm):
+    class Meta:
+        model = Segment
+        fields = ('start_date', 'end_date', 'transportation_method')

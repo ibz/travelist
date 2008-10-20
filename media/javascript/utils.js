@@ -101,7 +101,7 @@ function initTripMap(id, point_data)
     map.setCenter(new GLatLng((minLat + maxLat) / 2, (minLng + maxLng) / 2),
                   (Math.min(wZoom, hZoom)));
 
-    markers = [];
+    var markers = [];
     for(i = 0; i < points.length; i++)
     {
         markers.push(new GMarker(points[i], {title: titles[i]}));
@@ -111,7 +111,7 @@ function initTripMap(id, point_data)
                    var mgr = new MarkerManager(map);
                    mgr.addMarkers(markers, 1);
                    mgr.refresh();
-                   map.addOverlay(new GPolyline(points, "#ff0000", 10));
+                   map.addOverlay(new GPolyline(points, "#ff0000", 3));
                }, 0);
 }
 
