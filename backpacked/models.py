@@ -32,6 +32,7 @@ class AdministrativeDivision(models.Model):
         return self.name
 
 class Place(models.Model):
+    source = models.IntegerField() # 1 = manual, 2 = geonames
     code = models.IntegerField()
     name = models.CharField(max_length=100)
     name_ascii = models.CharField(max_length=100)
