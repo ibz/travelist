@@ -34,6 +34,7 @@ class AdministrativeDivision(models.Model):
 class Place(models.Model):
     code = models.IntegerField()
     name = models.CharField(max_length=100)
+    name_ascii = models.CharField(max_length=100)
     country = models.ForeignKey(Country)
     administrative_division = models.ForeignKey(AdministrativeDivision, null=True)
     coords = models.PointField()
@@ -48,7 +49,8 @@ class Place(models.Model):
     def display_name(self):
         name = self.name
         if self.administrative_division:
-            name += ", %s" % self.administrative_division.name
+            if self.name != self.administrative_division.name:
+                name += ", %s" % self.administrative_division.name
         name += ", %s" % self.country.name
         return name
 
@@ -66,19 +68,21 @@ class UserProfile(models.Model):
     def __unicode__(self):
         return self.user.username
 
-PUBLIC = 1
-PROTECTED = 2
-PRIVATE = 3
-VISIBILITIES = ((PUBLIC, "Everyone"),
-               (PROTECTED, "Friends only"),
-               (PRIVATE, "Myself only"))
+class Visibility:
+    PUBLIC = 1
+    PROTECTED = 2
+    PRIVATE = 3
+
+VISIBILITIES = ((Visibility.PUBLIC, "Everyone"),
+#               (Visibility.PROTECTED, "Friends only"),
+               (Visibility.PRIVATE, "Myself only"))
 
 class Trip(models.Model):
     user = models.ForeignKey(User)
     name = models.CharField(max_length=200)
     start_date = models.DateField()
     end_date = models.DateField()
-    visibility = models.IntegerField(choices=VISIBILITIES, default=PUBLIC)
+    visibility = models.IntegerField(choices=VISIBILITIES, default=Visibility.PUBLIC)
 
     class Admin:
         pass
@@ -94,6 +98,10 @@ class Point(models.Model):
 
     def __unicode__(self):
         return str(self.coords)
+
+    @property
+    def annotation_count(self):
+        return self.annotation_set.all().count()
 
 
 TRANSPORTATION_METHODS = ((0, "Unspecified"),
@@ -129,6 +137,10 @@ class Segment(models.Model):
     def length(self):
         return distance(self.p1.coords.coords, self.p2.coords.coords).km
 
+    @property
+    def annotation_count(self):
+        return self.annotation_set.all().count()
+
 TEXT = 1
 URL = 2
 CONTENT_TYPES = ((TEXT, "Text"),
@@ -142,7 +154,7 @@ class Annotation(models.Model):
     title = models.CharField(max_length=30)
     content_type = models.IntegerField(choices=CONTENT_TYPES)
     content = models.TextField()
-    visibility = models.IntegerField(choices=VISIBILITIES, default=PUBLIC)
+    visibility = models.IntegerField(choices=VISIBILITIES, default=Visibility.PUBLIC)
 
     @property
     def entity(self):

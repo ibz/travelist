@@ -4,6 +4,7 @@ from datetime import timedelta
 from random import random
 
 from django import forms
+from django.http import Http404
 from django.http import HttpResponseRedirect
 from django.http import HttpResponseBadRequest
 from django.http import HttpResponse
@@ -24,6 +25,7 @@ from backpacked.models import Trip
 from backpacked.models import Point
 from backpacked.models import Segment
 from backpacked.models import UserProfile
+from backpacked.models import Visibility
 from backpacked.forms import AnnotationEditForm
 from backpacked.forms import AnnotationNewForm
 from backpacked.forms import ContentInput
@@ -121,6 +123,9 @@ def trip_list(request):
 
 def trip_view(request, id):
     trip = get_object_or_404(Trip, id=id)
+    if trip.visibility == Visibility.PRIVATE:
+        if trip.user != request.user:
+            raise Http404()
     segments = sorted(list(trip.segment_set.all()))
     points = []
     for segment in segments:
@@ -209,13 +214,16 @@ def widget_content_input(request):
 
 def place_search(request):
     if request.GET:
-        res = Place.objects.filter(name__istartswith=request.GET['q'])[:10]
+        res = Place.objects.filter(name_ascii__istartswith=request.GET['q'])[:10]
         return HttpResponse("\n".join(["%s|%s" % (l.display_name, l.id) for l in res]))
     else:
         return HttpResponseBadRequest()
 
 def annotation_view(request, trip_id, entity, entity_id, id):
     annotation = get_object_or_404(Annotation, id=id)
+    if annotation.visibility == Visibility.PRIVATE:
+        if annotation.trip.user != request.user:
+            raise Http404()
     return render("annotation_view.html", request,
                   {'annotation': annotation})
 

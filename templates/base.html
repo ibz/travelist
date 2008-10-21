@@ -4,7 +4,7 @@
   <tr>
     <td class="header-left">
       <ul class="flat-list">
-        {% if not request.user.is_anonymous %}  
+        {% if not user.is_anonymous %}
         <li>
           <a href="/trip/list/">My trips</a>
         </li>
@@ -16,16 +16,18 @@
     </td>
     <td class="header-right">
       <span>
-        {% if not request.user.is_anonymous %}
+        {% if not user.is_anonymous %}
             Logged in as {{ user.username }}.
         {% endif %}
       </span>
       <ul class="flat-list">
-        {% if not request.user.is_anonymous %}
         <li>
-          <a href="/account/logout/">Logout</a>
-        </li>
+        {% if not user.is_anonymous %}
+            <a href="/account/logout/">Logout</a>
+        {% else %}
+            <a href="/">Login</a>
         {% endif %}
+        </li>
       </ul>
     </td>
 </table>
