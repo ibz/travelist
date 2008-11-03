@@ -1,6 +1,5 @@
 body {
  font-family: verdana, arial, helvetica, sans-serif;
- font-size: x-small;
  background-color: white;
  margin: 0;
 }
@@ -34,6 +33,7 @@ input.button {
  width: 100%;
  background-color: #CEE3F8;
  border-bottom: 1px solid #5F99CF;
+ font-size: x-small;
 }
 
 .header-left {
@@ -51,18 +51,19 @@ input.button {
  width: 80%;
 }
 
-.trip-list .trip {
- font-size: medium;
-}
-
-.navigation {
- font-size: medium;
-}
-
 .plain-list {
  list-style-type: none;
 }
 
-.trip-details {
- font-size: medium;
+#map {
+ border: 2px solid #5F99CF;
+ margin-top: 25px;
+}
+
+#trip-components .ui-tabs-panel {
+ min-height: 150px;
+ border-left: 0;
+ border-bottom: 0;
+ border-top: 1px solid #5F99CF;
+ border-right: 1px solid #5F99CF;
 }

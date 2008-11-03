@@ -13,69 +13,103 @@ function toggle_annotations(id)
     var a = document.getElementById("link_" + id);
     a.textContent = ul.style.display == 'none' ? "+" : "-";
 }
+
+$(document).ready(function() { $("#trip-components > ul").tabs(); });
 </script>
 
 <table width="100%">
 <tr>
-<td width="400px">
+<td>
+  <h2>{{ trip.name }}</h2>
+</td>
+<td align="left">
+<table width="700px">
+<tr>
+<td>
+  Started on: {{ trip.start_date|date }}<br />
+  Ended on: {{ trip.end_date|date }}<br />
+  Owned by: {% ifequal user.id trip.user_id %}me{% else %}{{
+  trip.user.username }}{% endifequal %}<br />
+</td>
+<td align="right">
+<span>
+  {% ifequal user.id trip.user_id %}
+  <a class="navigation" href="/trip/{{ trip.id }}/edit/">edit trip</a><br />
+  <a class="navigation" href="/trip/{{ trip.id }}/edit/segments/">edit segments</a><br />
+  {% endifequal %}
+</span>
+</td>
+</tr>
+</table>
+</td>
+</tr>
+<tr>
+<td valign="top" width="400px">
+  <div id="trip-components">
+    <ul>
+      <li><a href="#points"><span>Points</span></a></li>
+      <li><a href="#segments"><span>Segments</span></a></li>
+      <li><a href="#pictures"><span>Pictures</span></a></li>
+    </ul>
 
-<div class="trip-details">
-<h2>{{ trip.name }}</h2>
-<ul class="plain-list">
-    <li>Started on: {{ trip.start_date|date }}</li>
-    <li>Ended on: {{ trip.end_date|date }}</li>
-    <li>Owned by: {% ifequal user.id trip.user_id %}me{% else %}{{ trip.user.username }}{% endifequal %}</li>
-</ul>
+    <div id="points">
+      <ul class="plain-list">
+        {% for point in points %}
+        <li>
+          {% if point.annotation_count %}
+          <a id="link_point_{{ forloop.counter }}" title="Toggle details"
+             href="javascript:toggle_annotations(point_{{ forloop.counter }}')">+</a>
+          {% endif %}
+          {{ point.name }}
+          {% ifequal user.id trip.user_id %}
+          <span style="position: absolute; left: 370px;">
+            <a href="/trip/{{ trip.id }}/point/{{ point.id }}/annotation/new/" title="Annotate">adn</a>
+          </span>
+          {% endifequal %}
+          <ul id="point_{{ forloop.counter }}" class="plain-list" style="display: none;">
+            {% for annotation in point.annotation_set.all %}
+            <li>{{ annotation.render_short }}</li>
+            {% endfor %}
+          </ul>
+        </li>
+        {% endfor %}
+      </ul>
+    </div>
 
-Trip segments:
-<ul class="plain-list">
-{% for segment in segments %}
-    <li>
-        <a id="link_segment_{{ forloop.counter }}" title="Toggle details"
-           href="javascript:toggle_annotations('segment_{{ forloop.counter }}')">+</a>
-        {{ segment.p1.name }} - {{ segment.p2.name }}
-        {% ifequal user.id trip.user_id %}
-            <a href="/trip/{{ trip.id }}/segment/{{ segment.id }}/edit/" title="Edit segment details">E</a>
-            <a href="/trip/{{ trip.id }}/segment/{{ segment.id }}/annotation/new/" title="Add an annotation">A</a>
-        {% endifequal %}
-        <ul id="segment_{{ forloop.counter }}" class="plain-list" style="display: none;">
+    <div id="segments">
+      <ul class="plain-list">
+        {% for segment in segments %}
+        <li>
+          <a id="link_segment_{{ forloop.counter }}" title="Toggle details"
+             href="javascript:toggle_annotations('segment_{{ forloop.counter }}')">+</a>
+          {{ segment.p1.name }} - {{ segment.p2.name }}
+          {% ifequal user.id trip.user_id %}
+          <span style="position: absolute; left: 345px;">
+            <a href="/trip/{{ trip.id }}/segment/{{ segment.id }}/annotation/new/" title="Annotate">adn</a>
+            <a href="/trip/{{ trip.id }}/segment/{{ segment.id }}/edit/" title="Edit segment details">edit</a>
+          </span>
+          {% endifequal %}
+          <ul id="segment_{{ forloop.counter }}" class="plain-list" style="display: none;">
             {% if segment.start_date %}<li>Start date: {{ segment.start_date|date }}</li>{% endif %}
             {% if segment.end_date %}<li>End date: {{ segment.end_date|date }}</li>{% endif %}
             {% if segment.transportation_method %}<li>Transportation method: {{ segment.transportation_method_str }}</li>{% endif %}
             <li>Length: {{ segment.length|floatformat:2 }} km</li>
             {% for annotation in segment.annotation_set.all %}
-                <li>{{ annotation.render_short }}</li>
+            <li>{{ annotation.render_short }}</li>
             {% endfor %}
-        </ul>
-    </li>
-{% endfor %}
-</ul>
+          </ul>
+        </li>
+        {% endfor %}
+      </ul>
+    </div>
 
-Trip points:
-<ul class="plain-list">
-{% for point in points %}
-    <li>
-        {% if point.annotation_count %}
-            <a id="link_point_{{ forloop.counter }}" title="Toggle details"
-               href="javascript:toggle_annotations(point_{{ forloop.counter }}')">+</a>
-        {% endif %}
-        {{ point.name }}
-        {% ifequal user.id trip.user_id %}
-            <a href="/trip/{{ trip.id }}/point/{{ point.id }}/annotation/new/" title="Add an annotation">A</a>
-        {% endifequal %}
-        <ul id="point_{{ forloop.counter }}" class="plain-list" style="display: none;">
-            {% for annotation in point.annotation_set.all %}
-                <li>{{ annotation.render_short }}</li>
-            {% endfor %}
-        </ul>
-    </li>
-{% endfor %}
-</ul>
-</div>
+    <div id="pictures">
+    </div>
+  </div>
 </td>
 
 <td valign="top">
-  <div id="map" style="width: 700px; height: 400px"></div>
+  <div id="map" class="map" style="width: 700px; height: 400px"></div>
   <script type="text/javascript">
       var point_data = [
       {% for point in trip.point_set.all %}
@@ -90,9 +124,5 @@ Trip points:
 
 </tr>
 </table>
-
-{% ifequal user.id trip.user_id %}
-<a class="navigation" href="/trip/{{ trip.id }}/edit/">Edit trip</a>
-{% endifequal %}
 
 {% endblock %}
