@@ -3,17 +3,36 @@
 <head>
 <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
 <title>backpacked.it</title>
+
 <link href="{{ MEDIA_URL }}css/lib/jquery.autocomplete.css" rel="stylesheet" type="text/css" media="screen" />
+<link href="{{ MEDIA_URL }}css/lib/ui.datepicker.css" rel="stylesheet" type="text/css" media="screen" />
 <link href="{{ MEDIA_URL }}css/lib/flora.css" rel="stylesheet" type="text/css" media="screen" />
 <link href="{{ MEDIA_URL }}css/lib/flora.tabs.css" rel="stylesheet" type="text/css" media="screen" />
 <link href="{{ MEDIA_URL }}css/main.css" rel="stylesheet" type="text/css" media="screen" />
-<script src="{{ MEDIA_URL }}javascript/utils.js" type="text/javascript"></script>
+
 <script src="{{ MEDIA_URL }}javascript/lib/jquery-1.2.6.js" type="text/javascript"></script>
 <script src="{{ MEDIA_URL }}javascript/lib/jquery.autocomplete.js" type="text/javascript"></script>
+<script src="{{ MEDIA_URL }}javascript/lib/jquery.form.js" type="text/javascript"></script>
 <script src="{{ MEDIA_URL }}javascript/lib/ui.core.js" type="text/javascript"></script>
+<script src="{{ MEDIA_URL }}javascript/lib/ui.sortable.js" type="text/javascript"></script>
+<script src="{{ MEDIA_URL }}javascript/lib/ui.datepicker.js" type="text/javascript"></script>
 <script src="{{ MEDIA_URL }}javascript/lib/ui.tabs.js" type="text/javascript"></script>
+<script src="{{ MEDIA_URL }}javascript/lib/effects.core.js" type="text/javascript"></script>
+<script src="{{ MEDIA_URL }}javascript/lib/effects.transfer.js" type="text/javascript"></script>
+<script src="{{ MEDIA_URL }}javascript/utils.js" type="text/javascript"></script>
+
+{% block htmlhead %}{% endblock %}
+
+<script type="text/javascript">
+var date_format_short = "{{ settings.DATE_FORMAT_SHORT_JS }}";
+var date_format_long = "{{ settings.DATE_FORMAT_LONG_JS }}";
+
+{% block script %}
+{% endblock %}
+</script>
+
 </head>
 <body>
-{% block body %}{% endblock %}
+{% block htmlbody %}{% endblock %}
 </body>
 </html>

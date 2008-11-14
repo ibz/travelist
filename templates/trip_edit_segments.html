@@ -1,0 +1,214 @@
+{% extends "content.html" %}
+
+{% block script %}
+var last_id = 0;
+
+var transportation_methods = { {% for t in transportation_method_choices %}{{ t.0 }}: "{{ t.1 }}"{% if not forloop.last %},{% endif %}{% endfor %} };
+
+var segment_data = {};
+
+function add_segment(segment_id, p1_name, p2_name)
+{
+    var id = last_id++;
+    var li = $("#segment-template").clone(true).attr({id: "segment_" + id, segment_id: segment_id, style: ""});
+    li.find(".segment-points").text(p1_name + " - " + p2_name);
+    li.find(".segment-edit-link").attr('href', "javascript:edit_segment(" + id + ");");
+    li.find(".segment-delete-link").attr('href', "javascript:delete_segment(" + id + ");");
+    li.find(".segment-edit-save").attr('onclick', "javascript:edit_segment_save(" + id + ");");
+    li.find(".segment-edit-cancel").attr('onclick', "javascript:edit_segment_cancel(" + id + ");");
+    li.find(".start-date,.end-date").datepicker({dateFormat: date_format_short});
+    $("#sort-segments").append(li);
+
+    return id;
+}
+
+function add_new_segment()
+{
+    var p1_name = $("#new_segment_p1_name").val();
+    var p1_id = $("#new_segment_p1_id").val();
+    var p2_name = $("#new_segment_p2_name").val();
+    var p2_id = $("#new_segment_p2_id").val();
+    var segment_id = "newsegment_" + p1_id + "x" + p2_id;
+
+    if(p1_id == undefined || p1_id == "" || p2_id == undefined || p2_id == "")
+    {
+        alert("Please fill in the two points.");
+        return;
+    }
+
+    $("#new_segment_p1_name,#new_segment_p1_id,#new_segment_p2_name,#new_segment_p2_id").val("");
+
+    var id = add_segment(segment_id, p1_name, p2_name);
+    set_segment_data(id, "", "", 0, true);
+}
+
+function edit_segment(id)
+{
+    var segment = $("#segment_" + id);
+    var edit = segment.find(".segment-edit");
+    edit.show();
+    segment.find(".segment-view").effect('transfer', {to: edit}, 500);
+    var data = segment_data[id];
+    edit.find(".start-date").val(data.start_date);
+    edit.find(".end-date").val(data.end_date);
+    edit.find(".transportation-method").val(data.transportation_method);
+}
+
+function edit_segment_save(id)
+{
+    var segment = $("#segment_" + id);
+    var edit = segment.find(".segment-edit");
+    edit.effect('transfer', {to: segment.find(".segment-view")}, 500).hide();
+    var start_date = edit.find(".start-date").val();
+    var end_date = edit.find(".end-date").val();
+    var transportation_method = edit.find(".transportation-method").val();
+
+    set_segment_details(id, start_date, end_date, transportation_method);
+    set_segment_data(id, start_date, end_date, transportation_method, true);
+}
+
+function edit_segment_cancel(id)
+{
+    var segment = $("#segment_" + id);
+    segment.find(".segment-edit").effect('transfer', {to: segment.find(".segment-view")}, 500).hide();
+}
+
+function set_segment_details(id, start_date, end_date, transportation_method)
+{
+    var start_date_h = convertDate("s", "l", start_date);
+    var end_date_h = convertDate("s", "l", end_date);
+    var details;
+    if(start_date_h != "" || end_date_h != "")
+    {
+        details = (start_date != "" ? start_date_h : "?") + " - " + (end_date != "" ? end_date_h : "?");
+    }
+    if(parseInt(transportation_method))
+    {
+        var transportation_method_h = transportation_methods[parseInt(transportation_method)];
+        details += ", " + transportation_method_h;
+    }
+    $("#segment_" + id).find(".segment-details").text(details);
+}
+
+function set_segment_data(id, start_date, end_date, transportation_method, modified)
+{
+    segment_data[id] = {start_date: convertDate("s", "s", start_date),
+                        end_date: convertDate("s", "s", end_date),
+                        transportation_method: parseInt(transportation_method),
+                        modified: modified};
+}
+
+function delete_segment(id)
+{
+    $("#segment_" + id).remove();
+}
+
+function save()
+{
+    var ids = $("#sort-segments").sortable('toArray');
+    var segment_strs = [];
+    for(var i = 0; i < ids.length; i++)
+    {
+        var id = parseInt(ids[i].substr(ids[i].indexOf("_") + 1));
+        var segment_id = $("#segment_" + id).attr("segment_id");
+        var segment = segment_data[id];
+        var segment_str = "id=" + segment_id;
+        if(segment.modified)
+        {
+            segment_str += ",";
+            segment_str += "start_date=" + segment.start_date + ",";
+            segment_str += "end_date=" + segment.end_date + ",";
+            segment_str += "transportation_method=" + segment.transportation_method;
+        }
+        segment_strs.push(segment_str);
+    }
+    var segments_str = segment_strs.join(";");
+
+    $.post("/trip/{{ trip.id }}/edit/segments/",
+           {segments: segments_str},
+           function(data) { window.location = "/trip/{{ trip.id }}/"; });
+}
+
+function init_segments()
+{
+    var segments = [
+    {% for s in segments %}
+        ["oldsegment_{{ s.id }}", "{{ s.p1.name }}", "{{ s.p2.name }}", "{{ s.start_date }}", "{{ s.end_date }}", "{{ s.transportation_method }}"]{% if not forloop.last %},{% endif %}
+    {% endfor %}
+    ];
+
+    for(var i = 0; i < segments.length; i++)
+    {
+        var s = segments[i];
+        var id = add_segment(s[0], s[1], s[2]);
+        set_segment_details(id, s[3], s[4], s[5]);
+        set_segment_data(id, s[3], s[4], s[5], false);
+    }
+}
+
+function init()
+{
+    $("#sort-segments").sortable({revert: true, placeholder: "ui-placeholder"});
+    init_segments();
+    autoCompletePlace("#new_segment_p1_name", "#new_segment_p1_id");
+    autoCompletePlace("#new_segment_p2_name", "#new_segment_p2_id");
+}
+
+$(document).ready(init);
+{% endblock %}
+
+{% block title %}
+Edit segments for {{ trip.name }}
+{% endblock %}
+
+{% block operations %}
+<input type="button" class="button" value="save" onclick="javascript:save();" /><br />
+<a class="navigation" href="/trip/{{ trip.id }}/">cancel</a>
+{% endblock %}
+
+{% block content %}
+<ul id="sort-segments">
+</ul>
+
+<ul style="display: none;">
+  <li id="segment-template">
+    <table class="segment-view">
+      <tr>
+	<td><span class="segment-points"></span></td>
+	<td align="right"><a class="segment-edit-link">edit</a></td>
+      </tr>
+      <tr>
+	<td><span class="segment-details"></span></td>
+	<td align="right"><a class="segment-delete-link">delete</a></td>
+      </tr>
+    </table>
+    <table class="segment-edit" style="display: none;">
+      <tr>
+	<td>
+	  <label>Start, end date:</label>
+	  <input type="text" class="start-date" size="10" />
+	  <input type="text" class="end-date" size="10" />
+	</td>
+	<td align="right"><input type="button" class="segment-edit-save button" value="save" /></td>
+      </tr>
+      <tr>
+	<td>
+	  <label>Transportation method:</label>
+	  <select class="transportation-method">
+	    {% for transportation_method in transportation_method_choices %}
+	    <option value="{{ transportation_method.0 }}">{{ transportation_method.1 }}</option>
+	    {% endfor %}
+	  </select>
+	</td>
+	<td align="right"><input type="button" class="segment-edit-cancel button" value="cancel" /></td>
+      </tr>
+    </table>
+  </li>
+</ul>
+
+<input type="text" id="new_segment_p1_name" />
+<input type="hidden" id="new_segment_p1_id" />
+<input type="text" id="new_segment_p2_name" />
+<input type="hidden" id="new_segment_p2_id" />
+<input type="button" class="button" value="Add" onclick="javascript:add_new_segment();" />
+{% endblock %}

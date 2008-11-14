@@ -75,5 +75,10 @@ INSTALLED_APPS = (
 )
 
 GOOGLE_MAPS_API_KEY = "ABQIAAAAq_mjC_qAMFZ-7Y07h8CbfxRKR2kFp3iqjCq4a6HN9rHMOG-QDRRCAx73IYXNGFNtbDRPrqsSVloaWQ"
-GEOS_LIBRARY_PATH = "/usr/lib/libgeos_c.so"
 
+DATE_FORMAT_SHORT_JS = "yy-mm-dd"
+DATE_FORMAT_LONG_JS = "M. d, yy"
+
+DATE_FORMAT_SHORT_PY = "%Y-%m-%d"
+
+execfile("settings_local.py")

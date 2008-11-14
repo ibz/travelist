@@ -1,22 +1,98 @@
-{% extends "base.html" %}
+{% extends "content.html" %}
+
+{% block script %}
+function new_trip()
+{
+    $("#new-trip-row").show();
+    $("#new-trip-link").effect('transfer', {to: "#new-trip-row"}, 500);
+    $("#new-trip-name").focus();
+}
+
+function new_trip_cancel()
+{
+    $("#new-trip-row :text").val("");
+    $("#new-trip-row").effect('transfer', {to: "#new-trip-link"}, 500).hide();
+}
+
+function new_trip_save()
+{
+    var name = document.getElementById("new-trip-name").value;
+    var start_date = document.getElementById("new-trip-start-date").value;
+    var end_date = document.getElementById("new-trip-end-date").value;
+    var visibility = document.getElementById("new-trip-visibility").value;
+
+    if(name == "" || start_date == "" || end_date == "")
+    {
+        alert("Please fill in the name, start date and end date.");
+        return;
+    }
+
+    $.post("/trip/new/", {name: name,
+                          start_date: start_date,
+                          end_date: end_date,
+                          visibility: visibility},
+                          function(data)
+                          {
+                              id = eval("(" + data+ ")").id;
+                              window.location = "/trip/" + id + "/edit/create-segments/";
+                          });
+}
+{% endblock %}
+
+{% block title %}
+My trips
+{% endblock %}
+
+{% block summary %}
+Total trips: <span>TODO</span><br />
+Total km: <span>TODO</span><br />
+Total days: <span>TODO</span><br />
+{% endblock %}
+
+{% block operations %}
+<a id="new-trip-link" class="navigation" href="javascript:new_trip();">add trip</a>
+{% endblock %}
+
 {% block content %}
-<br />
-<table class="trip-list">
-{% if trips %}
-{% for trip in trips %}
-    <tr class="trip">
-        <td><a href="/trip/{{ trip.id }}/">{{ trip.name }}</a></td>
-        <td>{{ trip.start_date }} - {{ trip.end_date }}</td>
-        <td>
-            {% ifequal trip.user_id user.id %}
-            <a href="/trip/{{ trip.id }}/delete/" onclick="javascript:return confirm('Really delete the trip {{ trip.name }}?');">Delete</a>
-            {% endifequal %}
-        </td>
-    </tr>
-{% endfor %}
-{% else %}
-<span>You have no trips.</span>
-{% endif %}
+<table id="trip-list" width="1000px">
+  <thead>
+    <td width="45%">Name</td>
+    <td width="15%">Start date</td>
+    <td width="15%">End date</td>
+    <td width="10%" class="lastcolumn">Visibility</td>
+    <td width="7%" class="operations"></td>
+    <td width="7%" class="operations"></td>
+  </thead>
+  {% for trip in trips %}
+  <tr{% if forloop.first %} class="firstrow"{% endif %}>
+        <td class="firstcolumn"><a href="/trip/{{ trip.id }}/">{{ trip.name }}</a></td>
+        <td>{{ trip.start_date|date }}</td>
+	<td>{{ trip.end_date|date }}</td>
+	<td class="lastcolumn">{{ trip.visibility_h }}</td>
+        <td class="operations"></td>
+	<td class="operations">
+          <a href="/trip/{{ trip.id }}/delete/" onclick="javascript:return confirm('Really delete the trip {{ trip.name }}?');">delete</a>
+	</td>
+  </tr>
+  {% endfor %}
+  <tr><td colspan="6" height="20px"></td></tr>
+  <tr id="new-trip-row" style="display: none;">
+    <td class="firstcolumn"><input type="text" id="new-trip-name" size="50" /></td>
+    <td><input type="text" id="new-trip-start-date" size="10" /></td>
+    <td><input type="text" id="new-trip-end-date" size="10" /></td>
+    <td>
+      <select id="new-trip-visibility">
+        {% for visibility in visibility_choices %}
+        <option value="{{ visibility.0 }}">{{ visibility.1 }}</option>
+        {% endfor %}
+      </select>
+    </td>
+    <td class="operations">
+      <input type="button" class="button" value="Save" onclick="javascript:new_trip_save();" />
+    </td>
+    <td class="operations">
+      <input type="button" class="button" value="Cancel" onclick="javascript:new_trip_cancel();" />
+    </td>
+  </tr>
 </table>
-<a class="navigation" href="/trip/new/">Add trip</a>
 {% endblock %}

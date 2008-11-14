@@ -1,11 +1,11 @@
-{% extends "base.html" %}
+{% extends "content.html" %}
 
-{% block content %}
-
+{% block htmlhead %}
 <script src="http://maps.google.com/maps?file=api&amp;v=2&amp;key={{ settings.GOOGLE_MAPS_API_KEY }}" type="text/javascript"></script>
 <script src="{{ MEDIA_URL }}javascript/lib/markermanager.js" type="text/javascript"></script>
+{% endblock %}
 
-<script type="text/javascript">
+{% block script %}
 function toggle_annotations(id)
 {
     var ul = document.getElementById(id);
@@ -14,115 +14,153 @@ function toggle_annotations(id)
     a.textContent = ul.style.display == 'none' ? "+" : "-";
 }
 
-$(document).ready(function() { $("#trip-components > ul").tabs(); });
-</script>
+function edit_trip()
+{
+    $("#trip-details").hide();
+    $("#trip-details-edit").show();
+    $("#trip-details-edit-link").effect('transfer', {to: "#trip-details-edit"}, 500);
+    $("#trip-details-edit #id_name").focus();
+}
 
-<table width="100%">
-<tr>
-<td>
-  <h2>{{ trip.name }}</h2>
-</td>
-<td align="left">
-<table width="700px">
-<tr>
-<td>
-  Started on: {{ trip.start_date|date }}<br />
-  Ended on: {{ trip.end_date|date }}<br />
-  Owned by: {% ifequal user.id trip.user_id %}me{% else %}{{
-  trip.user.username }}{% endifequal %}<br />
-</td>
-<td align="right">
-<span>
+function update_trip_details()
+{
+    function do_update(trip)
+    {
+        $("#title").html(trip.name);
+        $("#trip-details #start-date").html(trip.start_date_h);
+        $("#trip-details #end-date").html(trip.end_date_h);
+        $("#trip-details #visibility").html(trip.visibility_h);
+    }
+    $.get("/trip/{{ trip.id }}/json/", function(data){ do_update(eval("(" + data + ")")); });
+}
+
+function edit_trip_saved()
+{
+    $("#trip-details").show();
+    $("#trip-details-edit").effect("transfer", {to: "#trip-details"}, 500).hide();
+    update_trip_details();
+}
+
+function edit_trip_cancel()
+{
+    $("#trip-details-edit").effect("transfer", {to: "#trip-details-edit-link"}, 500).hide();
+    $("#trip-details").show();
+}
+
+function init()
+{
+    $("#trip-components > ul").tabs();
+    $("#trip-details-edit > form").ajaxForm({success: edit_trip_saved});
+    update_trip_details();
+    initTripMap('map', point_data);
+}
+
+function cleanup()
+{
+    cleanupMap();
+}
+
+var point_data = [
+{% for segment in segments %}
+  [{{ segment.p1.coords.coords.0 }}, {{ segment.p1.coords.coords.1 }}, "{{ segment.p1.name }}"],
+  [{{ segment.p2.coords.coords.0 }}, {{ segment.p2.coords.coords.1 }}, "{{ segment.p2.name }}"]{% if not forloop.last %},{% endif %}
+{% endfor %}
+];
+
+$(document).ready(init);
+$(document).unload(cleanup);
+{% endblock %}
+
+{% block summary %}
+<div id="trip-details">
+  Started on: <span id="start-date"></span><br />
+  Ended on: <span id="end-date"></span><br />
+  Visibility: <span id="visibility"></span><br />
+  Owned by: {% ifequal user.id trip.user_id %}me{% else %}{{ trip.user.username }}{% endifequal %}<br />
+</div>
+<div id="trip-details-edit" style="display: none;">
+  <form action="/trip/{{ trip.id }}/edit/" method="POST">
+  <table>
+    {{ trip_edit_form }}
+  </table>
+  <input type="submit" class="button" value="Save" />
+  <a class="navigation" href="javascript:edit_trip_cancel();">Cancel</a>
+  </form>
+</div>
+{% endblock %}
+
+{% block operations %}
   {% ifequal user.id trip.user_id %}
-  <a class="navigation" href="/trip/{{ trip.id }}/edit/">edit trip</a><br />
+  <a id="trip-details-edit-link" class="navigation" href="javascript:edit_trip();">edit trip</a><br />
   <a class="navigation" href="/trip/{{ trip.id }}/edit/segments/">edit segments</a><br />
+  <a class="navigation" href="/trip/{{ trip.id }}/edit/annotations/">edit annotations</a>
   {% endifequal %}
-</span>
-</td>
-</tr>
-</table>
-</td>
-</tr>
+{% endblock %}
+
+{% block content %}
+<table width="1000px">
 <tr>
-<td valign="top" width="400px">
-  <div id="trip-components">
-    <ul>
-      <li><a href="#points"><span>Points</span></a></li>
-      <li><a href="#segments"><span>Segments</span></a></li>
-      <li><a href="#pictures"><span>Pictures</span></a></li>
-    </ul>
+<td width="400px" valign="top">
+<div id="trip-components">
+  <ul>
+    <li><a href="#points"><span>Points</span></a></li>
+    <li><a href="#segments"><span>Segments</span></a></li>
+    <li><a href="#pictures"><span>Pictures</span></a></li>
+  </ul>
 
-    <div id="points">
-      <ul class="plain-list">
-        {% for point in points %}
-        <li>
-          {% if point.annotation_count %}
-          <a id="link_point_{{ forloop.counter }}" title="Toggle details"
-             href="javascript:toggle_annotations(point_{{ forloop.counter }}')">+</a>
-          {% endif %}
-          {{ point.name }}
-          {% ifequal user.id trip.user_id %}
-          <span style="position: absolute; left: 370px;">
-            <a href="/trip/{{ trip.id }}/point/{{ point.id }}/annotation/new/" title="Annotate">adn</a>
-          </span>
-          {% endifequal %}
-          <ul id="point_{{ forloop.counter }}" class="plain-list" style="display: none;">
-            {% for annotation in point.annotation_set.all %}
-            <li>{{ annotation.render_short }}</li>
-            {% endfor %}
-          </ul>
-        </li>
+<div id="points">
+  <ul class="plain-list">
+    {% for point in points %}
+    <li>
+      {% if point.annotation_count %}
+      <span onclick="javascript:toggle_annotations(point_{{ forloop.counter }}')">
+        <span id="link_point_{{ forloop.counter }}" class="expand-item">+</span>
+        {{ point.name }}
+      </span>
+      <ul id="point_{{ forloop.counter }}" class="plain-list" style="display: none;">
+        {% for annotation in point.annotation_set.all %}
+        <li>{{ annotation.render_short }}</li>
         {% endfor %}
       </ul>
-    </div>
+      {% else %}
+      {{ point.name }}
+      {% endif %}
+    </li>
+    {% endfor %}
+  </ul>
+</div>
 
-    <div id="segments">
-      <ul class="plain-list">
-        {% for segment in segments %}
-        <li>
-          <a id="link_segment_{{ forloop.counter }}" title="Toggle details"
-             href="javascript:toggle_annotations('segment_{{ forloop.counter }}')">+</a>
+<div id="segments">
+  <ul class="plain-list">
+    {% for segment in segments %}
+    <li>
+      <span onclick="javascript:toggle_annotations('segment_{{ forloop.counter }}')">
+        <span id="link_segment_{{ forloop.counter }}" class="expand-item">+</span>
           {{ segment.p1.name }} - {{ segment.p2.name }}
-          {% ifequal user.id trip.user_id %}
-          <span style="position: absolute; left: 345px;">
-            <a href="/trip/{{ trip.id }}/segment/{{ segment.id }}/annotation/new/" title="Annotate">adn</a>
-            <a href="/trip/{{ trip.id }}/segment/{{ segment.id }}/edit/" title="Edit segment details">edit</a>
-          </span>
-          {% endifequal %}
-          <ul id="segment_{{ forloop.counter }}" class="plain-list" style="display: none;">
-            {% if segment.start_date %}<li>Start date: {{ segment.start_date|date }}</li>{% endif %}
-            {% if segment.end_date %}<li>End date: {{ segment.end_date|date }}</li>{% endif %}
-            {% if segment.transportation_method %}<li>Transportation method: {{ segment.transportation_method_str }}</li>{% endif %}
-            <li>Length: {{ segment.length|floatformat:2 }} km</li>
-            {% for annotation in segment.annotation_set.all %}
-            <li>{{ annotation.render_short }}</li>
-            {% endfor %}
-          </ul>
-        </li>
-        {% endfor %}
+      </span>
+      <ul id="segment_{{ forloop.counter }}" class="plain-list" style="display: none;">
+	{% if segment.start_date %}<li>Start date: {{ segment.start_date|date }}</li>{% endif %}
+	{% if segment.end_date %}<li>End date: {{ segment.end_date|date }}</li>{% endif %}
+	{% if segment.transportation_method %}<li>Transportation method: {{ segment.transportation_method_str }}</li>{% endif %}
+	<li>Length: {{ segment.length|floatformat:2 }} km</li>
+	{% for annotation in segment.annotation_set.all %}
+	<li>{{ annotation.render_short }}</li>
+	{% endfor %}
       </ul>
-    </div>
+    </li>
+    {% endfor %}
+  </ul>
+</div>
 
-    <div id="pictures">
-    </div>
-  </div>
+<div id="pictures">
+  TODO
+</div>
+</div>
 </td>
 
 <td valign="top">
-  <div id="map" class="map" style="width: 700px; height: 400px"></div>
-  <script type="text/javascript">
-      var point_data = [
-      {% for point in trip.point_set.all %}
-          [{{ point.coords.coords.0 }}, {{ point.coords.coords.1 }}, "{{ point.name }}"]
-          {% if not forloop.last %},{% endif %}
-      {% endfor %}
-      ];
-      $(document).ready(function() { initTripMap('map', point_data); });
-      $(document).unload(function() { cleanupMap(); });
-  </script>
+  <div id="map" class="map" style="width: 600px; height: 400px"></div>
 </td>
-
 </tr>
 </table>
-
 {% endblock %}

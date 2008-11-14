@@ -13,8 +13,6 @@ from backpacked.models import Point
 from backpacked.models import Segment
 from backpacked.models import Trip
 from backpacked.models import UserProfile
-from backpacked.models import TRANSPORTATION_METHODS
-from backpacked.utils import group_items
 from backpacked.utils import find
 
 class PlaceInput(forms.widgets.Widget):

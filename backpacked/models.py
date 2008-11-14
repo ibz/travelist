@@ -7,6 +7,8 @@ from geopy.distance import distance
 
 from lib.mock import Mock
 
+from backpacked.utils import Enum
+
 class Country(models.Model):
     code = models.CharField(max_length=2)
     name = models.CharField(max_length=100)
@@ -69,27 +71,25 @@ class UserProfile(models.Model):
     def __unicode__(self):
         return self.user.username
 
-class Visibility:
-    PUBLIC = 1
-    PROTECTED = 2
-    PRIVATE = 3
-
-VISIBILITIES = ((Visibility.PUBLIC, "Everyone"),
-#               (Visibility.PROTECTED, "Friends only"),
-               (Visibility.PRIVATE, "Myself only"))
+Visibility = Enum({'PUBLIC': (1, "Everyone"),
+                   'PRIVATE': (3, "Myself only")})
 
 class Trip(models.Model):
     user = models.ForeignKey(User)
     name = models.CharField(max_length=200)
     start_date = models.DateField()
     end_date = models.DateField()
-    visibility = models.IntegerField(choices=VISIBILITIES, default=Visibility.PUBLIC)
+    visibility = models.IntegerField(choices=Visibility.choices, default=Visibility.PUBLIC)
 
     class Admin:
         pass
 
     def __unicode__(self):
         return self.name
+
+    @property
+    def visibility_h(self):
+        return Visibility.get_description(self.visibility)
 
 class Point(models.Model):
     trip = models.ForeignKey(Trip)
@@ -104,16 +104,15 @@ class Point(models.Model):
     def annotation_count(self):
         return self.annotation_set.all().count()
 
-
-TRANSPORTATION_METHODS = ((0, "Unspecified"),
-                          (1, "Train"),
-                          (2, "Airplane"),
-                          (3, "Walk"),
-                          (4, "Bike"),
-                          (5, "Car"),
-                          (6, "Bus"),
-                          (7, "Boat"),
-                          (8, "Motorcycle"))
+TransportationMethod = Enum([(0, "Unspecified"),
+                             (1, "Train"),
+                             (2, "Airplane"),
+                             (3, "Walk"),
+                             (4, "Bike"),
+                             (5, "Car"),
+                             (6, "Bus"),
+                             (7, "Boat"),
+                             (8, "Motorcycle")])
 
 class Segment(models.Model):
     trip = models.ForeignKey(Trip)
@@ -121,7 +120,7 @@ class Segment(models.Model):
     p2 = models.ForeignKey(Point, related_name="segments_in")
     start_date = models.DateTimeField(blank=True, null=True)
     end_date = models.DateTimeField(blank=True, null=True)
-    transportation_method = models.IntegerField(choices=TRANSPORTATION_METHODS, default=0)
+    transportation_method = models.IntegerField(choices=TransportationMethod.choices, default=0)
     order_rank = models.IntegerField()
 
     def __unicode__(self):
@@ -132,7 +131,7 @@ class Segment(models.Model):
 
     @property
     def transportation_method_str(self):
-        return [t for t in TRANSPORTATION_METHODS if t[0] == self.transportation_method][0][1]
+        return TransportationMethod.get_description(self.transportation_method)
 
     @property
     def length(self):
@@ -142,10 +141,8 @@ class Segment(models.Model):
     def annotation_count(self):
         return self.annotation_set.all().count()
 
-TEXT = 1
-URL = 2
-CONTENT_TYPES = ((TEXT, "Text"),
-                 (URL, "URL"))
+ContentType = Enum({'TEXT': (1, "Text"),
+                    'URL': (2, "URL")})
 
 class Annotation(models.Model):
     trip = models.ForeignKey(Trip)
@@ -153,9 +150,9 @@ class Annotation(models.Model):
     segment = models.ForeignKey(Segment, null=True)
     date = models.DateTimeField(blank=True, null=True)
     title = models.CharField(max_length=30)
-    content_type = models.IntegerField(choices=CONTENT_TYPES)
+    content_type = models.IntegerField(choices=ContentType.choices)
     content = models.TextField()
-    visibility = models.IntegerField(choices=VISIBILITIES, default=Visibility.PUBLIC)
+    visibility = models.IntegerField(choices=Visibility.choices, default=Visibility.PUBLIC)
 
     @property
     def entity(self):

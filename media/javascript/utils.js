@@ -1,20 +1,39 @@
-function addTableRow(id, url)
+
+function autoCompletePlace(name, id)
 {
-    $.get(url, null,
-            function(data, status)
-            {
-                var table = document.getElementById(id);
-                var tbody = table.getElementsByTagName("tbody")[0];
-                var row = document.createElement("tr");
-                var columns = data.split("|");
-                for (var i=0; i < columns.length; i++)
-                {
-                    var column = document.createElement("td");
-                    column.innerHTML = "<td>" + columns[i] + "</td>";
-                    row.appendChild(column);
-                }
-                tbody.appendChild(row);
-            });
+    $(name).autocomplete("/place/search/",
+                         {minChars: 2,
+			  matchSubset: false,
+			  onItemSelect: function(li) {
+			      $(id).attr('value', li.extra[0]);
+                              $(name).attr('value', li.extra[1]);
+                          }});
+}
+
+function convertDate(from_format, to_format, date)
+{
+    function get_format(f)
+    {
+        if(f == "s")
+        {
+            return date_format_short;
+        }
+        else if(f == "l")
+        {
+            return date_format_long;
+        }
+        else
+        {
+            return f;
+        }
+    }
+
+    if(date == undefined || date == "" || date.toLowerCase() == "none")
+    {
+        return "";
+    }
+
+    return $.datepicker.formatDate(get_format(to_format), $.datepicker.parseDate(get_format(from_format), date));
 }
 
 function registerContentTypeEvent(selector, name)

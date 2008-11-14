@@ -1,47 +1,81 @@
-{% extends "base.html" %}
+{% extends "content.html" %}
+
+{% block script %}
+var last_id = 0;
+
+function add_place(place_id, name)
+{
+    var id = last_id++;
+    var li = $("#place-template").clone(true).attr({id: "place_" + id, place_id: place_id, style: ""});
+    li.find(".place-name").text(name);
+    li.find(".place-delete-link").attr('href', "javascript:delete_place(" + id + ");");
+    $("#sort-places").append(li);
+}
+
+function add_new_place()
+{
+    var name = $("#new-place-name").val();
+    var place_id = $("#new-place-id").val();
+    if(place_id == undefined || place_id == "")
+    {
+        alert("Please fill in the place name.");
+        return;
+    }
+
+    $("#new-place-name,#new-place-id").val("");
+
+    add_place(place_id, name);
+}
+
+function delete_place(id)
+{
+    $("#place_" + id).remove();
+}
+
+function save()
+{
+    var place_ids = $("#sort-places").sortable('toArray', "place_id");
+    $.post("/trip/{{ trip.id }}/edit/create-segments/",
+           {places: place_ids.join(",")},
+           function(data) { window.location = "/trip/{{ trip.id }}/"; });
+}
+
+function init()
+{
+    $("#sort-places").sortable({revert: true,
+                                placeholder: 'ui-placeholder'});
+    autoCompletePlace("#new-place-name", "#new-place-id");
+}
+
+$(document).ready(init);
+{% endblock %}
+
+{% block title %}
+Please enter the points you've passed through
+{% endblock %}
+
+{% block operations %}
+<input type="button" class="button" value="save" onclick="javascript:save();" />
+{% endblock %}
 
 {% block content %}
-<script type="text/javascript">
-function add_place() {
-    var place_name_input = document.getElementById("new_place_name");
-    var place_id_input = document.getElementById("new_place_id");
-    var place_name = place_name_input.value;
-    var place_id = place_id_input.value;
-    place_name_input.value = place_id_input.value = "";
 
-    var tbody = document.getElementById('places').getElementsByTagName("tbody")[0];
-    var row = document.createElement("tr");
-    var column = document.createElement("td");
+<ul id="sort-places">
+</ul>
 
-    var hidden = document.createElement("input");
-    hidden.type = "hidden";
-    hidden.name = tbody.rows.length;
-    hidden.value = place_id;
-    var span = document.createElement("span");
-    span.innerHTML = "<span>" + place_name + "</span>";
+<ul style="display: none;">
+  <li id="place-template">
+    <table>
+      <tr>
+	<td><span class="place-name"></span></td>
+	<td align="right"><a class="place-delete-link">delete</a></td>
+      </tr>
+    </table>
+  </li>
+</ul>
 
-    column.appendChild(hidden);
-    column.appendChild(span);
-    row.appendChild(column);
-    tbody.appendChild(row);
-}
-</script>
+<input type="text" id="new-place-name" />
+<input type="hidden" id="new-place-id" />
+<input type="button" class="button" value="Add" onclick="javascript:add_new_place();" />
 
-<form method="POST" action="">
-
-<table id="places"><tbody></tbody></table>
-
-<input type="text" id="new_place_name" />
-<input type="hidden" id="new_place_id" />
-<input type="button" class="button" value="Add" onclick="javascript:add_place();" />
-<script type="text/javascript">
-$("#new_place_name").autocomplete("/place/search/",
-    {minChars: 2, matchSubset: false,
-     onItemSelect: function(li) { $("#new_place_id").attr('value', li.extra[0]); }});
-</script>
-
-<br />
-
-<input type="submit" class="button" value="Save" />
-</form>
 {% endblock %}

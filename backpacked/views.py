@@ -1,3 +1,4 @@
+import re
 import sha
 from datetime import datetime
 from datetime import timedelta
@@ -18,6 +19,7 @@ from django.contrib.auth.models import User
 from django.db import transaction
 from django.contrib.auth.decorators import login_required
 from django.template import RequestContext
+from django.utils import simplejson
 
 from backpacked.models import Annotation
 from backpacked.models import Place
@@ -26,6 +28,7 @@ from backpacked.models import Point
 from backpacked.models import Segment
 from backpacked.models import UserProfile
 from backpacked.models import Visibility
+from backpacked.models import TransportationMethod
 from backpacked.forms import AnnotationEditForm
 from backpacked.forms import AnnotationNewForm
 from backpacked.forms import ContentInput
@@ -34,6 +37,8 @@ from backpacked.forms import AccountDetailsForm
 from backpacked.forms import AccountRegistrationForm
 from backpacked.forms import TripEditForm
 from backpacked.forms import SegmentEditForm
+from backpacked.utils import format_date, parse_date, format_date_human
+from backpacked.utils import find
 
 import settings
 
@@ -41,7 +46,13 @@ def render(template, request, context=None):
     if not context:
         context = {}
     context['settings'] = settings
+    context['visibility_choices'] = Visibility.choices
+    context['transportation_method_choices'] = TransportationMethod.choices
     return render_to_response(template, context, context_instance=RequestContext(request))
+
+def serialize(format, data):
+    assert format == 'json'
+    return HttpResponse(simplejson.dumps(data))
 
 def index(request):
     if request.user.is_authenticated():
@@ -54,6 +65,8 @@ def account_login(request):
     if request.POST:
         user = authenticate(username=request.POST['username'],
                             password=request.POST['password'])
+        if not user.is_active:
+            return HttpResponseRedirect("/")
         login(request, user)
         return HttpResponseRedirect("/")
 
@@ -121,42 +134,48 @@ def trip_list(request):
     trips = Trip.objects.filter(user=request.user).order_by('start_date')
     return render("trip_list.html", request, {'trips': trips})
 
-def trip_view(request, id):
+def trip(request, id, format=None):
     trip = get_object_or_404(Trip, id=id)
     if trip.visibility == Visibility.PRIVATE:
         if trip.user != request.user:
             raise Http404()
-    segments = sorted(list(trip.segment_set.all()))
-    points = []
-    for segment in segments:
-        if segment.p1 not in points:
-            points.append(segment.p1)
-        if segment.p2 not in points:
-            points.append(segment.p2)
-    return render("trip_view.html", request,
-                  {'trip': trip,
-                   'segments': segments,
-                   'points': points})
+    if format:
+        data = {'id': trip.id,
+                'name': trip.name,
+                'start_date': format_date(trip.start_date),
+                'start_date_h': format_date_human(trip.start_date),
+                'end_date': format_date(trip.end_date),
+                'end_date_h': format_date_human(trip.end_date),
+                'visibility': trip.visibility,
+                'visibility_h': Visibility.get_description(trip.visibility)}
+        return serialize(format, data)
+    else:
+        segments = sorted(list(trip.segment_set.all()))
+        points = []
+        for segment in segments:
+            for point in [segment.p1, segment.p2]:
+                if not point in points:
+                    points.append(point)
+        return render("trip_view.html", request,
+                      {'trip': trip,
+                       'segments': segments,
+                       'points': points,
+                       'trip_edit_form': TripEditForm(instance=trip)})
 
 @login_required
 def trip_edit(request, id=None):
+    if request.method != 'POST':
+        return HttpResponseBadRequest()
     if id:
         trip = get_object_or_404(Trip, id=id, user=request.user)
     else:
         trip = Trip(user=request.user)
-    if request.POST:
-        form = TripEditForm(request.POST, instance=trip)
-        if form.is_valid():
-            trip = form.save()
-            if id:
-                return HttpResponseRedirect("/trip/%s/" % trip.id)
-            else:
-                return HttpResponseRedirect("/trip/%s/edit/create-segments/" % trip.id)
+    form = TripEditForm(request.POST, instance=trip)
+    if form.is_valid():
+        trip = form.save()
+        return serialize('json', {'id': trip.id})
     else:
-        form = TripEditForm(instance=trip)
-    return render("trip_edit.html", request,
-                  {'trip': trip,
-                   'form': form})
+        return HttpResponseBadRequest()
 
 @login_required
 def trip_create_segments(request, id):
@@ -164,22 +183,79 @@ def trip_create_segments(request, id):
     assert len(list(trip.segment_set.all())) == 0
     assert len(list(trip.point_set.all())) == 0
     if request.method == 'GET':
-        return render("trip_create_segments.html", request)
+        return render("trip_create_segments.html", request,
+                      {'trip': trip})
     elif request.method == 'POST':
-        place_ids = [int(request.POST[unicode(pid)])
-                     for pid in sorted([int(pid)
-                                        for pid in request.POST.keys()])]
+        place_ids = [int(pid) for pid in request.POST['places'].split(",")]
         points = []
         for place_id in place_ids:
-            place = Place.objects.get(id=place_id)
-            point = Point(trip=trip, place=place, name=place.name, coords=place.coords)
-            point.save()
-            points.append(point)
-        for i in range(len(points) - 1):
-            p1, p2 = points[i], points[i + 1]
+            if not find(points, lambda p: p.place_id == place_id):
+                place = Place.objects.get(id=place_id)
+                point = Point(trip=trip, place=place, name=place.name, coords=place.coords)
+                point.save()
+                points.append(point)
+        for i in range(len(place_ids) - 1):
+            place_id_1, place_id_2 = place_ids[i], place_ids[i + 1]
+            p1 = find(points, lambda p: p.place_id == place_ids[i])
+            p2 = find(points, lambda p: p.place_id == place_ids[i + 1])
             segment = Segment(trip=trip, p1=p1, p2=p2, order_rank=i)
             segment.save()
         return HttpResponseRedirect("/trip/%s/" % trip.id)
+
+@login_required
+def trip_edit_segments(request, id):
+    if request.method == 'GET':
+        trip = get_object_or_404(Trip, id=id)
+        segments = sorted(list(trip.segment_set.all()))
+        return render("trip_edit_segments.html", request,
+                      {'trip': trip,
+                       'segments': segments})
+    elif request.method == 'POST':
+        trip = get_object_or_404(Trip, id=id)
+        segments = list(trip.segment_set.all())
+        points = list(trip.point_set.all())
+        new_segments = [dict([nsi.split("=") for nsi in ns.split(",")])
+                        for ns in request.POST['segments'].split(";")]
+
+        # delete segments
+        for segment in segments:
+            if not find(new_segments, lambda s: s['id'] == "oldsegment_%s" % segment.id):
+                segment.delete()
+
+        # add / modify segments
+        for i in range(len(new_segments)):
+            new_segment = new_segments[i]
+            op, id = re.match(r"(old|new)segment_(.+)", new_segment['id']).groups()
+            if op == 'old':
+                segment = find(segments, lambda s: s.id == int(id))
+                segment.order_rank = i
+                if len(new_segment) != 1: # this segment was edited
+                    segment.start_date = parse_date(new_segment['start_date'])
+                    segment.end_date = parse_date(new_segment['end_date'])
+                    segment.transportation_method = int(new_segment['transportation_method'])
+                segment.save()
+            elif op == 'new':
+                p1_place_id, p2_place_id = [int(place_id) for place_id in id.split("x")]
+                for place_id in [p1_place_id, p2_place_id]:
+                    if not find(points, lambda p: p.place_id == place_id):
+                        place = Place.objects.get(id=place_id)
+                        point = Point(trip=trip, place=place, name=place.name, coords=place.coords)
+                        point.save()
+                        points.append(point)
+                p1 = find(points, lambda p: p.place_id == p1_place_id)
+                p2 = find(points, lambda p: p.place_id == p2_place_id)
+                segment = Segment(trip=trip, p1=p1, p2=p2, order_rank=i)
+                segment.start_date = parse_date(new_segment['start_date'])
+                segment.end_date = parse_date(new_segment['end_date'])
+                segment.transportation_method = int(new_segment['transportation_method'])
+                segment.save()
+                segments.append(segment)
+
+        # delete useless points
+        for point in list(trip.point_set.all()):
+            if not find(segments, lambda s: s.id and (s.p1_id == point.id or s.p2_id == point.id)):
+                point.delete()
+        return HttpResponse()
 
 @login_required
 def trip_delete(request, id):
@@ -215,7 +291,7 @@ def widget_content_input(request):
 def place_search(request):
     if request.GET:
         res = Place.objects.filter(name_ascii__istartswith=request.GET['q'])[:10]
-        return HttpResponse("\n".join(["%s|%s" % (l.display_name, l.id) for l in res]))
+        return HttpResponse("\n".join(["%s|%s|%s" % (l.display_name, l.id, l.name) for l in res]))
     else:
         return HttpResponseBadRequest()
 
