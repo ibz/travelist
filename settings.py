@@ -81,4 +81,5 @@ DATE_FORMAT_LONG_JS = "M. d, yy"
 
 DATE_FORMAT_SHORT_PY = "%Y-%m-%d"
 
-execfile("settings_local.py")
+execfile(os.path.join(os.path.dirname(__file__), "settings_local.py"))
+
