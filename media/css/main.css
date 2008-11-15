@@ -85,6 +85,7 @@ input.button {
 
 #sort-segments li.edit-mode {
  border: 1px dashed #5F99CF;
+ margin-bottom: 5px;
 }
 
 #sort-segments li table {
