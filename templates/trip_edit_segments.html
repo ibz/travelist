@@ -48,6 +48,7 @@ function edit_segment(id)
     var edit = segment.find(".segment-edit");
     edit.show();
     segment.find(".segment-view").effect('transfer', {to: edit}, 500);
+    segment.addClass("edit-mode");
     var data = segment_data[id];
     edit.find(".start-date").val(data.start_date);
     edit.find(".end-date").val(data.end_date);
@@ -59,6 +60,7 @@ function edit_segment_save(id)
     var segment = $("#segment_" + id);
     var edit = segment.find(".segment-edit");
     edit.effect('transfer', {to: segment.find(".segment-view")}, 500).hide();
+    segment.removeClass("edit-mode");
     var start_date = edit.find(".start-date").val();
     var end_date = edit.find(".end-date").val();
     var transportation_method = edit.find(".transportation-method").val();
@@ -71,6 +73,7 @@ function edit_segment_cancel(id)
 {
     var segment = $("#segment_" + id);
     segment.find(".segment-edit").effect('transfer', {to: segment.find(".segment-view")}, 500).hide();
+    segment.removeClass("edit-mode");
 }
 
 function set_segment_details(id, start_date, end_date, transportation_method)

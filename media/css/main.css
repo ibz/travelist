@@ -80,17 +80,27 @@ input.button {
 }
 
 #sort-segments li {
- border: 1px dashed #5F99CF;
  width: 410px;
- margin-bottom: 10px;
+}
+
+#sort-segments li.edit-mode {
+ border: 1px dashed #5F99CF;
+}
+
+#sort-segments li table {
+ margin-bottom: 5px;
+ margin-left: 5px;
+}
+
+#sort-segments li.edit-mode table {
+ margin: 5px;
 }
 
 #sort-segments li table {
  background-color: #CEE3F8;
  border: 1px solid #5F99CF;
  width: 400px;
- height: 50px;
- margin: 5px;
+ height: 30px;
  cursor: pointer;
 }
 
@@ -117,8 +127,9 @@ input.button {
  background-color: #CEE3F8;
  border: 1px solid #5F99CF;
  width: 400px;
- height: 50px;
- margin: 5px;
+ height: 30px;
+ margin-bottom: 5px;
+ margin-left: 5px;
  cursor: pointer;
 }
 
