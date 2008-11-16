@@ -36,8 +36,7 @@ from backpacked.forms import AccountLoginForm
 from backpacked.forms import AccountDetailsForm
 from backpacked.forms import AccountRegistrationForm
 from backpacked.forms import TripEditForm
-from backpacked.forms import SegmentEditForm
-from backpacked.utils import format_date, parse_date, format_date_human
+from backpacked.utils import format_date, parse_date
 from backpacked.utils import find
 
 import settings
@@ -134,48 +133,52 @@ def trip_list(request):
     trips = Trip.objects.filter(user=request.user).order_by('start_date')
     return render("trip_list.html", request, {'trips': trips})
 
-def trip(request, id, format=None):
+def trip(request, id=None, format=None):
+    if request.method == 'GET':
+        trip = get_object_or_404(Trip, id=id)
+        if trip.visibility == Visibility.PRIVATE:
+            if trip.user != request.user:
+                raise Http404()
+        if format:
+            data = {'id': trip.id,
+                    'name': trip.name,
+                    'start_date': format_date(trip.start_date),
+                    'end_date': format_date(trip.end_date),
+                    'visibility': trip.visibility}
+            return serialize(format, data)
+        else:
+            return render("trip_view.html", request,
+                          {'trip': trip,
+                           'trip_edit_form': TripEditForm(instance=trip)})
+    elif request.method == 'POST':
+        if not request.user.is_authenticated:
+            return HttpResponseBadRequest()
+        if id:
+            trip = get_object_or_404(Trip, id=id, user=request.user)
+        else:
+            trip = Trip(user=request.user)
+        form = TripEditForm(request.POST, instance=trip)
+        if form.is_valid():
+            trip = form.save()
+            return serialize('json', {'id': trip.id})
+        else:
+            return HttpResponseBadRequest()
+
+def trip_details(request, id):
     trip = get_object_or_404(Trip, id=id)
     if trip.visibility == Visibility.PRIVATE:
         if trip.user != request.user:
             raise Http404()
-    if format:
-        data = {'id': trip.id,
-                'name': trip.name,
-                'start_date': format_date(trip.start_date),
-                'start_date_h': format_date_human(trip.start_date),
-                'end_date': format_date(trip.end_date),
-                'end_date_h': format_date_human(trip.end_date),
-                'visibility': trip.visibility,
-                'visibility_h': Visibility.get_description(trip.visibility)}
-        return serialize(format, data)
-    else:
-        segments = sorted(list(trip.segment_set.all()))
-        points = []
-        for segment in segments:
-            for point in [segment.p1, segment.p2]:
-                if not point in points:
-                    points.append(point)
-        return render("trip_view.html", request,
-                      {'trip': trip,
-                       'segments': segments,
-                       'points': points,
-                       'trip_edit_form': TripEditForm(instance=trip)})
-
-@login_required
-def trip_edit(request, id=None):
-    if request.method != 'POST':
-        return HttpResponseBadRequest()
-    if id:
-        trip = get_object_or_404(Trip, id=id, user=request.user)
-    else:
-        trip = Trip(user=request.user)
-    form = TripEditForm(request.POST, instance=trip)
-    if form.is_valid():
-        trip = form.save()
-        return serialize('json', {'id': trip.id})
-    else:
-        return HttpResponseBadRequest()
+    segments = sorted(list(trip.segment_set.all()))
+    points = []
+    for segment in segments:
+        for point in [segment.p1, segment.p2]:
+            if not point in points:
+                points.append(point)
+    return render("trip_details.html", request,
+                  {'trip': trip,
+                   'segments': segments,
+                   'points': points})
 
 @login_required
 def trip_create_segments(request, id):
@@ -203,11 +206,11 @@ def trip_create_segments(request, id):
         return HttpResponseRedirect("/trip/%s/" % trip.id)
 
 @login_required
-def trip_edit_segments(request, id):
+def trip_segments(request, id):
     if request.method == 'GET':
         trip = get_object_or_404(Trip, id=id)
         segments = sorted(list(trip.segment_set.all()))
-        return render("trip_edit_segments.html", request,
+        return render("trip_segments.html", request,
                       {'trip': trip,
                        'segments': segments})
     elif request.method == 'POST':
@@ -263,21 +266,6 @@ def trip_delete(request, id):
     trip.delete()
     return HttpResponseRedirect("/trip/list/")
 
-@login_required
-def segment_edit(request, trip_id, id):
-    segment = get_object_or_404(Segment, id=id, trip__user=request.user)
-    if request.POST:
-        form = SegmentEditForm(request.POST, instance=segment)
-        if form.is_valid():
-            form.save()
-            return HttpResponseRedirect("/trip/%s/" % trip_id)
-    else:
-        form = SegmentEditForm(instance=segment)
-    return render("segment_edit.html", request,
-                  {'trip_id': trip_id,
-                   'segment': segment,
-                   'form': form})
-
 def widget_content_input(request):
     if request.GET:
         content_type = int(request.GET['content_type'])
@@ -290,8 +278,10 @@ def widget_content_input(request):
 
 def place_search(request):
     if request.GET:
-        res = Place.objects.filter(name_ascii__istartswith=request.GET['q'])[:10]
-        return HttpResponse("\n".join(["%s|%s|%s" % (l.display_name, l.id, l.name) for l in res]))
+        render_p = lambda p: "%s|%s|%s|%s,%s" % (p.display_name, p.id, p.name,
+                                                 p.coords.coords[0], p.coords.coords[1])
+        places = Place.objects.filter(name_ascii__istartswith=request.GET['q'])[:10]
+        return HttpResponse("\n".join([render_p(p) for p in places]))
     else:
         return HttpResponseBadRequest()
 

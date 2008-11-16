@@ -59,7 +59,7 @@ input.button {
  margin-top: 25px;
 }
 
-#trip-components .ui-tabs-panel {
+#trip-details-tabs .ui-tabs-panel {
  min-height: 150px;
  border-left: 0;
  border-bottom: 0;
@@ -67,7 +67,11 @@ input.button {
  border-right: 1px solid #5F99CF;
 }
 
-#trip-details-edit {
+#trip-details #sort-segments {
+ padding-top: 25px;
+}
+
+#trip-info-edit {
  background-color: #CEE3F8;
  border: 1px solid #5F99CF;
  padding: 2px;
@@ -80,7 +84,7 @@ input.button {
 }
 
 #sort-segments li {
- width: 410px;
+ width: 390px;
 }
 
 #sort-segments li.edit-mode {
@@ -100,7 +104,7 @@ input.button {
 #sort-segments li table {
  background-color: #CEE3F8;
  border: 1px solid #5F99CF;
- width: 400px;
+ width: 380px;
  height: 30px;
  cursor: pointer;
 }

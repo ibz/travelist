@@ -10,6 +10,8 @@ def find(l, func):
             return item
 
 def format_date(value):
+    if not value:
+        return ""
     return value.strftime(settings.DATE_FORMAT_SHORT_PY)
 
 def parse_date(s):

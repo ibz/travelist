@@ -152,8 +152,3 @@ class AnnotationEditForm(AnnotationNewForm):
         model = Annotation
         fields = tuple([f for f in AnnotationNewForm.Meta.fields
                         if f != 'content_type'])
-
-class SegmentEditForm(forms.ModelForm):
-    class Meta:
-        model = Segment
-        fields = ('start_date', 'end_date', 'transportation_method')

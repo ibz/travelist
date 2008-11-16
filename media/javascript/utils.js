@@ -1,5 +1,5 @@
 
-function autoCompletePlace(name, id)
+function autoCompletePlace(name, id, coords)
 {
     $(name).autocomplete("/place/search/",
                          {minChars: 2,
@@ -7,6 +7,7 @@ function autoCompletePlace(name, id)
 			  onItemSelect: function(li) {
 			      $(id).attr('value', li.extra[0]);
                               $(name).attr('value', li.extra[1]);
+                              $(coords).attr('value', li.extra[2]);
                           }});
 }
 
@@ -120,6 +121,10 @@ function initTripMap(id, point_data)
     map.setCenter(new GLatLng((minLat + maxLat) / 2, (minLng + maxLng) / 2),
                   (Math.min(wZoom, hZoom)));
 
+    for(i = 0; i < points.length - 1; i += 2)
+    {
+        map.addOverlay(new GPolyline([points[i], points[i+1]], "#ff0000", 3));
+    }
     var markers = [];
     for(i = 0; i < points.length; i++)
     {
@@ -130,7 +135,6 @@ function initTripMap(id, point_data)
                    var mgr = new MarkerManager(map);
                    mgr.addMarkers(markers, 1);
                    mgr.refresh();
-                   map.addOverlay(new GPolyline(points, "#ff0000", 3));
                }, 0);
 }
 

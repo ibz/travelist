@@ -1,9 +1,5 @@
-{% extends "content.html" %}
-
-{% block script %}
+<script type="text/javascript">
 var last_id = 0;
-
-var transportation_methods = { {% for t in transportation_method_choices %}{{ t.0 }}: "{{ t.1 }}"{% if not forloop.last %},{% endif %}{% endfor %} };
 
 var segment_data = {};
 
@@ -26,8 +22,14 @@ function add_new_segment()
 {
     var p1_name = $("#new_segment_p1_name").val();
     var p1_id = $("#new_segment_p1_id").val();
+    var p1_coords = $("#new_segment_p1_coords").val().split(",");
+    var p1_lat = parseFloat(p1_coords[0]);
+    var p1_lng = parseFloat(p1_coords[1]);
     var p2_name = $("#new_segment_p2_name").val();
     var p2_id = $("#new_segment_p2_id").val();
+    var p2_coords = $("#new_segment_p2_coords").val().split(",");
+    var p2_lat = parseFloat(p2_coords[0]);
+    var p2_lng = parseFloat(p2_coords[1]);
     var segment_id = "newsegment_" + p1_id + "x" + p2_id;
 
     if(p1_id == undefined || p1_id == "" || p2_id == undefined || p2_id == "")
@@ -36,10 +38,14 @@ function add_new_segment()
         return;
     }
 
-    $("#new_segment_p1_name,#new_segment_p1_id,#new_segment_p2_name,#new_segment_p2_id").val("");
+    $("#new_segment_p1_name,#new_segment_p1_id,#new_segment_p1_coords,#new_segment_p2_name,#new_segment_p2_id,#new_segment_p2_coords").val("");
 
     var id = add_segment(segment_id, p1_name, p2_name);
-    set_segment_data(id, "", "", 0, true);
+    set_segment_data(id, {start_date: "", end_date: "", transportation_method: 0, modified: true,
+                          p1_lat: p1_lat, p1_lng: p1_lng, p1_name: p1_name,
+                          p2_lat: p2_lat, p2_lng: p2_lng, p2_name: p2_name});
+
+    refresh_map();
 }
 
 function edit_segment(id)
@@ -57,23 +63,19 @@ function edit_segment(id)
 
 function edit_segment_save(id)
 {
-    var segment = $("#segment_" + id);
-    var edit = segment.find(".segment-edit");
-    edit.effect('transfer', {to: segment.find(".segment-view")}, 500).hide();
-    segment.removeClass("edit-mode");
+    var segment = $("#segment_" + id).removeClass("edit-mode");
+    var edit = segment.find(".segment-edit").hide();
     var start_date = edit.find(".start-date").val();
     var end_date = edit.find(".end-date").val();
     var transportation_method = edit.find(".transportation-method").val();
 
     set_segment_details(id, start_date, end_date, transportation_method);
-    set_segment_data(id, start_date, end_date, transportation_method, true);
+    set_segment_data(id, {start_date: start_date, end_date: end_date, transportation_method: transportation_method, modified: true});
 }
 
 function edit_segment_cancel(id)
 {
-    var segment = $("#segment_" + id);
-    segment.find(".segment-edit").effect('transfer', {to: segment.find(".segment-view")}, 500).hide();
-    segment.removeClass("edit-mode");
+    $("#segment_" + id).removeClass("edit-mode").find(".segment-edit").hide();
 }
 
 function set_segment_details(id, start_date, end_date, transportation_method)
@@ -93,83 +95,93 @@ function set_segment_details(id, start_date, end_date, transportation_method)
     $("#segment_" + id).find(".segment-details").text(details);
 }
 
-function set_segment_data(id, start_date, end_date, transportation_method, modified)
+function set_segment_data(id, dict)
 {
-    segment_data[id] = {start_date: convertDate("s", "s", start_date),
-                        end_date: convertDate("s", "s", end_date),
-                        transportation_method: parseInt(transportation_method),
-                        modified: modified};
+    if(!(id in segment_data))
+    {
+        segment_data[id] = {};
+    }
+    $.each(dict,
+           function(k, v)
+           {
+               segment_data[id][k] = v;
+           });
 }
 
 function delete_segment(id)
 {
     $("#segment_" + id).remove();
+    refresh_map();
 }
 
-function save()
+function trip_segments_save()
 {
-    var ids = $("#sort-segments").sortable('toArray');
     var segment_strs = [];
-    for(var i = 0; i < ids.length; i++)
-    {
-        var id = parseInt(ids[i].substr(ids[i].indexOf("_") + 1));
-        var segment_id = $("#segment_" + id).attr("segment_id");
-        var segment = segment_data[id];
-        var segment_str = "id=" + segment_id;
-        if(segment.modified)
-        {
-            segment_str += ",";
-            segment_str += "start_date=" + segment.start_date + ",";
-            segment_str += "end_date=" + segment.end_date + ",";
-            segment_str += "transportation_method=" + segment.transportation_method;
-        }
-        segment_strs.push(segment_str);
-    }
+    $.each($("#sort-segments").sortable('toArray'),
+           function()
+           {
+               var id = parseInt(this.substr(this.indexOf("_") + 1));
+               var segment_id = $("#segment_" + id).attr("segment_id");
+               var segment = segment_data[id];
+               var segment_str = "id=" + segment_id;
+               if(segment.modified)
+               {
+                   segment_str += ",";
+                   segment_str += "start_date=" + segment.start_date + ",";
+                   segment_str += "end_date=" + segment.end_date + ",";
+                   segment_str += "transportation_method=" + segment.transportation_method;
+               }
+               segment_strs.push(segment_str);
+           });
     var segments_str = segment_strs.join(";");
 
-    $.post("/trip/{{ trip.id }}/edit/segments/",
+    $.post("/trip/{{ trip.id }}/segments/",
            {segments: segments_str},
-           function(data) { window.location = "/trip/{{ trip.id }}/"; });
+           function(data) { update_trip_details(); });
+}
+
+function trip_segments_cancel()
+{
+    update_trip_details();
 }
 
 function init_segments()
 {
-    var segments = [
     {% for s in segments %}
-        ["oldsegment_{{ s.id }}", "{{ s.p1.name }}", "{{ s.p2.name }}", "{{ s.start_date }}", "{{ s.end_date }}", "{{ s.transportation_method }}"]{% if not forloop.last %},{% endif %}
+    var id = add_segment("oldsegment_{{ s.id }}", "{{ s.p1.name }}", "{{ s.p2.name }}");
+    set_segment_details(id, "{{ s.start_date }}", "{{ s.end_date }}", {{ s.transportation_method }});
+    set_segment_data(id,
+                     {start_date: "{{ s.start_date|default:"" }}", end_date: "{{ s.end_date|default:"" }}",
+                      transportation_method: {{ s.transportation_method }}, modified: false,
+                      p1_lat: {{ s.p1.coords.coords.0 }}, p1_lng: {{ s.p1.coords.coords.1 }}, p1_name: "{{ s.p1.name }}",
+                      p2_lat: {{ s.p2.coords.coords.0 }}, p2_lng: {{ s.p2.coords.coords.1 }}, p2_name: "{{ s.p2.name }}"});
     {% endfor %}
-    ];
-
-    for(var i = 0; i < segments.length; i++)
-    {
-        var s = segments[i];
-        var id = add_segment(s[0], s[1], s[2]);
-        set_segment_details(id, s[3], s[4], s[5]);
-        set_segment_data(id, s[3], s[4], s[5], false);
-    }
 }
 
 function init()
 {
     $("#sort-segments").sortable({revert: true, placeholder: "ui-placeholder"});
     init_segments();
-    autoCompletePlace("#new_segment_p1_name", "#new_segment_p1_id");
-    autoCompletePlace("#new_segment_p2_name", "#new_segment_p2_id");
+    refresh_map();
+    autoCompletePlace("#new_segment_p1_name", "#new_segment_p1_id", "#new_segment_p1_coords");
+    autoCompletePlace("#new_segment_p2_name", "#new_segment_p2_id", "#new_segment_p2_coords");
+}
+
+function refresh_map()
+{
+    var point_data = [];
+    $.each($("#sort-segments").sortable('toArray'),
+           function()
+           {
+               var segment = segment_data[parseInt(this.substr(this.indexOf("_") + 1))];
+               point_data.push([segment.p1_lat, segment.p1_lng, segment.p1_name]);
+               point_data.push([segment.p2_lat, segment.p2_lng, segment.p2_name]);
+           });
+    initTripMap("map", point_data);
 }
 
 $(document).ready(init);
-{% endblock %}
-
-{% block title %}
-Edit segments for {{ trip.name }}
-{% endblock %}
-
-{% block operations %}
-<input type="button" class="button" value="save" onclick="javascript:save();" /><br />
-<a class="navigation" href="/trip/{{ trip.id }}/">cancel</a>
-{% endblock %}
-
-{% block content %}
+</script>
 <ul id="sort-segments">
 </ul>
 
@@ -211,7 +223,13 @@ Edit segments for {{ trip.name }}
 
 <input type="text" id="new_segment_p1_name" />
 <input type="hidden" id="new_segment_p1_id" />
+<input type="hidden" id="new_segment_p1_coords" />
 <input type="text" id="new_segment_p2_name" />
 <input type="hidden" id="new_segment_p2_id" />
+<input type="hidden" id="new_segment_p2_coords" />
 <input type="button" class="button" value="Add" onclick="javascript:add_new_segment();" />
-{% endblock %}
+
+<p>
+<input type="button" class="button" value="Save" onclick="javascript:trip_segments_save();" />
+<input type="button" class="button" value="Cancel" onclick="javascript:trip_segments_cancel();" />
+</p>
