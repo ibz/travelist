@@ -1,0 +1,23 @@
+{% extends "content.html" %}
+
+{% block script %}
+function init()
+{
+    $("#trip-info-edit #id_start_date").datepicker({dateFormat: date_format_short});
+    $("#trip-info-edit #id_end_date").datepicker({dateFormat: date_format_short});
+}
+
+$(document).ready(init);
+{% endblock %}
+
+{% block summary %}
+<div id="trip-info-edit">
+  <form action="/trip/new/" method="POST">
+  <table>
+    {{ trip_edit_form }}
+  </table>
+  <input type="submit" class="button" value="Save" />
+  <a class="navigation" href="/trip/list/">Cancel</a>
+  </form>
+</div>
+{% endblock %}

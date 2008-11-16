@@ -137,7 +137,7 @@ function trip_segments_save()
 
     $.post("/trip/{{ trip.id }}/segments/",
            {segments: segments_str},
-           function(data) { update_trip_details(); });
+           function(data) { segment_strs.length ? update_trip_details() : edit_points(); });
 }
 
 function trip_segments_cancel()
@@ -169,15 +169,14 @@ function init()
 
 function refresh_map()
 {
-    var point_data = [];
-    $.each($("#sort-segments").sortable('toArray'),
-           function()
-           {
-               var segment = segment_data[parseInt(this.substr(this.indexOf("_") + 1))];
-               point_data.push([segment.p1_lat, segment.p1_lng, segment.p1_name]);
-               point_data.push([segment.p2_lat, segment.p2_lng, segment.p2_name]);
-           });
-    initTripMap("map", point_data);
+    var point_data = $.map($("#sort-segments").sortable('toArray'),
+                           function(id)
+                           {
+                               var segment = segment_data[parseInt(id.substr(id.indexOf("_") + 1))];
+                               return [[segment.p1_lat, segment.p1_lng, segment.p1_name],
+                                       [segment.p2_lat, segment.p2_lng, segment.p2_name]];
+                           });
+    initTripMap("map", point_data, 'segments');
 }
 
 $(document).ready(init);

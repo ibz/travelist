@@ -133,36 +133,51 @@ def trip_list(request):
     trips = Trip.objects.filter(user=request.user).order_by('start_date')
     return render("trip_list.html", request, {'trips': trips})
 
-def trip(request, id=None, format=None):
+def trip_serialize(request, id, format):
+    if request.method != 'GET':
+        return HttpResponseBadRequest()
+    trip = get_object_or_404(Trip, id=id)
+    if trip.visibility == Visibility.PRIVATE:
+        if trip.user != request.user:
+            raise Http404()
+    return serialize(format, {'id': trip.id,
+                              'name': trip.name,
+                              'start_date': format_date(trip.start_date),
+                              'end_date': format_date(trip.end_date),
+                              'visibility': trip.visibility})
+
+@login_required
+def trip_new(request):
+    trip = Trip(user=request.user)
+    form = TripEditForm(request.POST or None, instance=trip)
+    if request.method == 'GET':
+        return render("trip_new.html", request,
+                      {'trip': trip,
+                       'trip_edit_form': form})
+    elif request.method == 'POST':
+        if form.is_valid():
+            trip = form.save()
+            return HttpResponseRedirect("/trip/%s/" % trip.id)
+    return HttpResponseBadRequest()
+
+def trip(request, id):
     if request.method == 'GET':
         trip = get_object_or_404(Trip, id=id)
         if trip.visibility == Visibility.PRIVATE:
             if trip.user != request.user:
                 raise Http404()
-        if format:
-            data = {'id': trip.id,
-                    'name': trip.name,
-                    'start_date': format_date(trip.start_date),
-                    'end_date': format_date(trip.end_date),
-                    'visibility': trip.visibility}
-            return serialize(format, data)
-        else:
-            return render("trip_view.html", request,
-                          {'trip': trip,
-                           'trip_edit_form': TripEditForm(instance=trip)})
+        return render("trip.html", request,
+                      {'trip': trip,
+                       'trip_edit_form': TripEditForm(instance=trip)})
     elif request.method == 'POST':
         if not request.user.is_authenticated:
             return HttpResponseBadRequest()
-        if id:
-            trip = get_object_or_404(Trip, id=id, user=request.user)
-        else:
-            trip = Trip(user=request.user)
+        trip = get_object_or_404(Trip, id=id, user=request.user)
         form = TripEditForm(request.POST, instance=trip)
         if form.is_valid():
             trip = form.save()
-            return serialize('json', {'id': trip.id})
-        else:
-            return HttpResponseBadRequest()
+            return HttpResponse()
+    return HttpResponseBadRequest()
 
 def trip_details(request, id):
     trip = get_object_or_404(Trip, id=id)
@@ -181,12 +196,12 @@ def trip_details(request, id):
                    'points': points})
 
 @login_required
-def trip_create_segments(request, id):
+def trip_points(request, id):
     trip = get_object_or_404(Trip, id=id, user=request.user)
     assert len(list(trip.segment_set.all())) == 0
     assert len(list(trip.point_set.all())) == 0
     if request.method == 'GET':
-        return render("trip_create_segments.html", request,
+        return render("trip_points.html", request,
                       {'trip': trip})
     elif request.method == 'POST':
         place_ids = [int(pid) for pid in request.POST['places'].split(",")]
@@ -203,7 +218,8 @@ def trip_create_segments(request, id):
             p2 = find(points, lambda p: p.place_id == place_ids[i + 1])
             segment = Segment(trip=trip, p1=p1, p2=p2, order_rank=i)
             segment.save()
-        return HttpResponseRedirect("/trip/%s/" % trip.id)
+        return HttpResponse()
+    return HttpResponseBadRequest()
 
 @login_required
 def trip_segments(request, id):
@@ -218,7 +234,7 @@ def trip_segments(request, id):
         segments = list(trip.segment_set.all())
         points = list(trip.point_set.all())
         new_segments = [dict([nsi.split("=") for nsi in ns.split(",")])
-                        for ns in request.POST['segments'].split(";")]
+                        for ns in request.POST['segments'].split(";") if ns]
 
         # delete segments
         for segment in segments:

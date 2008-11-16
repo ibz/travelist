@@ -67,7 +67,8 @@ input.button {
  border-right: 1px solid #5F99CF;
 }
 
-#trip-details #sort-segments {
+#trip-details #sort-segments,
+#trip-details #sort-places {
  padding-top: 25px;
 }
 
@@ -124,14 +125,14 @@ input.button {
 }
 
 #sort-places li {
- width: 410px;
+ width: 390px;
  margin-bottom: 10px;
 }
 
 #sort-places li table {
  background-color: #CEE3F8;
  border: 1px solid #5F99CF;
- width: 400px;
+ width: 380px;
  height: 30px;
  margin-bottom: 5px;
  margin-left: 5px;

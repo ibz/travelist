@@ -24,6 +24,11 @@ function edit_segments()
     $("#trip-segments-edit-link").effect('transfer', {to: "#trip-details"}, 500);
 }
 
+function edit_points()
+{
+    $("#trip-details").load("/trip/{{ trip.id }}/points/");
+}
+
 function update_trip_info()
 {
     function do_update(trip)
@@ -57,8 +62,14 @@ function edit_trip_cancel()
 function init()
 {
     $("#trip-info-edit > form").ajaxForm({success: edit_trip_saved});
+    $("#trip-info-edit #id_start_date").datepicker({dateFormat: date_format_short});
+    $("#trip-info-edit #id_end_date").datepicker({dateFormat: date_format_short});
     update_trip_info();
-    update_trip_details();
+    {% if trip.segment_set.count %}
+        update_trip_details();
+    {% else %}
+        edit_points();
+    {% endif %}
 }
 
 function cleanup()

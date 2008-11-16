@@ -1,0 +1,113 @@
+<script type="text/javascript">
+var last_id = 0;
+
+var place_data = {};
+
+function add_place(place_id, name)
+{
+    var id = last_id++;
+    var li = $("#place-template").clone(true).attr({id: "place_" + id, place_id: place_id, style: ""});
+    li.find(".place-name").text(name);
+    li.find(".place-delete-link").attr('href', "javascript:delete_place(" + id + ");");
+    $("#sort-places").append(li);
+
+    return id;
+}
+
+function add_new_place()
+{
+    var name = $("#new-place-name").val();
+    var place_id = $("#new-place-id").val();
+    var coords = $("#new-place-coords").val().split(",");
+    var lat = parseFloat(coords[0]);
+    var lng = parseFloat(coords[1]);
+
+    if(place_id == undefined || place_id == "")
+    {
+        alert("Please fill in the place name.");
+        return;
+    }
+
+    $("#new-place-name,#new-place-id,#new-place-coords").val("");
+
+    var id = add_place(place_id, name);
+    set_place_data(id, {lat: lat, lng: lng, name: name});
+
+    refresh_map();
+}
+
+function set_place_data(id, dict)
+{
+    if(!(id in place_data))
+    {
+        place_data[id] = {};
+    }
+    $.each(dict,
+           function(k, v)
+           {
+               place_data[id][k] = v;
+           });
+}
+
+function delete_place(id)
+{
+    $("#place_" + id).remove();
+    refresh_map();
+}
+
+function trip_points_save()
+{
+    var place_ids = $("#sort-places").sortable('toArray', "place_id");
+    $.post("/trip/{{ trip.id }}/points/",
+           {places: place_ids.join(",")},
+           function(data) { update_trip_details(); });
+}
+
+function trip_points_cancel()
+{
+    update_trip_details();
+}
+
+function init()
+{
+    $("#sort-places").sortable({revert: true, placeholder: "ui-placeholder", update: function(){ refresh_map(); }});
+    refresh_map();
+    autoCompletePlace("#new-place-name", "#new-place-id", "#new-place-coords");
+}
+
+function refresh_map()
+{
+    var point_data = $.map($("#sort-places").sortable('toArray'),
+                           function(id)
+                           {
+                               var place = place_data[parseInt(id.substr(id.indexOf("_") + 1))];
+                               return [[place.lat, place.lng, place.name]];
+                           });
+    initTripMap("map", point_data, 'points');
+}
+
+$(document).ready(init);
+</script>
+<ul id="sort-places">
+</ul>
+
+<ul style="display: none;">
+  <li id="place-template">
+    <table>
+      <tr>
+	<td><span class="place-name"></span></td>
+	<td align="right"><a class="place-delete-link">delete</a></td>
+      </tr>
+    </table>
+  </li>
+</ul>
+
+<input type="text" id="new-place-name" />
+<input type="hidden" id="new-place-id" />
+<input type="hidden" id="new-place-coords" />
+<input type="button" class="button" value="Add" onclick="javascript:add_new_place();" />
+
+<p>
+<input type="button" class="button" value="Save" onclick="javascript:trip_points_save();" />
+<input type="button" class="button" value="Cancel" onclick="javascript:trip_points_cancel();" />
+</p>

@@ -73,7 +73,7 @@ function init()
         [{{ segment.p2.coords.coords.0 }}, {{ segment.p2.coords.coords.1 }}, "{{ segment.p2.name }}"]{% if not forloop.last %},{% endif %}
     {% endfor %}
     ];
-    initTripMap("map", point_data);
+    initTripMap("map", point_data, 'segments');
 }
 
 $(document).ready(init);
