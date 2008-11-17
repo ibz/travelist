@@ -1,6 +1,6 @@
 from datetime import datetime
 
-from django.template import defaultfilters
+from django import template
 
 import settings
 
@@ -17,10 +17,18 @@ def format_date(value):
 def parse_date(s):
     if not s:
         return None
-    return datetime.strptime(s, settings.DATE_FORMAT_SHORT_PY)
+    for format in [settings.DATE_FORMAT_SHORT_PY,
+                   settings.DATE_TIME_FORMAT_SHORT_PY,
+                   "%s %s" % (settings.DATE_FORMAT_SHORT_PY, settings.TIME_FORMAT_LONG_PY)]:
+        try:
+            return datetime.strptime(s, format)
+        except ValueError:
+            continue
+        except:
+            raise
 
 def format_date_human(value):
-    return defaultfilters.date(value)
+    return template.defaultfilters.date(value)
 
 class Enum:
     def __init__(self, all):

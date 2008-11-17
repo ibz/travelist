@@ -92,7 +92,7 @@ $(document).unload(cleanup);
   Owned by: {% ifequal user.id trip.user_id %}me{% else %}{{ trip.user.username }}{% endifequal %}<br />
 </div>
 <div id="trip-info-edit" style="display: none;">
-  <form action="/trip/{{ trip.id }}/" method="POST">
+  <form action="/trip/{{ trip.id }}/edit/" method="POST">
   <table width="100%">
     <thead><th>Edit trip</th><td></td></thead>
     {{ trip_edit_form }}

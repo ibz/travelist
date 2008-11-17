@@ -17,19 +17,19 @@
           "fields": {"code": "XX", "name": "Unnamed country"}},
 
 {"pk": 0, "model": "backpacked.place",
-          "fields": {"code": 0, "coords": "POINT(0 0)", "name": "North Pole", "country": 1}},
+          "fields": {"code": 0, "coords": "POINT(0 0)", "name": "North Pole", "country": 1, "source": 1}},
 {"pk": 1, "model": "backpacked.place",
-          "fields": {"code": 1, "coords": "POINT(39.9288889 116.3883333)", "name": "Beijing", "country": 1}},
+          "fields": {"code": 1, "coords": "POINT(39.9288889 116.3883333)", "name": "Beijing", "country": 1, "source": 1}},
 {"pk": 2, "model": "backpacked.place",
-          "fields": {"code": 2, "coords": "POINT(51.6594444 103.7061111)", "name": "Slyudyanka", "country": 1}},
+          "fields": {"code": 2, "coords": "POINT(51.6594444 103.7061111)", "name": "Slyudyanka", "country": 1, "source": 1}},
 {"pk": 3, "model": "backpacked.place",
-          "fields": {"code": 3, "coords": "POINT(51.8583333 104.8644444)", "name": "Listvyanka", "country": 1}},
+          "fields": {"code": 3, "coords": "POINT(51.8583333 104.8644444)", "name": "Listvyanka", "country": 1, "source": 1}},
 {"pk": 4, "model": "backpacked.place",
-          "fields": {"code": 4, "coords": "POINT(52.2977778 104.2963889)", "name": "Irkutsk", "country": 1}},
+          "fields": {"code": 4, "coords": "POINT(52.2977778 104.2963889)", "name": "Irkutsk", "country": 1, "source": 1}},
 {"pk": 5, "model": "backpacked.place",
-          "fields": {"code": 5, "coords": "POINT(53.1938889 107.3397222)", "name": "Khuzhir", "country": 1}},
+          "fields": {"code": 5, "coords": "POINT(53.1938889 107.3397222)", "name": "Khuzhir", "country": 1, "source": 1}},
 {"pk": 6, "model": "backpacked.place",
-          "fields": {"code": 6, "coords": "POINT(55.7522222 37.6155556)", "name": "Moscow", "country": 1}},
+          "fields": {"code": 6, "coords": "POINT(55.7522222 37.6155556)", "name": "Moscow", "country": 1, "source": 1}},
 {"pk": 7, "model": "backpacked.place",
-          "fields": {"code": 7, "coords": "POINT(47.6333333 26.25)", "name": "Suceava", "country": 1}}
+          "fields": {"code": 7, "coords": "POINT(47.6333333 26.25)", "name": "Suceava", "country": 1, "source": 1}}
 ]

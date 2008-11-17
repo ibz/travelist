@@ -80,6 +80,9 @@ DATE_FORMAT_SHORT_JS = "yy-mm-dd"
 DATE_FORMAT_LONG_JS = "M. d, yy"
 
 DATE_FORMAT_SHORT_PY = "%Y-%m-%d"
+TIME_FORMAT_SHORT_PY = "%H:%M"
+TIME_FORMAT_LONG_PY = TIME_FORMAT_SHORT_PY + ":%S"
+DATE_TIME_FORMAT_SHORT_PY = "%s %s" % (DATE_FORMAT_SHORT_PY, TIME_FORMAT_SHORT_PY)
 
 execfile(os.path.join(os.path.dirname(__file__), "settings_local.py"))
 

@@ -5,8 +5,6 @@ from django.utils.safestring import mark_safe
 
 from geopy.distance import distance
 
-from lib.mock import Mock
-
 from backpacked.utils import Enum
 
 class Country(models.Model):
@@ -91,6 +89,12 @@ class Trip(models.Model):
     def visibility_h(self):
         return Visibility.get_description(self.visibility)
 
+    def is_visible_to(self, user):
+        if self.visibility == Visibility.PRIVATE and self.user != user:
+            return False
+        else:
+            return True
+
 class Point(models.Model):
     trip = models.ForeignKey(Trip)
     place = models.ForeignKey(Place, null=True)
@@ -154,6 +158,15 @@ class Annotation(models.Model):
     content = models.TextField()
     visibility = models.IntegerField(choices=Visibility.choices, default=Visibility.PUBLIC)
 
+    def __init__(self, trip_id, entity, entity_id):
+        self.trip_id = trip_id
+        if entity == 'point':
+            self.point_id = entity_id
+        elif entity == 'segment':
+            self.segment_id = entity_id
+        else:
+            raise ValueError()
+
     @property
     def entity(self):
         if self.point_id:
@@ -172,6 +185,12 @@ class Annotation(models.Model):
 
     def __unicode__(self):
         return self.title
+
+    def is_visible_to(self, user):
+        if self.visibility == Visibility.PRIVATE and self.user != user:
+            return False
+        else:
+            return True
 
     def render_short(self):
         if self.content_type == TEXT:
