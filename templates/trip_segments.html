@@ -181,6 +181,8 @@ function refresh_map()
 
 $(document).ready(init);
 </script>
+<div id="edit-segments">
+<div class="edit-header">Segments</div>
 <ul id="sort-segments">
 </ul>
 
@@ -214,7 +216,7 @@ $(document).ready(init);
 	    {% endfor %}
 	  </select>
 	</td>
-	<td align="right"><input type="button" class="segment-edit-cancel button" value="cancel" /></td>
+	<td align="right"><input type="button" class="segment-edit-cancel button cancel" value="cancel" /></td>
       </tr>
     </table>
   </li>
@@ -230,5 +232,6 @@ $(document).ready(init);
 
 <p>
 <input type="button" class="button" value="Save" onclick="javascript:trip_segments_save();" />
-<input type="button" class="button" value="Cancel" onclick="javascript:trip_segments_cancel();" />
+<input type="button" class="button cancel" value="Cancel" onclick="javascript:trip_segments_cancel();" />
 </p>
+</div>

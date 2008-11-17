@@ -15,6 +15,7 @@ function edit_trip()
     $("#trip-info").hide();
     $("#trip-info-edit").show();
     $("#trip-info-edit-link").effect('transfer', {to: "#trip-info-edit"}, 500);
+    $("#operations").hide();
     $("#trip-info-edit #id_name").focus();
 }
 
@@ -49,6 +50,7 @@ function update_trip_details()
 function edit_trip_saved()
 {
     $("#trip-info").show();
+    $("#operations").show();
     $("#trip-info-edit").hide();
     update_trip_info();
 }
@@ -56,6 +58,7 @@ function edit_trip_saved()
 function edit_trip_cancel()
 {
     $("#trip-info-edit").hide();
+    $("#operations").show();
     $("#trip-info").show();
 }
 
@@ -90,11 +93,12 @@ $(document).unload(cleanup);
 </div>
 <div id="trip-info-edit" style="display: none;">
   <form action="/trip/{{ trip.id }}/" method="POST">
-  <table>
+  <table width="100%">
+    <thead><th>Edit trip</th><td></td></thead>
     {{ trip_edit_form }}
   </table>
   <input type="submit" class="button" value="Save" />
-  <a class="navigation" href="javascript:edit_trip_cancel();">Cancel</a>
+  <input type="button" class="button cancel" value="Cancel" onclick="javascript:edit_trip_cancel();">
   </form>
 </div>
 {% endblock %}

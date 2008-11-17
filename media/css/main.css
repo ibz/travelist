@@ -14,8 +14,17 @@ table {
 }
 
 input.button {
- background-color: #CEE3F8;
- border: 1px solid #5F99CF;
+ color: #FFFFFF;
+ background-color: #5F99CF;
+ border-color: #D9DFEA #0E1F5B #0E1F5B #D9DFEA;
+ border-width: 1px;
+}
+
+input.button.cancel {
+ color: #000000;
+ background-color: #F0F0F0;
+ border-color: #E7E7E7 #666666 #666666 #E7E7E7;
+ border-width: 1px;
 }
 
 .clearleft {
@@ -73,18 +82,45 @@ input.button {
 }
 
 #trip-info-edit {
- background-color: #CEE3F8;
- border: 1px solid #5F99CF;
+ background-color: #F7F7F7;
  padding: 2px;
 }
 
-#sort-segments {
+#edit-segments, #edit-ponts {
+ background-color: #F7F7F7;
+ margin-top: 25px;
+}
+
+#edit-segments .edit-header, #edit-points .edit-header {
+ background-color: #DEDEDE;
+ font-size: x-small;
+ color: #333333;
+}
+
+#trip-info-edit thead {
+ background-color: #DEDEDE;
+ font-size: x-small;
+ color: #333333;
+ text-align: left;
+}
+
+#trip-info-edit tbody tr th {
+ text-align: right;
+}
+
+#trip-info-edit tbody tr th label {
+ text-decoration: none;
+ font-size: x-small;
+ padding-right: 5px;
+}
+
+#sort-segments, #sort-places {
  list-style: none;
  padding: 0;
  margin: 0;
 }
 
-#sort-segments li {
+#sort-segments li, #sort-places li {
  width: 390px;
 }
 
@@ -93,21 +129,18 @@ input.button {
  margin-bottom: 5px;
 }
 
-#sort-segments li table {
+#sort-segments li table, #sort-places li table {
  margin-bottom: 5px;
  margin-left: 5px;
-}
-
-#sort-segments li.edit-mode table {
- margin: 5px;
-}
-
-#sort-segments li table {
  background-color: #CEE3F8;
  border: 1px solid #5F99CF;
  width: 380px;
  height: 30px;
  cursor: pointer;
+}
+
+#sort-segments li.edit-mode table {
+ margin: 5px;
 }
 
 #sort-segments li .segment-edit {
@@ -116,27 +149,6 @@ input.button {
 
 #sort-segments li .segment-details {
  font-size: small;
-}
-
-#sort-places {
- list-style: none;
- padding: 0;
- margin: 0;
-}
-
-#sort-places li {
- width: 390px;
- margin-bottom: 10px;
-}
-
-#sort-places li table {
- background-color: #CEE3F8;
- border: 1px solid #5F99CF;
- width: 380px;
- height: 30px;
- margin-bottom: 5px;
- margin-left: 5px;
- cursor: pointer;
 }
 
 .ui-placeholder {

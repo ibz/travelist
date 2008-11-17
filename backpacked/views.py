@@ -204,7 +204,7 @@ def trip_points(request, id):
         return render("trip_points.html", request,
                       {'trip': trip})
     elif request.method == 'POST':
-        place_ids = [int(pid) for pid in request.POST['places'].split(",")]
+        place_ids = [int(pid) for pid in request.POST['places'].split(",") if pid]
         points = []
         for place_id in place_ids:
             if not find(points, lambda p: p.place_id == place_id):

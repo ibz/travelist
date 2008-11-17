@@ -13,11 +13,12 @@ $(document).ready(init);
 {% block summary %}
 <div id="trip-info-edit">
   <form action="/trip/new/" method="POST">
-  <table>
+  <table width="100%">
+    <thead><th>Edit trip</th><td></td></thead>
     {{ trip_edit_form }}
   </table>
   <input type="submit" class="button" value="Save" />
-  <a class="navigation" href="/trip/list/">Cancel</a>
+  <input type="button" class="button cancel" value="Cancel" onclick="javascript:window.location='/trip/list/';" />
   </form>
 </div>
 {% endblock %}

@@ -88,6 +88,8 @@ function refresh_map()
 
 $(document).ready(init);
 </script>
+<div id="edit-segments">
+<div class="edit-header">Points</div>
 <ul id="sort-places">
 </ul>
 
@@ -109,5 +111,6 @@ $(document).ready(init);
 
 <p>
 <input type="button" class="button" value="Save" onclick="javascript:trip_points_save();" />
-<input type="button" class="button" value="Cancel" onclick="javascript:trip_points_cancel();" />
+<input type="button" class="button cancel" value="Cancel" onclick="javascript:trip_points_cancel();" />
 </p>
+</div>
