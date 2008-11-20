@@ -31,19 +31,31 @@ input.button.cancel {
  border-width: 1px;
 }
 
-.clearleft {
- clear: left;
- height: 0px;
+.plain-list {
+ list-style-type: none;
 }
 
-.flat-list {
+.horizontal-list {
  display: inline;
  list-style-type: none;
 }
 
-.flat-list li {
+.horizontal-list li {
  display: inline;
  padding: 5px;
+}
+
+.sortable-list {
+ list-style: none;
+ padding: 0;
+ margin: 0;
+}
+
+ul .expand-item {
+ font-size: large;
+ color: #5F99CF;
+ cursor: pointer;
+ text-decoration: bold;
 }
 
 .header {
@@ -63,25 +75,9 @@ input.button.cancel {
  text-align: right;
 }
 
-.plain-list {
- list-style-type: none;
-}
-
-#map {
+.map {
  border: 2px solid #5F99CF;
  margin-top: 25px;
-}
-
-.ui-tabs-panel {
- border-left: 0;
- border-bottom: 0;
- border-top: 1px solid #5F99CF;
- border-right: 1px solid #5F99CF;
-}
-
-#trip-details #sort-segments,
-#trip-details #sort-places {
- padding-top: 25px;
 }
 
 .edit-box {
@@ -102,33 +98,66 @@ input.button.cancel {
  padding-right: 5px;
 }
 
+.data-grid thead {
+ background-color: #CEE3F8;
+ color: #5F99CF;
+ font-size: large;
+ text-decoration: bold;
+}
+
+.data-grid thead .operations {
+ background-color: white;
+}
+
+.data-grid .firstcolumn {
+ padding-left: 20px;
+}
+
+.data-grid .operations {
+ text-align: right;
+}
+
+.data-grid .firstrow {
+ border-top: 1px solid #5F99CF;
+}
+
+.data-grid .lastcolumn {
+ border-right: 1px solid #5F99CF;
+}
+
+.ui-tabs-panel {
+ border-left: 0;
+ border-bottom: 0;
+ border-top: 1px solid #5F99CF;
+ border-right: 1px solid #5F99CF;
+}
+
 #edit-segments, #edit-points {
  margin-top: 25px;
 }
 
-#sort-segments, #sort-places {
- list-style: none;
- padding: 0;
- margin: 0;
+#trip-details #sort-segments,
+#trip-details #sort-places {
+ padding-top: 25px;
 }
 
 #sort-segments li, #sort-places li {
  width: 390px;
 }
 
-#sort-segments li.edit-mode {
- border: 1px dashed #5F99CF;
- margin-bottom: 5px;
-}
-
 #sort-segments li table, #sort-places li table {
  margin-bottom: 5px;
  margin-left: 5px;
- background-color: #CEE3F8;
- border: 1px solid #5F99CF;
  width: 380px;
  height: 30px;
+ background-color: #CEE3F8;
+ border: 1px solid #5F99CF;
  cursor: pointer;
+}
+
+#sort-segments li.edit-mode {
+ border: 1px dashed #5F99CF;
+ margin-bottom: 5px;
 }
 
 #sort-segments li.edit-mode table {
@@ -149,38 +178,4 @@ input.button.cancel {
 
 .ui-effects-transfer {
  border: 2px solid #5F99CF;
-}
-
-ul .expand-item {
- font-size: large;
- color: #5F99CF;
- cursor: pointer;
- text-decoration: bold;
-}
-
-#trip-list thead, #annotation-list thead {
- background-color: #CEE3F8;
- color: #5F99CF;
- font-size: large;
- text-decoration: bold;
-}
-
-#trip-list thead td.operations, #annotation-list thead td.operations {
- background-color: white;
-}
-
-#trip-list td.firstcolumn, #annotation-list td.firstcolumn {
- padding-left: 20px;
-}
-
-#trip-list td.operations, #annotation-list td.operations {
- text-align: right;
-}
-
-#trip-list tr.firstrow td, #annotation-list tr.firstrow td {
- border-top: 1px solid #5F99CF;
-}
-
-#trip-list td.lastcolumn, #annotation-list td.lastcolumn {
- border-right: 1px solid #5F99CF;
 }

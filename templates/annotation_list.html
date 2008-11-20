@@ -39,7 +39,7 @@ $(document).ready(init);
   {% for group in annotation_groups %}
   <div id="content_type_{{ group.0 }}">
     {% if group.2 %}
-    <table id="annotation-list" width="900px">
+    <table id="annotation-list" class="data-grid" width="900px">
       <thead>
         <td width="30%">Annotation</td>
 	<td width="30%">Parent</td>

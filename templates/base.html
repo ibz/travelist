@@ -3,7 +3,7 @@
 <table class="header">
   <tr>
     <td class="header-left">
-      <ul class="flat-list">
+      <ul class="horizontal-list">
         {% if not user.is_anonymous %}
         <li>
           <a href="/trip/all/">My trips</a>
@@ -20,7 +20,7 @@
             Logged in as {{ user.username }}.
         {% endif %}
       </span>
-      <ul class="flat-list">
+      <ul class="horizontal-list">
         <li>
         {% if not user.is_anonymous %}
             <a href="/account/logout/">Logout</a>
