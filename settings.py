@@ -9,7 +9,7 @@ ADMINS = (
 MANAGERS = ADMINS
 
 DATABASE_ENGINE = 'postgresql_psycopg2'
-DATABASE_NAME = 'bit'
+DATABASE_NAME = 'backpackedit'
 DATABASE_USER = 'bit'
 DATABASE_PASSWORD = ''
 DATABASE_HOST = ''
