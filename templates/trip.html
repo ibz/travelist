@@ -6,10 +6,6 @@
 {% endblock %}
 
 {% block script %}
-
-var visibilities = { {% for v in visibility_choices %}{{ v.0 }}: "{{ v.1 }}"{% if not forloop.last %},{% endif %}{% endfor %} };
-var transportation_methods = { {% for t in transportation_method_choices %}{{ t.0 }}: "{{ t.1 }}"{% if not forloop.last %},{% endif %}{% endfor %} };
-
 function edit_trip()
 {
     $("#trip-info").hide();
@@ -91,10 +87,10 @@ $(document).unload(cleanup);
   Visibility: <span id="visibility"></span><br />
   Owned by: {% ifequal user.id trip.user_id %}me{% else %}{{ trip.user.username }}{% endifequal %}<br />
 </div>
-<div id="trip-info-edit" style="display: none;">
+<div id="trip-info-edit" class="edit-box" style="display: none;">
   <form action="/trip/{{ trip.id }}/edit/" method="POST">
   <table width="100%">
-    <thead><th>Edit trip</th><td></td></thead>
+    <thead class="edit-box-header"><th>Edit trip</th><td></td></thead>
     {{ trip_edit_form }}
   </table>
   <input type="submit" class="button" value="Save" />
@@ -107,7 +103,7 @@ $(document).unload(cleanup);
   {% ifequal user.id trip.user_id %}
   <a id="trip-info-edit-link" class="navigation" href="javascript:edit_trip();">edit trip</a><br />
   <a id="trip-segments-edit-link" class="navigation" href="javascript:edit_segments();">edit segments</a><br />
-  <a class="navigation" href="/trip/{{ trip.id }}/edit/annotations/">edit annotations</a>
+  <a class="navigation" href="/trip/{{ trip.id }}/annotation/all/">edit annotations</a>
   {% endifequal %}
 {% endblock %}
 

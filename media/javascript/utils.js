@@ -37,24 +37,6 @@ function convertDate(from_format, to_format, date)
     return $.datepicker.formatDate(get_format(to_format), $.datepicker.parseDate(get_format(from_format), date));
 }
 
-function registerContentTypeEvent(selector, name)
-{
-    $("#id_" + selector).change(
-            function()
-            {
-                var content_type = $("#id_" + selector + " option:selected").eq(0).val();
-                if(content_type == "")
-                {
-                    document.getElementById(name).innerHTML = "";
-                }
-                $.get("/widget/content_input/?content_type=" + content_type + "&content_type_selector=" + selector + "&name=" + name, null,
-                        function(data, status)
-                        {
-                            document.getElementById(name).innerHTML = data;
-                        });
-            });
-}
-
 function initTripMap(id, point_data, point_data_type /* can be 'points' or 'segments' */)
 {
     if (!GBrowserIsCompatible())

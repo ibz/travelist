@@ -2,10 +2,10 @@
 
 {% block body %}
 
-<div>
-{{ annotation.render }}
-</div>
+<p>
+{{ annotation.ui.render }}
+</p>
 
-<a class="navigation" href="/trip/{{ annotation.trip.id }}/">Back to trip</a>
+<a class="navigation" href="/trip/{{ annotation.trip.id }}/annotation/all/">Back to annotation list</a>
 
 {% endblock %}

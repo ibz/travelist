@@ -9,56 +9,59 @@ from backpacked import models
 from backpacked import utils
 from backpacked import views
 
+def all(request, trip_id):
+    trip = shortcuts.get_object_or_404(models.Trip, id=trip_id)
+    annotations = list(models.Annotation.objects.filter(trip=trip).all())
+    grouped_annotations = dict([(c, []) for c in models.ContentType.values])
+    for annotation in annotations:
+        grouped_annotations[annotation.content_type].append(annotation)
+    annotation_groups = [(k, models.ContentType.get_description(k), v)
+                         for k, v in grouped_annotations.items()]
+    return views.render("annotation_list.html", request,
+                        {'trip': trip, 'annotation_groups': annotation_groups})
+
 @require_GET
-def view(request, trip_id, entity, entity_id, id):
+def view(request, trip_id, id):
     annotation = shortcuts.get_object_or_404(models.Annotation, id=id)
-    if annotation.is_visible_to(request.user):
+    if not annotation.is_visible_to(request.user):
         raise http.Http404()
     return views.render("annotation_view.html", request, {'annotation': annotation})
 
-def edit_GET(request, trip_id, entity, entity_id, id=None):
-    if id:
-        annotation = shortcuts.get_object_or_404(models.Annotation, id=id)
-        form = forms.AnnotationEditForm(instance=annotation)
-    else:
-        annotation = models.Annotation(trip_id=trip_id, entity=entity, entity_id=entity_id)
-        form = forms.AnnotationNewForm(instance=annotation)
-    return views.render("annotation_edit.html", request, {'trip_id': trip_id, 'annotation': annotation, 'form': form})
+def edit_GET(request, annotation):
+    form = forms.AnnotationEditForm(instance=annotation)
+    return views.render("annotation_edit.html", request, {'annotation': annotation, 'form': form})
 
-def edit_POST(request, trip_id, entity, entity_id, id=None):
-    if id:
-        annotation = shortcuts.get_object_or_404(models.Annotation, id=id)
-        form = forms.AnnotationEditForm(request.POST, instance=annotation)
-    else:
-        annotation = models.Annotation(trip_id=trip_id, entity=entity, entity_id=entity_id)
-        form = forms.AnnotationNewForm(request.POST, instance=annotation)
+def edit_POST(request, annotation):
+    form = forms.AnnotationEditForm(request.POST, instance=annotation)
     if form.is_valid():
-        annotation = form.save()
-        return http.HttpResponseRedirect("/trip/%s/" % trip_id)
+        form.save()
+        return http.HttpResponseRedirect("/trip/%s/annotation/all/" % annotation.trip.id)
     else:
-        return views.render("annotation_edit.html", request, {'trip_id': trip_id, 'annotation': annotation, 'form': form})
+        return views.render("annotation_edit.html", request, {'annotation': annotation, 'form': form})
 
 @login_required
 @require_http_methods(["GET", "POST"])
-def edit(request, trip_id, entity, entity_id, id=None):
+def new(request, trip_id):
+    content_type = int(request.GET.get('content_type', 0))
+    assert content_type
+    annotation = models.Annotation(trip_id=trip_id, content_type=content_type)
     if request.method == 'GET':
-        return edit_GET(request, trip_id, entity, entity_id, id=None)
+        return edit_GET(request, annotation)
     elif request.method == 'POST':
-        return edit_POST(request, trip_id, entity, entity_id, id=None)
+        return edit_POST(request, annotation)
+
+@login_required
+@require_http_methods(["GET", "POST"])
+def edit(request, trip_id, id):
+    annotation = shortcuts.get_object_or_404(models.Annotation, id=id, trip__user=request.user)
+    if request.method == 'GET':
+        return edit_GET(request, annotation)
+    elif request.method == 'POST':
+        return edit_POST(request, annotation)
 
 @login_required
 @require_GET
-def delete(request, trip_id, entity, entity_id, id):
+def delete(request, trip_id, id):
     annotation = shortcuts.get_object_or_404(models.Annotation, id=id, trip__user=request.user)
     annotation.delete()
-    return http.HttpResponseRedirect("/trip/%s/%s/%s/annotation/list/"
-                                     % (trip_id, entity, entity_id))
-
-@login_required
-@require_GET
-def widget_content_input(request):
-    content_type = int(request.GET['content_type'])
-    content_type_selector = request.GET['content_type_selector']
-    name = request.GET['name']
-    input = forms.ContentInput(content_type, content_type_selector)
-    return http.HttpResponse(input.render(name, None))
+    return http.HttpResponseRedirect("/trip/%s/annotation/all/" % trip_id)

@@ -1,11 +1,20 @@
 {% extends "base.html" %}
 
 {% block body %}
-<form method="POST" action="">
 <table>
+<tr>
+<td width="300px">
+<div class="edit-box">
+<form method="POST" action="">
+<table width="100%">
+<thead class="edit-box-header"><th><nobr>Edit annotation</nobr></th><td></td></thead>
 {{ form }}
 </table>
 <input type="submit" class="button" value="{% if annotation.id %}Save{% else %}Create{% endif %}" />
-<a href="/trip/{{ trip_id }}/{{ annotation.entity }}/{{ annotation.entity_id }}/annotation/list/">Cancel</a>
+<input type="button" class="button cancel" value="Cancel" onclick="javascript:window.location='/trip/{{ annotation.trip.id }}/annotation/all/';" />
+</div>
 </form>
+</td>
+</tr>
+</table>
 {% endblock %}

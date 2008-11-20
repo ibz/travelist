@@ -4,14 +4,8 @@
 My trips
 {% endblock %}
 
-{% block summary %}
-Total trips: <span>TODO</span><br />
-Total km: <span>TODO</span><br />
-Total days: <span>TODO</span><br />
-{% endblock %}
-
 {% block operations %}
-<a id="new-trip-link" class="navigation" href="/trip/new/">add trip</a>
+<a class="navigation" href="/trip/new/">add trip</a>
 {% endblock %}
 
 {% block content %}
@@ -30,7 +24,7 @@ Total days: <span>TODO</span><br />
 	<td>{{ trip.end_date|date }}</td>
 	<td class="lastcolumn">{{ trip.visibility_h }}</td>
 	<td class="operations">
-          <a href="/trip/{{ trip.id }}/delete/" onclick="javascript:return confirm('Really delete the trip {{ trip.name }}?');">delete</a>
+          <a href="/trip/{{ trip.id }}/delete/" onclick="javascript:return confirm('Really delete {{ trip.name }}?');">delete</a>
 	</td>
   </tr>
   {% endfor %}

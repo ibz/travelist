@@ -13,6 +13,10 @@ table {
  border-collapse: collapse;
 }
 
+form table tr th {
+ text-align: right;
+}
+
 input.button {
  color: #FFFFFF;
  background-color: #5F99CF;
@@ -68,8 +72,7 @@ input.button.cancel {
  margin-top: 25px;
 }
 
-#trip-details-tabs .ui-tabs-panel {
- min-height: 150px;
+.ui-tabs-panel {
  border-left: 0;
  border-bottom: 0;
  border-top: 1px solid #5F99CF;
@@ -81,37 +84,26 @@ input.button.cancel {
  padding-top: 25px;
 }
 
-#trip-info-edit {
+.edit-box {
  background-color: #F7F7F7;
  padding: 2px;
 }
 
-#edit-segments, #edit-ponts {
- background-color: #F7F7F7;
- margin-top: 25px;
-}
-
-#edit-segments .edit-header, #edit-points .edit-header {
- background-color: #DEDEDE;
- font-size: x-small;
- color: #333333;
-}
-
-#trip-info-edit thead {
+.edit-box .edit-box-header {
  background-color: #DEDEDE;
  font-size: x-small;
  color: #333333;
  text-align: left;
 }
 
-#trip-info-edit tbody tr th {
- text-align: right;
-}
-
-#trip-info-edit tbody tr th label {
+.edit-box label {
  text-decoration: none;
  font-size: x-small;
  padding-right: 5px;
+}
+
+#edit-segments, #edit-points {
+ margin-top: 25px;
 }
 
 #sort-segments, #sort-places {
@@ -166,29 +158,29 @@ ul .expand-item {
  text-decoration: bold;
 }
 
-#trip-list thead {
+#trip-list thead, #annotation-list thead {
  background-color: #CEE3F8;
  color: #5F99CF;
  font-size: large;
  text-decoration: bold;
 }
 
-#trip-list thead td.operations {
+#trip-list thead td.operations, #annotation-list thead td.operations {
  background-color: white;
 }
 
-#trip-list td.firstcolumn {
+#trip-list td.firstcolumn, #annotation-list td.firstcolumn {
  padding-left: 20px;
 }
 
-#trip-list td.operations {
+#trip-list td.operations, #annotation-list td.operations {
  text-align: right;
 }
 
-#trip-list tr.firstrow td {
+#trip-list tr.firstrow td, #annotation-list tr.firstrow td {
  border-top: 1px solid #5F99CF;
 }
 
-#trip-list td.lastcolumn {
+#trip-list td.lastcolumn, #annotation-list td.lastcolumn {
  border-right: 1px solid #5F99CF;
 }

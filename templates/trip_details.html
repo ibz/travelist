@@ -1,5 +1,5 @@
 <div id="trip-details-tabs">
-<ul>
+  <ul>
     <li><a href="#points"><span>Points</span></a></li>
     <li><a href="#segments"><span>Segments</span></a></li>
     <li><a href="#pictures"><span>Pictures</span></a></li>
@@ -38,7 +38,7 @@
       <ul id="segment_{{ forloop.counter }}" class="plain-list" style="display: none;">
 	{% if segment.start_date %}<li>Start date: {{ segment.start_date|date }}</li>{% endif %}
 	{% if segment.end_date %}<li>End date: {{ segment.end_date|date }}</li>{% endif %}
-	{% if segment.transportation_method %}<li>Transportation method: {{ segment.transportation_method_str }}</li>{% endif %}
+	{% if segment.transportation_method %}<li>Transportation method: {{ segment.transportation_method_h }}</li>{% endif %}
 	<li>Length: {{ segment.length|floatformat:2 }} km</li>
 	{% for annotation in segment.annotation_set.all %}
 	<li>{{ annotation.render_short }}</li>

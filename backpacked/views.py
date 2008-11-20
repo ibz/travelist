@@ -13,6 +13,7 @@ def render(template_file, request, context=None):
     if not context:
         context = {}
     context['settings'] = settings
+    context['content_type_choices'] = models.ContentType.choices
     context['visibility_choices'] = models.Visibility.choices
     context['transportation_method_choices'] = models.TransportationMethod.choices
     return shortcuts.render_to_response(template_file, context, context_instance=template.RequestContext(request))

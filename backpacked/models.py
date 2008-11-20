@@ -1,7 +1,5 @@
 from django.contrib.auth.models import User
 from django.contrib.gis.db import models
-from django.utils import html
-from django.utils.safestring import mark_safe
 
 from geopy.distance import distance
 
@@ -128,13 +126,13 @@ class Segment(models.Model):
     order_rank = models.IntegerField()
 
     def __unicode__(self):
-        return "%s - %s" % (self.p1, self.p2)
+        return self.name
 
     def __cmp__(self, other):
         return cmp(self.order_rank, other.order_rank)
 
     @property
-    def transportation_method_str(self):
+    def transportation_method_h(self):
         return TransportationMethod.get_description(self.transportation_method)
 
     @property
@@ -145,46 +143,59 @@ class Segment(models.Model):
     def annotation_count(self):
         return self.annotation_set.all().count()
 
+    @property
+    def name(self):
+        return "%s - %s" % (self.p1.name, self.p2.name)
+
 ContentType = Enum({'TEXT': (1, "Text"),
-                    'URL': (2, "URL")})
+                    'URL': (2, "URL"),
+                    'EXTERNAL_PHOTOS': (3, "Photos")})
 
 class Annotation(models.Model):
     trip = models.ForeignKey(Trip)
-    point = models.ForeignKey(Point, null=True)
-    segment = models.ForeignKey(Segment, null=True)
+    point = models.ForeignKey(Point, blank=True, null=True)
+    segment = models.ForeignKey(Segment, blank=True, null=True)
     date = models.DateTimeField(blank=True, null=True)
     title = models.CharField(max_length=30)
     content_type = models.IntegerField(choices=ContentType.choices)
     content = models.TextField()
     visibility = models.IntegerField(choices=Visibility.choices, default=Visibility.PUBLIC)
 
-    def __init__(self, trip_id, entity, entity_id):
-        self.trip_id = trip_id
-        if entity == 'point':
-            self.point_id = entity_id
-        elif entity == 'segment':
-            self.segment_id = entity_id
-        else:
-            raise ValueError()
+    class UI(object):
+        all = {}
+
+        class Meta(type):
+            def __init__(cls, name, bases, dct):
+                if hasattr(cls, 'content_type'):
+                    Annotation.UI.all[cls.content_type] = cls
+
+        __metaclass__ = Meta
+
+        def __init__(self, annotation):
+            self.annotation = annotation
+
+        def render_short(self):
+            raise NotImplementedError()
+
+        def render(self):
+            raise NotImplementedError()
+
+        def render_content_input(self, name, value, attrs=None):
+            raise NotImplementedError()
+
+        def clean_content(self, content):
+            raise NotImplementedError()
 
     @property
-    def entity(self):
-        if self.point_id:
-            return 'point'
-        elif self.segment_id:
-            return 'segment'
-
-    @property
-    def entity_id(self):
-        return self.point_id or self.segment_id
-
-    @property
-    def url(self):
-        return ("/trip/%s/%s/%s/annotation/%s/"
-                % (self.trip_id, self.entity, self.entity_id, self.id))
+    def ui(self):
+        return self.UI.all[self.content_type](self)
 
     def __unicode__(self):
         return self.title
+
+    @property
+    def visibility_h(self):
+        return Visibility.get_description(self.visibility)
 
     def is_visible_to(self, user):
         if self.visibility == Visibility.PRIVATE and self.user != user:
@@ -192,16 +203,16 @@ class Annotation(models.Model):
         else:
             return True
 
-    def render_short(self):
-        if self.content_type == TEXT:
-            return mark_safe("<a href=\"%s\">%s</a>"
-                             % (html.escape(self.url),
-                                html.escape(self.title)))
-        elif self.content_type == URL:
-            return mark_safe("<a href=\"%s\">%s</a>"
-                             % (html.escape(self.content),
-                                html.escape(self.title)))
+    @property
+    def url(self):
+        return "/trip/%s/annotation/%s/" % (self.trip.id, self.id)
 
-    def render(self):
-        if self.content_type == TEXT:
-            return self.content
+    @property
+    def parent_name(self):
+        if self.point_id:
+            return self.point.name
+        elif self.segment_id:
+            return self.segment.name
+        else:
+            return self.trip.name
+

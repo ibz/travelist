@@ -1,0 +1,72 @@
+{% extends "content.html" %}
+
+{% block script %}
+function update_new_annotation_link(tab_index)
+{
+    var content_type_id = [{% for c in content_type_choices %}{{ c.0 }}{% if not forloop.last %},{% endif %}{% endfor %}][tab_index];
+    $("#new-annotation-link").attr({href: "/trip/{{ trip.id }}/annotation/new/?content_type=" + content_type_id});
+    $("#new-annotation-link").text("add new " + content_types[content_type_id]);
+}
+
+function init()
+{
+    $("#annotation-tabs > ul").tabs().bind('tabsselect', function(event, ui) { update_new_annotation_link(ui.index); });
+    update_new_annotation_link($("#annotation-tabs > ul").tabs().data('selected.tabs'));
+}
+
+$(document).ready(init);
+{% endblock %}
+
+{% block title %}
+{{ trip.name }}
+{% endblock %}
+
+{% block operations %}
+<a href="/trip/{{ trip.id }}/">back to trip</a><br />
+<a id="new-annotation-link"></a>
+{% endblock %}
+
+{% block content %}
+<table width="1000px">
+<tr>
+<td>
+<div id="annotation-tabs">
+  <ul>
+    {% for content_type in content_type_choices %}
+    <li><a href="#content_type_{{ content_type.0 }}" content_type="{{ content_type.0 }}"><span>{{ content_type.1 }}</span></a></li>
+    {% endfor %}
+  </ul>
+  {% for group in annotation_groups %}
+  <div id="content_type_{{ group.0 }}">
+    {% if group.2 %}
+    <table id="annotation-list" width="900px">
+      <thead>
+        <td width="30%">Annotation</td>
+	<td width="30%">Parent</td>
+	<td width="15%">Date</td>
+	<td width="15%" class="lastcolumn">Visibility</td>
+	<td width="7%" class="operations"></td>
+      </thead>
+      {% for annotation in group.2 %}
+      <tr{% if forloop.first %} class="firstrow"{% endif %}>
+        <td class="firstcolumn">{{ annotation.ui.render_short }}</td>
+	<td>{{ annotation.parent_name }}</td>
+        <td>{{ annotation.date|date }}</td>
+	<td class="lastcolumn">{{ annotation.visibility_h }}</td>
+	<td class="operations">
+	  <a href="/trip/{{ trip.id }}/annotation/{{ annotation.id }}/edit/">edit</a>
+          <a href="/trip/{{ trip.id }}/annotation/{{ annotation.id }}/delete/" onclick="javascript:return confirm('Really delete {{ annotation.name }}?');">delete</a>
+	</td>
+      </tr>
+      {% endfor %}
+    </table>
+    {% else %}
+    <p>No {{ group.1 }} annotations. <a href="/trip/{{ trip.id }}/annotation/new/?content_type={{ group.0 }}">Add one</a>.</p>
+    {% endif %}
+  </div>
+  {% endfor %}
+</div>
+</td>
+</tr>
+</table>
+{% endblock %}
