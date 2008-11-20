@@ -7,7 +7,7 @@ from django.contrib.auth.decorators import login_required
 from django.utils import simplejson
 from django.views.decorators.http import require_GET, require_POST, require_http_methods
 
-from backpacked import forms
+from backpacked import tripui
 from backpacked import models
 from backpacked import utils
 from backpacked import views
@@ -23,14 +23,14 @@ def view(request, id):
     trip = shortcuts.get_object_or_404(models.Trip, id=id)
     if not trip.is_visible_to(request.user):
         raise http.Http404()
-    form = forms.TripEditForm(instance=trip)
+    form = tripui.TripEditForm(instance=trip)
     return views.render("trip.html", request, {'trip': trip, 'trip_edit_form': form})
 
 @login_required
 @require_POST
 def edit(request, id):
     trip = shortcuts.get_object_or_404(models.Trip, id=id, user=request.user)
-    form = forms.TripEditForm(request.POST, instance=trip)
+    form = tripui.TripEditForm(request.POST, instance=trip)
     if form.is_valid():
         trip = form.save()
         return http.HttpResponse()
@@ -39,12 +39,12 @@ def edit(request, id):
 
 def new_GET(request):
     trip = models.Trip(user=request.user)
-    form = forms.TripEditForm(instance=trip)
+    form = tripui.TripEditForm(instance=trip)
     return views.render("trip_new.html", request, {'trip': trip, 'trip_edit_form': form})
 
 def new_POST(request):
     trip = models.Trip(user=request.user)
-    form = forms.TripEditForm(request.POST, instance=trip)
+    form = tripui.TripEditForm(request.POST, instance=trip)
     if form.is_valid():
         trip = form.save()
         return http.HttpResponseRedirect("/trip/%s/" % trip.id)

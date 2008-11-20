@@ -4,7 +4,7 @@ from django.contrib import auth
 from django.contrib.auth.decorators import login_required
 from django.views.decorators.http import require_GET, require_POST, require_http_methods
 
-from backpacked import forms
+from backpacked import annotationui
 from backpacked import models
 from backpacked import utils
 from backpacked import views
@@ -28,11 +28,11 @@ def view(request, trip_id, id):
     return views.render("annotation_view.html", request, {'annotation': annotation})
 
 def edit_GET(request, annotation):
-    form = forms.AnnotationEditForm(instance=annotation)
+    form = annotationui.AnnotationEditForm(instance=annotation)
     return views.render("annotation_edit.html", request, {'annotation': annotation, 'form': form})
 
 def edit_POST(request, annotation):
-    form = forms.AnnotationEditForm(request.POST, instance=annotation)
+    form = annotationui.AnnotationEditForm(request.POST, instance=annotation)
     if form.is_valid():
         form.save()
         return http.HttpResponseRedirect("/trip/%s/annotation/all/" % annotation.trip.id)

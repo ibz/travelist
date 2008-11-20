@@ -11,7 +11,7 @@ from django.core import mail
 from django.db.transaction import commit_on_success
 from django.views.decorators.http import require_GET, require_POST, require_http_methods
 
-from backpacked import forms
+from backpacked import accountui
 from backpacked import models
 from backpacked import utils
 from backpacked import views
@@ -33,12 +33,12 @@ def logout(request):
     return http.HttpResponseRedirect("/")
 
 def register_GET(request):
-    form = forms.AccountRegistrationForm()
+    form = accountui.AccountRegistrationForm()
     return views.render("account_register.html", request, {'form': form})
 
 def register_POST(request):
     user = auth.models.User(is_staff=False, is_superuser=False, is_active=False)
-    form = forms.AccountRegistrationForm(request.POST, instance=user)
+    form = accountui.AccountRegistrationForm(request.POST, instance=user)
     if form.is_valid():
         user = form.save()
 
@@ -86,11 +86,11 @@ def activate(request, activation_key):
     return views.render("account_activate.html", request, {'success': True})
 
 def details_GET(request):
-    form = forms.AccountDetailsForm(instance=request.user.get_profile())
+    form = accountui.AccountDetailsForm(instance=request.user.get_profile())
     return views.render("account_details.html", request, {'form': form})
 
 def details_POST(request):
-    form = forms.AccountDetailsForm(request.POST, instance=request.user.get_profile())
+    form = accountui.AccountDetailsForm(request.POST, instance=request.user.get_profile())
     if form.is_valid():
         form.save()
         return http.HttpResponseRedirect("/")

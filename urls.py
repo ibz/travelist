@@ -42,7 +42,7 @@ urlpatterns = patterns('',
       'backpacked.trip.delete'),
 
     (r"^place/search/$",
-      'backpacked.views.place_search'),
+      'backpacked.place.search'),
 
     (r"^trip/(?P<trip_id>\d+)/annotation/all/$",
       'backpacked.annotation.all'),
