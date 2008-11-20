@@ -45,37 +45,44 @@ class ContentInput(forms.widgets.Widget):
 NoWidget = type("", (forms.widgets.Widget,), {'render': lambda *_, **__: ""})()
 
 class AnnotationEditForm(forms.ModelForm):
+    title = forms.fields.CharField(max_length=30)
+    date = forms.fields.DateField(required=False)
     parent = forms.fields.ChoiceField()
+    visibility = forms.fields.ChoiceField(choices=models.Visibility.choices)
+    content = forms.fields.CharField(widget=ContentInput())
     point = forms.fields.Field(widget=NoWidget, label="", required=False)
     segment = forms.fields.Field(widget=NoWidget, label="", required=False)
-    content = forms.fields.CharField(widget=ContentInput())
 
     class Meta:
-        model = models.Annotation
-        fields = ('parent', 'point', 'segment', 'date', 'title', 'visibility', 'content')
+        fields = ('title', 'date', 'parent', 'visibility', 'content') + \
+                 ('point', 'segment') # editable through the 'parent' field
 
-    def __init__(self, data=None, files=None, instance=None):
-        super(AnnotationEditForm, self).__init__(data, files, instance=instance)
+    def __init__(self, data=None, files=None, annotation=None):
+        super(AnnotationEditForm, self).__init__(data, files, instance=annotation)
 
-        points = list(instance.trip.point_set.all())
-        segments = sorted(list(instance.trip.segment_set.all()))
-        self.fields['parent'].choices = [("p_%s" % p.id, p.name) for p in points] + \
+        points = list(annotation.trip.point_set.all())
+        segments = sorted(list(annotation.trip.segment_set.all()))
+        self.fields['parent'].choices = [("", "")] + \
+                                        [("p_%s" % p.id, p.name) for p in points] + \
                                         [("s_%s" % s.id, unicode(s)) for s in segments]
 
-        if instance.point_id:
-            self.initial['parent'] = "p_%s" % instance.point_id
-        elif instance.segment_id:
-            self.initial['parent'] = "s_%s" % instance.segment_id
+        if annotation.point_id:
+            self.initial['parent'] = "p_%s" % annotation.point_id
+        elif annotation.segment_id:
+            self.initial['parent'] = "s_%s" % annotation.segment_id
         else:
             self.initial['parent'] = ""
 
-        self.fields['content'].widget.annotation = instance
+        self.fields['content'].widget.annotation = annotation
+        self.fields['content'].label = annotation.content_type_h
 
     def clean_content(self):
         return self.instance.ui.clean_content(self.cleaned_data['content'])
 
-    def clean(self):
-        parent = self.cleaned_data['parent']
+    def clean_parent(self):
+        parent = self.cleaned_data.get('parent')
+        if not parent:
+            raise forms.util.ValidationError("This field is required.")
         assert re.match(r"^[ps]_\d+$", parent)
         id = int(parent[2:])
         self.cleaned_data['point'] = self.cleaned_data['segment'] = None
@@ -84,4 +91,3 @@ class AnnotationEditForm(forms.ModelForm):
         elif parent.startswith("s_"):
             self.cleaned_data['segment'] = models.Segment.objects.get(id=id)
 
-        return self.cleaned_data

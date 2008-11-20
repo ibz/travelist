@@ -2,7 +2,7 @@
   <ul>
     <li><a href="#points"><span>Points</span></a></li>
     <li><a href="#segments"><span>Segments</span></a></li>
-    <li><a href="#pictures"><span>Pictures</span></a></li>
+    <li><a href="#photos"><span>Photos</span></a></li>
   </ul>
 
 <div id="points">
@@ -16,7 +16,7 @@
       </span>
       <ul id="point_{{ forloop.counter }}" class="plain-list" style="display: none;">
         {% for annotation in point.annotation_set.all %}
-        <li>{{ annotation.render_short }}</li>
+        <li>{{ annotation.ui.render_short }}</li>
         {% endfor %}
       </ul>
       {% else %}
@@ -41,7 +41,7 @@
 	{% if segment.transportation_method %}<li>Transportation method: {{ segment.transportation_method_h }}</li>{% endif %}
 	<li>Length: {{ segment.length|floatformat:2 }} km</li>
 	{% for annotation in segment.annotation_set.all %}
-	<li>{{ annotation.render_short }}</li>
+	<li>{{ annotation.ui.render_short }}</li>
 	{% endfor %}
       </ul>
     </li>
@@ -49,8 +49,14 @@
   </ul>
 </div>
 
-<div id="pictures">
-  TODO
+<div id="photos">
+  <ul class="plain-list">
+    {% for annotation in trip.annotation_set.all %}
+    {% if annotation.is_photos %}
+    <li>{{ annotation.ui.render_short }}</li>
+    {% endif %}
+    {% endfor %}
+  </ul>
 </div>
 </div>
 

@@ -188,10 +188,17 @@ class Annotation(models.Model):
 
     @property
     def ui(self):
+        if not self.UI.all:
+            # HACK: make sure annotation UIs are loaded
+            from backpacked import annotationui
         return self.UI.all[self.content_type](self)
 
     def __unicode__(self):
         return self.title
+
+    @property
+    def content_type_h(self):
+        return ContentType.get_description(self.content_type)
 
     @property
     def visibility_h(self):
@@ -202,6 +209,10 @@ class Annotation(models.Model):
             return False
         else:
             return True
+
+    @property
+    def is_photos(self):
+        return self.content_type == ContentType.EXTERNAL_PHOTOS
 
     @property
     def url(self):
