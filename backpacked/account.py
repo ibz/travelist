@@ -37,26 +37,23 @@ def register_GET(request):
     return views.render("account_register.html", request, {'form': form})
 
 def register_POST(request):
-    user = auth.models.User(is_staff=False, is_superuser=False, is_active=False)
+    user = auth.models.User(is_staff=False, is_superuser=False, is_active=True)
     form = accountui.AccountRegistrationForm(request.POST, instance=user)
     if form.is_valid():
         user = form.save()
 
         salt = sha.new(str(random())).hexdigest()[:5]
-        activation_key = sha.new(salt + user.username).hexdigest()
-        key_expires = datetime.today() + timedelta(2)
-        profile = models.UserProfile(user=user,
-                                     activation_key=activation_key,
-                                     key_expires=key_expires)
+        confirmation_key = sha.new(salt + user.username).hexdigest()
+        profile = models.UserProfile(user=user, confirmation_key=confirmation_key)
         profile.save()
 
         email_subject = "Your new backpacked.it account confirmation"
         email_body = (
-"""Hello %s and thanks for signing up for a backpacked.it account!
-To activate your account click this link within 48 hours:
-http://backpacked.it/account/activate/%s/""" % (
-                user.username,
-                profile.activation_key))
+"""Hello %(user)s and thanks for signing up for a backpacked.it account!
+To confirm your email address click this link:
+http://backpacked.it/account/confirm-email/%(user)s/?key=%(key)s""" % (
+                {'user': user.username,
+                 'key': profile.confirmation_key}))
         mail.send_mail(email_subject,
                        email_body,
                        settings.CUSTOMER_EMAIL,
@@ -76,14 +73,11 @@ def register(request):
         return register_POST(request)
 
 @require_GET
-def activate(request, activation_key):
-    user_profile = shortcuts.get_object_or_404(models.UserProfile, activation_key=activation_key)
-    if user_profile.key_expires < datetime.today():
-        return views.render("account_activate.html", request, {'expired': True})
-    user = user_profile.user
-    user.is_active = True
-    user.save()
-    return views.render("account_activate.html", request, {'success': True})
+def confirm_email(request, username):
+    key = request.GET['key']
+    user_profile = shortcuts.get_object_or_404(models.UserProfile, user__username=username, confirmation_key=key)
+    user_profile.email_confirmed = True
+    return views.render("account_confirmed_email.html", request)
 
 def details_GET(request):
     form = accountui.AccountDetailsForm(instance=request.user.get_profile())

@@ -53,10 +53,14 @@ class Place(models.Model):
         name += ", %s" % self.country.name
         return name
 
+UserLevel = Enum([(1, "Basic"),
+                  (2, "Pro")])
+
 class UserProfile(models.Model):
     user = models.OneToOneField(User)
-    activation_key = models.CharField(max_length=40)
-    key_expires = models.DateTimeField()
+    level = models.IntegerField(choices=UserLevel.choices, default=UserLevel.BASIC)
+    confirmation_key = models.CharField(max_length=40)
+    email_confirmed = models.BooleanField(default=False)
     name = models.CharField(max_length=50, blank=True)
     current_location = models.ForeignKey(Place, blank=True, null=True)
     about = models.TextField(blank=True)

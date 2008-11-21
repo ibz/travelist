@@ -85,4 +85,3 @@ TIME_FORMAT_LONG_PY = TIME_FORMAT_SHORT_PY + ":%S"
 DATE_TIME_FORMAT_SHORT_PY = "%s %s" % (DATE_FORMAT_SHORT_PY, TIME_FORMAT_SHORT_PY)
 
 execfile(os.path.join(os.path.dirname(__file__), "settings_local.py"))
-

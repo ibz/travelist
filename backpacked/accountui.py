@@ -1,3 +1,5 @@
+import re
+
 from django import forms
 
 from backpacked import models
@@ -17,7 +19,12 @@ class AccountDetailsForm(forms.ModelForm):
         fields = ('name', 'current_location', 'about')
 
 class AccountRegistrationForm(forms.ModelForm):
-    username = forms.fields.CharField(help_text="Use letters, digits and underscores for this.")
+    USERNAME_RE = re.compile(r"^\w+$")
+    USERNAME_BLACKLIST = ["admin", "root"] + \
+                         ["media", "account", "trip", "place", "annotation", "segment", "point"] + \
+                         ["faq", "friend", "contact", "feed", "settings", "help", "profile", "explore"]
+
+    username = forms.fields.CharField()
     email = forms.fields.EmailField()
     password = forms.fields.CharField(widget=forms.widgets.PasswordInput)
     alpha_code = forms.fields.CharField()
@@ -28,11 +35,15 @@ class AccountRegistrationForm(forms.ModelForm):
 
     def clean_username(self):
         username = self.cleaned_data['username']
+        if not self.USERNAME_RE.match(username):
+            raise forms.util.ValidationError("The username should contain only letters, digits and underscores.")
+        if username in self.USERNAME_BLACKLIST:
+            raise forms.util.ValidationError("That username is not available.")
         try:
             models.User.objects.get(username=username)
         except models.User.DoesNotExist:
             return username
-        raise forms.util.ValidationError("The username \"%s\" is already taken." % username)
+        raise forms.util.ValidationError("That username is not available.")
 
     def clean_alpha_code(self):
         if self.cleaned_data['alpha_code'] != "i want the alpha!":

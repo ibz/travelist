@@ -1,9 +1,13 @@
 {% extends "plain.html" %}
 {% block htmlbody %}
+{% if created %}
+<p>Your account has been created. Please log in <a href="/">here</a>.</p>
+{% else %}
 <form method="POST" action="">
 <table>
 {{ form }}
 </table>
 <input type="submit" class="button" value="Register" />
 </form>
+{% endif %}
 {% endblock %}
