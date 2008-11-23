@@ -1,7 +1,7 @@
 from django.contrib.auth.models import User
 from django.contrib.gis.db import models
 
-from backpacked.utils import Enum
+from backpacked import utils
 
 class Country(models.Model):
     code = models.CharField(max_length=2)
@@ -51,8 +51,8 @@ class Place(models.Model):
         name += ", %s" % self.country.name
         return name
 
-UserLevel = Enum([(1, "Basic"),
-                  (2, "Pro")])
+UserLevel = utils.Enum([(1, "Basic"),
+                        (2, "Pro")])
 
 class UserProfile(models.Model):
     user = models.OneToOneField(User)
@@ -69,8 +69,8 @@ class UserProfile(models.Model):
     def __unicode__(self):
         return self.user.username
 
-Visibility = Enum({'PUBLIC': (1, "Everyone"),
-                   'PRIVATE': (3, "Myself only")})
+Visibility = utils.Enum({'PUBLIC': (1, "Everyone"),
+                         'PRIVATE': (3, "Myself only")})
 
 class Trip(models.Model):
     user = models.ForeignKey(User)
@@ -112,10 +112,6 @@ class Point(models.Model):
         return cmp(self.order_rank, other.order_rank)
 
     @property
-    def annotation_count(self):
-        return self.annotation_set.all().count()
-
-    @property
     def point_annotations(self):
         return self.annotation_set.filter(segment=False)
 
@@ -123,9 +119,10 @@ class Point(models.Model):
     def segment_annotations(self):
         return self.annotation_set.filter(segment=True)
 
-ContentType = Enum({'TEXT': (1, "Text"),
-                    'URL': (2, "URL"),
-                    'EXTERNAL_PHOTOS': (3, "Photos")})
+ContentType = utils.Enum({'TEXT': (1, "Text"),
+                          'URL': (2, "URL"),
+                          'EXTERNAL_PHOTOS': (3, "Photos"),
+                          'TRANSPORTATION': (4, "Transportation")})
 
 class Annotation(models.Model):
     trip = models.ForeignKey(Trip)
@@ -137,37 +134,10 @@ class Annotation(models.Model):
     content = models.TextField()
     visibility = models.IntegerField(choices=Visibility.choices, default=Visibility.PUBLIC)
 
-    class UI(object):
-        all = {}
-
-        class Meta(type):
-            def __init__(cls, name, bases, dct):
-                if hasattr(cls, 'content_type'):
-                    Annotation.UI.all[cls.content_type] = cls
-
-        __metaclass__ = Meta
-
-        def __init__(self, annotation):
-            self.annotation = annotation
-
-        def render_short(self):
-            raise NotImplementedError()
-
-        def render(self):
-            raise NotImplementedError()
-
-        def render_content_input(self, name, value, attrs=None):
-            raise NotImplementedError()
-
-        def clean_content(self, content):
-            raise NotImplementedError()
-
     @property
     def ui(self):
-        if not self.UI.all:
-            # make sure annotation types have been loaded
-            from backpacked import annotationtypes
-        return self.UI.all[self.content_type](self)
+        from backpacked import annotationtypes
+        return annotationtypes.UI.all[self.content_type](self)
 
     def __unicode__(self):
         return self.title

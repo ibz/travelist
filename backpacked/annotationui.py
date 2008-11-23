@@ -17,9 +17,14 @@ class ParentField(forms.fields.ChoiceField):
     def _set_annotation(self, annotation):
         self._annotation = annotation
         points = sorted(list(annotation.trip.point_set.all()))
-        choices = [("", "")] + [("p_%s" % p.id, p.name) for p in points]
-        for i in range(len(points) - 1):
-            choices.append(("s_%s" % points[i].id, "%s - %s" % (points[i].name, points[i + 1].name)))
+        choices = []
+        if annotation.ui.trip_allowed:
+            choices += [("", "")]
+        if annotation.ui.point_allowed:
+            choices += [("p_%s" % p.id, p.name) for p in points]
+        if annotation.ui.segment_allowed:
+            for i in range(len(points) - 1):
+                choices.append(("s_%s" % points[i].id, "%s - %s" % (points[i].name, points[i + 1].name)))
         self.choices = choices
 
     annotation = property(_get_annotation, _set_annotation)
@@ -72,6 +77,12 @@ class AnnotationEditForm(forms.ModelForm):
         self.fields['parent'].annotation = annotation
         self.fields['content'].widget.annotation = annotation
         self.fields['content'].label = annotation.content_type_h
+
+        if hasattr(annotation.ui, 'exclude_fields'):
+            for f in annotation.ui.exclude_fields:
+                self.fields[f].label = ""
+                self.fields[f].widget = NoWidget()
+        self.fields['title'].required = annotation.ui.title_required
 
     def clean_content(self):
         return self.instance.ui.clean_content(self.cleaned_data['content'])
