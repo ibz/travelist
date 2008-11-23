@@ -11,7 +11,7 @@ from backpacked import views
 
 def all(request, trip_id):
     trip = shortcuts.get_object_or_404(models.Trip, id=trip_id)
-    annotations = list(models.Annotation.objects.filter(trip=trip).all())
+    annotations = list(models.Annotation.objects.filter(trip=trip))
     grouped_annotations = dict([(c, []) for c in models.ContentType.values])
     for annotation in annotations:
         grouped_annotations[annotation.content_type].append(annotation)

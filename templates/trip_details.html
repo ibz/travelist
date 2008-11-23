@@ -1,27 +1,32 @@
 <div id="trip-details-tabs">
-  <ul>
-    <li><a href="#points"><span>Points</span></a></li>
-    <li><a href="#segments"><span>Segments</span></a></li>
-    <li><a href="#photos"><span>Photos</span></a></li>
-  </ul>
+<ul>
+  <li><a href="#points"><span>Points</span></a></li>
+  <li><a href="#segments"><span>Segments</span></a></li>
+  <li><a href="#photos"><span>Photos</span></a></li>
+</ul>
 
 <div id="points">
+  <a href="javascript:edit_points();">edit points</a>
   <ul class="plain-list">
     {% for point in points %}
     <li>
-      {% if point.annotation_count %}
-      <span onclick="javascript:toggle_annotations(point_{{ forloop.counter }}')">
+      {% if point.annotation_count or point.date_arrived or point.date_left %}
+      <span class="link" onclick="javascript:toggle_annotations('point_{{ forloop.counter }}')">
         <span id="link_point_{{ forloop.counter }}" class="expand-item">+</span>
-        {{ point.name }}
+      {% else %}
+      <span>
+        <span class="expand-item-disabled">+</span>
+      {% endif %}
+        {{ point.name }} {% if point.visited %}(visited){% endif %}
       </span>
       <ul id="point_{{ forloop.counter }}" class="plain-list" style="display: none;">
+	{% if point.date_arrived or point.date_left %}
+          <li>{% if point.date_arrived %}{{ point.date_arrived|date }}{% else %}?{% endif %} - {% if point.date_left %}{{ point.date_left|date }}{% else %}?{% endif %}</li>
+	{% endif %}
         {% for annotation in point.annotation_set.all %}
-        <li>{{ annotation.ui.render_short }}</li>
+          <li>{{ annotation.ui.render_short }}</li>
         {% endfor %}
       </ul>
-      {% else %}
-      {{ point.name }}
-      {% endif %}
     </li>
     {% endfor %}
   </ul>
@@ -31,16 +36,13 @@
   <ul class="plain-list">
     {% for segment in segments %}
     <li>
-      <span onclick="javascript:toggle_annotations('segment_{{ forloop.counter }}')">
+      <span class="link" onclick="javascript:toggle_annotations('segment_{{ forloop.counter }}')">
         <span id="link_segment_{{ forloop.counter }}" class="expand-item">+</span>
           {{ segment.p1.name }} - {{ segment.p2.name }}
       </span>
       <ul id="segment_{{ forloop.counter }}" class="plain-list" style="display: none;">
-	{% if segment.start_date %}<li>Start date: {{ segment.start_date|date }}</li>{% endif %}
-	{% if segment.end_date %}<li>End date: {{ segment.end_date|date }}</li>{% endif %}
-	{% if segment.transportation_method %}<li>Transportation method: {{ segment.transportation_method_h }}</li>{% endif %}
 	<li>Length: {{ segment.length|floatformat:2 }} km</li>
-	{% for annotation in segment.annotation_set.all %}
+	{% for annotation in segment.annotations %}
 	<li>{{ annotation.ui.render_short }}</li>
 	{% endfor %}
       </ul>
@@ -73,13 +75,8 @@ function init()
 {
     $("#trip-details-tabs > ul").tabs();
 
-    var point_data = [
-    {% for segment in segments %}
-        [{{ segment.p1.coords.coords.0 }}, {{ segment.p1.coords.coords.1 }}, "{{ segment.p1.name }}"],
-        [{{ segment.p2.coords.coords.0 }}, {{ segment.p2.coords.coords.1 }}, "{{ segment.p2.name }}"]{% if not forloop.last %},{% endif %}
-    {% endfor %}
-    ];
-    initTripMap("map", point_data, 'segments');
+    var point_data = [{% for p in points %}[{{ p.coords.coords.0 }}, {{ p.coords.coords.1 }}, "{{ p.name }}"]{% if not forloop.last %},{% endif %}{% endfor %}];
+    initTripMap("map", point_data);
 }
 
 $(document).ready(init);

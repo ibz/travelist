@@ -1,5 +1,7 @@
 import re
 
+import geopy
+
 from django import http
 from django import shortcuts
 from django.contrib import auth
@@ -77,38 +79,59 @@ def details(request, id):
     trip = shortcuts.get_object_or_404(models.Trip, id=id)
     if not trip.is_visible_to(request.user):
         raise http.Http404()
-    segments = sorted(list(trip.segment_set.all()))
-    points = []
-    for segment in segments:
-        for point in [segment.p1, segment.p2]:
-            if not point in points:
-                points.append(point)
+    points = sorted(list(trip.point_set.all()))
+    segments = []
+    for i in range(len(points) - 1):
+        p1 = points[i]
+        p2 = points[i + 1]
+        length = geopy.distance.distance(p1.coords.coords, p2.coords.coords).km
+        annotations = p1.segment_annotations
+        segment = {'p1': p1, 'p2': p2, 'length': length, 'annotations': annotations}
+        segments.append(segment)
     return views.render("trip_details.html", request, {'trip': trip, 'segments': segments, 'points': points})
 
 def points_GET(request, id):
     trip = shortcuts.get_object_or_404(models.Trip, id=id, user=request.user)
-    assert len(list(trip.segment_set.all())) == 0
-    assert len(list(trip.point_set.all())) == 0
-    return views.render("trip_points.html", request, {'trip': trip})
+    points = sorted(list(trip.point_set.all()))
+    return views.render("trip_points.html", request, {'trip': trip, 'points': points})
 
+points_re = re.compile(r"^(old|new)point_(.+)$")
 def points_POST(request, id):
-    trip = shortcuts.get_object_or_404(models.Trip, id=id, user=request.user)
-    assert len(list(trip.segment_set.all())) == 0
-    assert len(list(trip.point_set.all())) == 0
-    place_ids = [int(pid) for pid in request.POST['places'].split(",") if pid]
-    points = []
-    for place_id in place_ids:
-        if not utils.find(points, lambda p: p.place_id == place_id):
+    trip = shortcuts.get_object_or_404(models.Trip, id=id)
+    points = list(trip.point_set.all())
+    new_points = [dict([npi.split("=") for npi in np.split(",")])
+                  for np in request.POST['points'].split(";") if np]
+
+    for point in points:
+        if not utils.find(new_points, lambda p: p['id'] == "oldpoint_%s" % point.id):
+            point.delete()
+
+    for i in range(len(new_points)):
+        new_point = new_points[i]
+        op, id = points_re.match(new_point['id']).groups()
+        id = int(id)
+        if op == 'old':
+            point = utils.find(points, lambda p: p.id == id)
+            modified = False
+            if point.order_rank != i:
+                point.order_rank = i
+                modified = True
+            if len(new_point) != 1: # this point was edited
+                point.date_arrived = utils.parse_date(new_point['date_arrived'])
+                point.date_left = utils.parse_date(new_point['date_left'])
+                point.visited = bool(int(new_point['visited']))
+                modified = True
+            if modified:
+                point.save()
+        elif op == 'new':
+            place_id = int(id)
             place = models.Place.objects.get(id=place_id)
             point = models.Point(trip=trip, place=place, name=place.name, coords=place.coords)
+            point.date_arrived = utils.parse_date(new_point['date_arrived'])
+            point.date_left = utils.parse_date(new_point['date_left'])
+            point.visited = bool(int(new_point['visited']))
+            point.order_rank = i
             point.save()
-            points.append(point)
-    for i in range(len(place_ids) - 1):
-        place_id_1, place_id_2 = place_ids[i], place_ids[i + 1]
-        p1 = utils.find(points, lambda p: p.place_id == place_ids[i])
-        p2 = utils.find(points, lambda p: p.place_id == place_ids[i + 1])
-        segment = models.Segment(trip=trip, p1=p1, p2=p2, order_rank=i)
-        segment.save()
     return http.HttpResponse()
 
 @login_required
@@ -118,66 +141,6 @@ def points(request, id):
         return points_GET(request, id)
     elif request.method == 'POST':
         return points_POST(request, id)
-
-def segments_GET(request, id):
-    trip = shortcuts.get_object_or_404(models.Trip, id=id)
-    segments = sorted(list(trip.segment_set.all()))
-    return views.render("trip_segments.html", request, {'trip': trip, 'segments': segments})
-
-def segments_POST(request, id):
-    trip = shortcuts.get_object_or_404(models.Trip, id=id)
-    segments = list(trip.segment_set.all())
-    points = list(trip.point_set.all())
-    new_segments = [dict([nsi.split("=") for nsi in ns.split(",")])
-                    for ns in request.POST['segments'].split(";") if ns]
-
-    # delete segments
-    for segment in segments:
-        if not utils.find(new_segments, lambda s: s['id'] == "oldsegment_%s" % segment.id):
-            segment.delete()
-
-    # add / modify segments
-    for i in range(len(new_segments)):
-        new_segment = new_segments[i]
-        op, id = re.match(r"(old|new)segment_(.+)", new_segment['id']).groups()
-        if op == 'old':
-            segment = utils.find(segments, lambda s: s.id == int(id))
-            segment.order_rank = i
-            if len(new_segment) != 1: # this segment was edited
-                segment.start_date = utils.parse_date(new_segment['start_date'])
-                segment.end_date = utils.parse_date(new_segment['end_date'])
-                segment.transportation_method = int(new_segment['transportation_method'])
-            segment.save()
-        elif op == 'new':
-            p1_place_id, p2_place_id = [int(place_id) for place_id in id.split("x")]
-            for place_id in [p1_place_id, p2_place_id]:
-                if not utils.find(points, lambda p: p.place_id == place_id):
-                    place = models.Place.objects.get(id=place_id)
-                    point = models.Point(trip=trip, place=place, name=place.name, coords=place.coords)
-                    point.save()
-                    points.append(point)
-            p1 = utils.find(points, lambda p: p.place_id == p1_place_id)
-            p2 = utils.find(points, lambda p: p.place_id == p2_place_id)
-            segment = models.Segment(trip=trip, p1=p1, p2=p2, order_rank=i)
-            segment.start_date = utils.parse_date(new_segment['start_date'])
-            segment.end_date = utils.parse_date(new_segment['end_date'])
-            segment.transportation_method = int(new_segment['transportation_method'])
-            segment.save()
-            segments.append(segment)
-
-    # delete useless points
-    for point in list(trip.point_set.all()):
-        if not utils.find(segments, lambda s: s.id and (s.p1_id == point.id or s.p2_id == point.id)):
-            point.delete()
-    return http.HttpResponse()
-
-@login_required
-@require_http_methods(["GET", "POST"])
-def segments(request, id):
-    if request.method == 'GET':
-        return segments_GET(request, id)
-    elif request.method == 'POST':
-        return segments_POST(request, id)
 
 @login_required
 @require_GET

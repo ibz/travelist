@@ -10,8 +10,7 @@ import settings
 
 extra_context = {'settings': settings,
                  'content_type_choices': models.ContentType.choices,
-                 'visibility_choices': models.Visibility.choices,
-                 'transportation_method_choices': models.TransportationMethod.choices}
+                 'visibility_choices': models.Visibility.choices}
 
 def render(template_file, request, context=None):
     if not context:

@@ -36,8 +36,6 @@ urlpatterns = patterns('',
       'backpacked.trip.details'),
     (r"^trip/(?P<id>\d+)/points/$",
       'backpacked.trip.points'),
-    (r"^trip/(?P<id>\d+)/segments/$",
-      'backpacked.trip.segments'),
     (r"^trip/(?P<id>\d+)/delete/$",
       'backpacked.trip.delete'),
 

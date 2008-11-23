@@ -1,20 +1,26 @@
 <script type="text/javascript">
 var last_id = 0;
 
-var place_data = {};
+var points = {};
 
-function add_place(place_id, name)
+function add_point(point_id, name)
 {
     var id = last_id++;
-    var li = $("#place-template").clone(true).attr({id: "place_" + id, place_id: place_id, style: ""});
-    li.find(".place-name").text(name);
-    li.find(".place-delete-link").attr('href', "javascript:delete_place(" + id + ");");
-    $("#sort-places").append(li);
+    var li = $("#point-template").clone(true).attr({id: "point_" + id, point_id: point_id, style: ""});
+    li.find(".point-name").text(name);
+    li.find(".point-delete-link").attr('href', "javascript:delete_point(" + id + ");");
+    li.find(".point-edit-link").attr('href', "javascript:edit_point(" + id + ");");
+    li.find(".point-edit-save").attr('onclick', "javascript:edit_point_save(" + id + ");");
+    li.find(".point-edit-cancel").attr('onclick', "javascript:edit_point_cancel(" + id + ");");
+    li.find(".date-arrived,.date-left").datepicker({dateFormat: date_format_short});
+    li.find(".visited").attr({id: "visited-" + id});
+    li.find(".visited-label").attr({for: "visited-" + id});
+    $("#sort-points").append(li);
 
     return id;
 }
 
-function add_new_place()
+function add_new_point()
 {
     var name = $("#new-place-name").val();
     var place_id = $("#new-place-id").val();
@@ -30,36 +36,103 @@ function add_new_place()
 
     $("#new-place-name,#new-place-id,#new-place-coords").val("");
 
-    var id = add_place(place_id, name);
-    set_place_data(id, {lat: lat, lng: lng, name: name});
+    var point_id = "newpoint_" + place_id;
+    var id = add_point(point_id, name);
+    set_point_data(id, {lat: lat, lng: lng, name: name,
+                        date_arrived: "", date_left: "", visited: false,
+                        modified: true});
 
     refresh_map();
+
+    $("#new-place-name").focus();
 }
 
-function set_place_data(id, dict)
+function edit_point(id)
 {
-    if(!(id in place_data))
+    var point = $("#point_" + id);
+    var edit = point.find(".point-edit");
+    edit.show();
+    point.find(".point-view").effect('transfer', {to: edit}, 500);
+    point.addClass("edit-mode");
+    var data = points[id];
+    edit.find(".date-arrived").val(data.date_arrived);
+    edit.find(".date-left").val(data.date_left);
+    edit.find(".visited").val(data.visited);
+}
+
+function edit_point_save(id)
+{
+    var point = $("#point_" + id).removeClass("edit-mode");
+    var edit = point.find(".point-edit").hide();
+    var date_arrived = edit.find(".date-arrived").val();
+    var date_left = edit.find(".date-left").val();
+    var visited = edit.find(".visited").attr('checked');
+
+    set_point_details(id, date_arrived, date_left, visited);
+    set_point_data(id, {date_arrived: date_arrived, date_left: date_left, visited: visited,
+                          modified: true});
+}
+
+function edit_point_cancel(id)
+{
+    $("#point_" + id).removeClass("edit-mode").find(".point-edit").hide();
+}
+
+function set_point_details(id, date_arrived, date_left, visited)
+{
+    var date_arrived_h = convertDate("s", "l", date_arrived);
+    var date_left_h = convertDate("s", "l", date_left);
+    var details = "";
+    if(date_arrived_h != "" || date_left_h != "")
     {
-        place_data[id] = {};
+        details = (date_arrived != "" ? date_arrived_h : "?") + " - " + (date_left != "" ? date_left_h : "?");
     }
-    $.each(dict,
-           function(k, v)
-           {
-               place_data[id][k] = v;
-           });
+    if(visited)
+    {
+        if(details != "")
+        {
+            details += ", ";
+        }
+        details += "visited";
+    }
+
+    $("#point_" + id).find(".point-details").text(details);
 }
 
-function delete_place(id)
+function set_point_data(id, dict)
 {
-    $("#place_" + id).remove();
+    if(!(id in points))
+    {
+        points[id] = {};
+    }
+    $.each(dict, function(k, v) { points[id][k] = v; });
+}
+
+function delete_point(id)
+{
+    $("#point_" + id).remove();
     refresh_map();
 }
 
 function trip_points_save()
 {
-    var place_ids = $("#sort-places").sortable('toArray', "place_id");
+    var point_strs = $.map($("#sort-points").sortable('toArray'),
+                           function(id)
+                           {
+                               var point = points[parseInt(id.substr(id.indexOf("_") + 1))];
+                               var point_str = "id=" + $("#" + id).attr("point_id");
+                               if(point.modified)
+                               {
+                                   point_str += ",";
+                                   point_str += "date_arrived=" + point.date_arrived + ",";
+                                   point_str += "date_left=" + point.date_left + ",";
+                                   point_str += "visited=" + (point.visited ? 1 : 0);
+                               }
+                               return point_str;
+                            });
+
     $.post("/trip/{{ trip.id }}/points/",
-           {places: place_ids.join(",")},
+           {points: point_strs.join(";")},
            function(data) { update_trip_details(); });
 }
 
@@ -68,37 +141,67 @@ function trip_points_cancel()
     update_trip_details();
 }
 
+function init_points()
+{
+    {% for p in points %}
+    var id = add_point("oldpoint_{{ p.id }}", "{{ p.name }}");
+    set_point_details(id, "{{ p.date_arrived|default:"" }}", "{{ p.date_left|default:"" }}", {% if p.visited %}true{% else %}false{% endif %});
+    set_point_data(id,
+                   {date_arrived: "{{ p.date_arrived|default:"" }}", date_left: "{{ p.date_left|default:"" }}", visited: {% if p.visited %}true{% else %}false{% endif %},
+                    lat: {{ p.coords.coords.0 }}, lng: {{ p.coords.coords.1 }}, name: "{{ p.name }}",
+                    modified: false});
+    {% endfor %}
+}
+
 function init()
 {
-    $("#sort-places").sortable({revert: true, placeholder: "ui-placeholder", update: function(){ refresh_map(); }});
+    $("#sort-points").sortable({revert: true, placeholder: "ui-placeholder", update: function(){ refresh_map(); }});
+    init_points();
     refresh_map();
     autoCompletePlace("#new-place-name", "#new-place-id", "#new-place-coords");
 }
 
 function refresh_map()
 {
-    var point_data = $.map($("#sort-places").sortable('toArray'),
+    var point_data = $.map($("#sort-points").sortable('toArray'),
                            function(id)
                            {
-                               var place = place_data[parseInt(id.substr(id.indexOf("_") + 1))];
-                               return [[place.lat, place.lng, place.name]];
+                               var point = points[parseInt(id.substr(id.indexOf("_") + 1))];
+                               return [[point.lat, point.lng, point.name]];
                            });
-    initTripMap("map", point_data, 'points');
+    initTripMap("map", point_data);
 }
 
 $(document).ready(init);
 </script>
-<div id="edit-segments" class="edit-box">
+<div id="edit-points" class="edit-box">
 <div class="edit-box-header">Points</div>
-<ul id="sort-places" class="sortable-list">
+<ul id="sort-points" class="sortable-list">
 </ul>
 
 <ul style="display: none;">
-  <li id="place-template">
-    <table>
+  <li id="point-template">
+    <table class="point-view">
       <tr>
-	<td><span class="place-name"></span></td>
-	<td align="right"><a class="place-delete-link">delete</a></td>
+	<td><span class="point-name"></span></td>
+	<td align="right"><a class="point-edit-link">edit</a></td>
+      </tr>
+      <tr>
+	<td><span class="point-details"></span></td>
+	<td align="right"><a class="point-delete-link">delete</a></td>
+      </tr>
+    </table>
+    <table class="point-edit" style="display: none;">
+      <tr>
+	<td>
+	  <label>Arrived:</label><input type="text" class="date-arrived" size="10" />
+	  <label>Left:</label><input type="text" class="date-left" size="10" />
+	</td>
+	<td align="right"><input type="button" class="point-edit-save button" value="save" /></td>
+      </tr>
+      <tr>
+	<td><input type="checkbox" class="visited" value="visited" /><label class="visited-label">visited</label></td>
+	<td align="right"><input type="button" class="point-edit-cancel button cancel" value="cancel" /></td>
       </tr>
     </table>
   </li>
@@ -107,7 +210,7 @@ $(document).ready(init);
 <input type="text" id="new-place-name" />
 <input type="hidden" id="new-place-id" />
 <input type="hidden" id="new-place-coords" />
-<input type="button" class="button" value="Add" onclick="javascript:add_new_place();" />
+<input type="button" class="button" value="Add" onclick="javascript:add_new_point();" />
 
 <p>
 <input type="button" class="button" value="Save" onclick="javascript:trip_points_save();" />

@@ -4,7 +4,7 @@ body {
  margin: 0;
 }
 
-a {
+a, .link {
  color: #336699;
  text-decoration: none;
 }
@@ -55,6 +55,11 @@ ul .expand-item {
  font-size: large;
  color: #5F99CF;
  cursor: pointer;
+ text-decoration: bold;
+}
+
+ul .expand-item-disabled {
+ font-size: large;
  text-decoration: bold;
 }
 
@@ -132,43 +137,42 @@ ul .expand-item {
  border-right: 1px solid #5F99CF;
 }
 
-#edit-segments, #edit-points {
+#edit-points {
  margin-top: 25px;
 }
 
-#trip-details #sort-segments,
-#trip-details #sort-places {
+#trip-details #sort-points {
  padding-top: 25px;
 }
 
-#sort-segments li, #sort-places li {
- width: 390px;
+#sort-points li {
+ width: 380px;
 }
 
-#sort-segments li table, #sort-places li table {
+#sort-points li table {
  margin-bottom: 5px;
  margin-left: 5px;
- width: 380px;
+ width: 370px;
  height: 30px;
  background-color: #CEE3F8;
  border: 1px solid #5F99CF;
  cursor: pointer;
 }
 
-#sort-segments li.edit-mode {
+#sort-points li.edit-mode {
  border: 1px dashed #5F99CF;
  margin-bottom: 5px;
 }
 
-#sort-segments li.edit-mode table {
+#sort-points li.edit-mode table {
  margin: 5px;
 }
 
-#sort-segments li .segment-edit {
+#sort-points li .point-edit {
  background-color: #E6F7D4;
 }
 
-#sort-segments li .segment-details {
+#sort-points li .point-details {
  font-size: small;
 }
 

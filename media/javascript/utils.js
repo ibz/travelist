@@ -37,7 +37,7 @@ function convertDate(from_format, to_format, date)
     return $.datepicker.formatDate(get_format(to_format), $.datepicker.parseDate(get_format(from_format), date));
 }
 
-function initTripMap(id, point_data, point_data_type /* can be 'points' or 'segments' */)
+function initTripMap(id, point_data)
 {
     if (!GBrowserIsCompatible())
     {
@@ -103,17 +103,8 @@ function initTripMap(id, point_data, point_data_type /* can be 'points' or 'segm
     map.setCenter(new GLatLng((minLat + maxLat) / 2, (minLng + maxLng) / 2),
                   (Math.min(wZoom, hZoom)));
 
-    if(point_data_type == 'points')
-    {
-        map.addOverlay(new GPolyline(points, "#ff0000", 3));
-    }
-    else if(point_data_type == 'segments')
-    {
-        for(i = 0; i < points.length - 1; i += 2)
-        {
-            map.addOverlay(new GPolyline([points[i], points[i+1]], "#ff0000", 3));
-        }
-    }
+    map.addOverlay(new GPolyline(points, "#ff0000", 3));
+
     var markers = [];
     for(i = 0; i < points.length; i++)
     {
