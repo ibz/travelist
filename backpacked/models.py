@@ -136,9 +136,9 @@ class Annotation(models.Model):
     visibility = models.IntegerField(choices=Visibility.choices, default=Visibility.PUBLIC)
 
     @property
-    def ui(self):
+    def manager(self):
         from backpacked import annotationtypes
-        return annotationtypes.UI.all[self.content_type](self)
+        return annotationtypes.get_manager(self.content_type)(self)
 
     def __unicode__(self):
         return self.title
@@ -156,10 +156,6 @@ class Annotation(models.Model):
             return False
         else:
             return True
-
-    @property
-    def is_photos(self):
-        return self.content_type == ContentType.EXTERNAL_PHOTOS
 
     @property
     def url(self):
@@ -182,5 +178,4 @@ class Annotation(models.Model):
 
     def save(self):
         super(Annotation, self).save()
-
-        self.ui.after_save()
+        self.manager.after_save()

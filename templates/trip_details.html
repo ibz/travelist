@@ -32,7 +32,7 @@ $(document).ready(function()
           <li>{% if point.date_arrived %}{{ point.date_arrived|date }}{% else %}?{% endif %} - {% if point.date_left %}{{ point.date_left|date }}{% else %}?{% endif %}</li>
 	{% endif %}
         {% for annotation in point.point_annotations %}
-          <li>{{ annotation.ui.render_short }}</li>
+          <li>{{ annotation.manager.render_short }}</li>
         {% endfor %}
       </ul>
     </li>
@@ -51,7 +51,7 @@ $(document).ready(function()
       <ul id="segment_{{ forloop.counter }}" class="plain-list" style="display: none;">
 	<li>Length: {{ segment.length|floatformat:2 }} km</li>
 	{% for annotation in segment.annotations %}
-	<li>{{ annotation.ui.render_short }}</li>
+	<li>{{ annotation.manager.render_short }}</li>
 	{% endfor %}
       </ul>
     </li>
@@ -62,8 +62,8 @@ $(document).ready(function()
 <div id="photos">
   <ul class="plain-list">
     {% for annotation in trip.annotation_set.all %}
-    {% if annotation.is_photos %}
-    <li>{{ annotation.ui.render_short }}</li>
+    {% if annotation.manager.is_photos %}
+    <li>{{ annotation.manager.render_short }}</li>
     {% endif %}
     {% endfor %}
   </ul>

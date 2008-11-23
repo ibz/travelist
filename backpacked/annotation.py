@@ -13,7 +13,7 @@ from backpacked import views
 def all(request, trip_id):
     level = request.user.userprofile.level
     accessible_content_type_choices = [c for c in models.ContentType.choices
-                                       if level in annotationtypes.UI.all[c[0]].user_levels]
+                                       if level in annotationtypes.get_manager(c[0]).user_levels]
     accessible_content_types = [c[0] for c in accessible_content_type_choices]
 
     trip = shortcuts.get_object_or_404(models.Trip, id=trip_id)
@@ -34,7 +34,7 @@ def view(request, trip_id, id):
     if not annotation.is_visible_to(request.user):
         raise http.Http404()
 
-    return annotation.ui.render(request)
+    return annotation.manager.render(request)
 
 def edit_GET(request, annotation):
     form = annotationui.AnnotationEditForm(annotation=annotation)
@@ -54,7 +54,7 @@ def new(request, trip_id):
     content_type = int(request.GET.get('content_type', 0))
     assert content_type
     annotation = models.Annotation(trip_id=trip_id, content_type=content_type)
-    if request.user.userprofile.level not in annotation.ui.user_levels:
+    if request.user.userprofile.level not in annotation.manager.user_levels:
         return http.HttpResponseForbidden()
     if request.method == 'GET':
         return edit_GET(request, annotation)
@@ -65,7 +65,7 @@ def new(request, trip_id):
 @require_http_methods(["GET", "POST"])
 def edit(request, trip_id, id):
     annotation = shortcuts.get_object_or_404(models.Annotation, id=id, trip__user=request.user)
-    if request.user.userprofile.level not in annotation.ui.user_levels:
+    if request.user.userprofile.level not in annotation.manager.user_levels:
         return http.HttpResponseForbidden()
     if request.method == 'GET':
         return edit_GET(request, annotation)

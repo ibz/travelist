@@ -40,7 +40,7 @@ $(document).ready(function() { init_annotation_list({{ trip.id }}); });
       </thead>
       {% for annotation in group.2 %}
       <tr{% if forloop.first %} class="firstrow"{% endif %}>
-        <td class="firstcolumn">{{ annotation.ui.render_short }}</td>
+        <td class="firstcolumn">{{ annotation.manager.render_short }}</td>
 	<td>{{ annotation.parent_name }}</td>
         <td>{{ annotation.date|date }}</td>
 	<td class="lastcolumn">{{ annotation.visibility_h }}</td>

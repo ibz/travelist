@@ -14,13 +14,16 @@ from backpacked import views
 
 import settings
 
-class UI(object):
+def get_manager(content_type):
+    return AnnotationManager.all[content_type]
+
+class AnnotationManager(object):
     all = {}
 
     class Meta(type):
         def __init__(cls, name, bases, dct):
             if hasattr(cls, 'content_type'):
-                UI.all[cls.content_type] = cls
+                AnnotationManager.all[cls.content_type] = cls
 
     __metaclass__ = Meta
 
@@ -31,6 +34,8 @@ class UI(object):
     segment_allowed = True
 
     user_levels = models.UserLevel.values
+
+    is_photos = False
 
     def __init__(self, annotation):
         self.annotation = annotation
@@ -50,7 +55,7 @@ class UI(object):
     def after_save(self):
         pass
 
-class TextAnnotationUI(UI):
+class TextAnnotationManager(AnnotationManager):
     content_type = models.ContentType.TEXT
 
     def render_short(self):
@@ -66,7 +71,7 @@ class TextAnnotationUI(UI):
     def clean_content(self, content):
         return content
 
-class UrlAnnotationUI(UI):
+class UrlAnnotationManager(AnnotationManager):
     content_type = models.ContentType.URL
 
     def render_short(self):
@@ -79,8 +84,10 @@ class UrlAnnotationUI(UI):
     def clean_content(self, content):
         return forms.fields.URLField().clean(content)
 
-class ExternalPhotosAnnotationUI(UrlAnnotationUI):
+class ExternalPhotosAnnotationManager(UrlAnnotationManager):
     content_type = models.ContentType.EXTERNAL_PHOTOS
+
+    is_photos = True
 
 Transportation = utils.Enum([(0, "Unspecified"),
                              (1, "Airplane"),
@@ -92,7 +99,7 @@ Transportation = utils.Enum([(0, "Unspecified"),
                              (7, "Train"),
                              (8, "Walk")])
 
-class TransportationAnnotationUI(UI):
+class TransportationAnnotationManager(AnnotationManager):
     content_type = models.ContentType.TRANSPORTATION
 
     exclude_fields = ('title', 'date')
@@ -111,7 +118,7 @@ class TransportationAnnotationUI(UI):
     def clean_content(self, content):
         return str(forms.fields.ChoiceField(choices=Transportation.choices).clean(content))
 
-class GPSAnnotationUI(UI):
+class GPSAnnotationManager(AnnotationManager):
     content_type = models.ContentType.GPS
 
     title_required = False
