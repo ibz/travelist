@@ -27,8 +27,8 @@
 var date_format_short = "{{ settings.DATE_FORMAT_SHORT_JS }}";
 var date_format_long = "{{ settings.DATE_FORMAT_LONG_JS }}";
 var visibilities = { {% for v in visibility_choices %}{{ v.0 }}: "{{ v.1 }}"{% if not forloop.last %},{% endif %}{% endfor %} };
-var transportation_methods = { {% for t in transportation_method_choices %}{{ t.0 }}: "{{ t.1 }}"{% if not forloop.last %},{% endif %}{% endfor %} };
 var content_types = { {% for c in content_type_choices %}{{ c.0 }}: "{{ c.1 }}"{% if not forloop.last %},{% endif %}{% endfor %} };
+var content_types_list = [{% for c in content_type_choices %}{{ c.0 }}{% if not forloop.last %},{% endif %}{% endfor %}];
 
 {% block script %}
 {% endblock %}

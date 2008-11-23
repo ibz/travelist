@@ -3,75 +3,13 @@
 {% block htmlhead %}
 <script src="http://maps.google.com/maps?file=api&amp;v=2&amp;key={{ settings.GOOGLE_MAPS_API_KEY }}" type="text/javascript"></script>
 <script src="{{ MEDIA_URL }}javascript/lib/markermanager.js" type="text/javascript"></script>
+
+<script src="{{ MEDIA_URL }}javascript/trip.js" type="text/javascript"></script>
 {% endblock %}
 
 {% block script %}
-function edit_trip()
-{
-    $("#trip-info").hide();
-    $("#trip-info-edit").show();
-    $("#trip-info-edit-link").effect('transfer', {to: "#trip-info-edit"}, 500);
-    $("#operations").hide();
-    $("#trip-info-edit #id_name").focus();
-}
-
-function edit_points()
-{
-    $("#trip-details").load("/trip/{{ trip.id }}/points/");
-}
-
-function update_trip_info()
-{
-    function do_update(trip)
-    {
-        $("#title").html(trip.name);
-        $("#trip-info #start-date").html(convertDate("s", "l", trip.start_date));
-        $("#trip-info #end-date").html(convertDate("s", "l", trip.end_date));
-        $("#trip-info #visibility").html(visibilities[parseInt(trip.visibility)]);
-    }
-    $.get("/trip/{{ trip.id }}/json/", function(data){ do_update(eval("(" + data + ")")); });
-}
-
-function update_trip_details()
-{
-    $("#trip-details").load("/trip/{{ trip.id }}/details/");
-}
-
-function edit_trip_saved()
-{
-    $("#trip-info").show();
-    $("#operations").show();
-    $("#trip-info-edit").hide();
-    update_trip_info();
-}
-
-function edit_trip_cancel()
-{
-    $("#trip-info-edit").hide();
-    $("#operations").show();
-    $("#trip-info").show();
-}
-
-function init()
-{
-    $("#trip-info-edit > form").ajaxForm({success: edit_trip_saved});
-    $("#trip-info-edit #id_start_date").datepicker({dateFormat: date_format_short});
-    $("#trip-info-edit #id_end_date").datepicker({dateFormat: date_format_short});
-    update_trip_info();
-    {% if trip.point_set.count %}
-        update_trip_details();
-    {% else %}
-        edit_points();
-    {% endif %}
-}
-
-function cleanup()
-{
-    cleanupMap();
-}
-
-$(document).ready(init);
-$(document).unload(cleanup);
+$(document).ready(function() { init_trip({{ trip.id }}, {% if trip.point_set.count %}true{% else %}false{% endif %}); });
+$(document).unload(cleanupMap);
 {% endblock %}
 
 {% block summary %}

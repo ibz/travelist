@@ -1,13 +1,11 @@
 {% extends "content.html" %}
 
-{% block script %}
-function init()
-{
-    $("#trip-info-edit #id_start_date").datepicker({dateFormat: date_format_short});
-    $("#trip-info-edit #id_end_date").datepicker({dateFormat: date_format_short});
-}
+{% block htmlhead %}
+<script src="{{ MEDIA_URL }}javascript/trip.js" type="text/javascript"></script>
+{% endblock %}
 
-$(document).ready(init);
+{% block script %}
+$(document).ready(init_trip_new);
 {% endblock %}
 
 {% block summary %}
