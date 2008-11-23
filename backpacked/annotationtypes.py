@@ -1,10 +1,18 @@
+import os
+import subprocess
+from tempfile import mkdtemp
+
 from django.utils import html
 from django.utils import safestring
 
+from django import http
 from django import forms
 
 from backpacked import models
 from backpacked import utils
+from backpacked import views
+
+import settings
 
 class UI(object):
     all = {}
@@ -22,13 +30,15 @@ class UI(object):
     point_allowed = True
     segment_allowed = True
 
+    user_levels = models.UserLevel.values
+
     def __init__(self, annotation):
         self.annotation = annotation
 
     def render_short(self):
         raise NotImplementedError()
 
-    def render(self):
+    def render(self, request):
         raise NotImplementedError()
 
     def render_content_input(self, name, value, attrs=None):
@@ -37,6 +47,9 @@ class UI(object):
     def clean_content(self, content):
         raise NotImplementedError()
 
+    def after_save(self):
+        pass
+
 class TextAnnotationUI(UI):
     content_type = models.ContentType.TEXT
 
@@ -44,8 +57,8 @@ class TextAnnotationUI(UI):
         return safestring.mark_safe("<a href=\"%s\">%s</a>" % (html.escape(self.annotation.url),
                                                                html.escape(self.annotation.title)))
 
-    def render(self):
-        return self.annotation.content
+    def render(self, request):
+        return views.render("annotation_view_text.html", request, {'annotation': self.annotation})
 
     def render_content_input(self, name, value, attrs=None):
         return forms.widgets.Textarea().render(name, value, attrs)
@@ -97,3 +110,75 @@ class TransportationAnnotationUI(UI):
 
     def clean_content(self, content):
         return str(forms.fields.ChoiceField(choices=Transportation.choices).clean(content))
+
+class GPSAnnotationUI(UI):
+    content_type = models.ContentType.GPS
+
+    title_required = False
+
+    user_levels = [models.UserLevel.PRO]
+
+    def get_cache_filename(self):
+        if self.annotation.id:
+            return os.path.join(settings.GPS_ANNOTATION_CACHE_PATH, "%s.kmz" % self.annotation.id)
+        else:
+            return None
+
+    def ensure_cache_file(self):
+        cachefilename = self.get_cache_filename()
+        assert cachefilename
+
+        if os.path.exists(cachefilename):
+            return
+
+        tempdir = mkdtemp()
+        gpxfilename = os.path.join(tempdir, "doc.gpx")
+        kmlfilename = os.path.join(tempdir, "doc.kml")
+        kmzfilename = os.path.join(tempdir, "doc.kmz")
+        try:
+            gpxfile = file(gpxfilename, "w")
+            try:
+                gpxfile.write(self.annotation.content)
+            finally:
+                gpxfile.close()
+            subprocess.check_call(["gpsbabel", "-i", "gpx", "-o", "kml", gpxfilename, kmlfilename])
+            subprocess.check_call(["zip", "-q", "-j", kmzfilename, kmlfilename])
+            os.rename(kmzfilename, cachefilename)
+        finally:
+            for f in [gpxfilename, kmlfilename, kmzfilename]:
+                if os.path.exists(f):
+                    os.unlink(f)
+            os.rmdir(tempdir)
+
+    def render_short(self):
+        title = "GPS"
+        if self.annotation.title:
+            title += ": %s" % self.annotation.title
+        return safestring.mark_safe("<a href=\"%s\">%s</a>" % (html.escape(self.annotation.url),
+                                                               html.escape(title)))
+
+    def render(self, request):
+        self.ensure_cache_file()
+
+        f = open(self.get_cache_filename(), "rb")
+        try:
+            content = f.read()
+        finally:
+            f.close()
+
+        response = http.HttpResponse(content, content_type="application/vnd.google-earth.kmz")
+        response["Content-Length"] = len(content)
+        response['Content-Disposition'] = "attachment; filename=%s.kmz" % self.annotation.id
+
+        return response
+
+    def render_content_input(self, name, value, attrs=None):
+        return forms.widgets.Textarea().render(name, value, attrs)
+
+    def clean_content(self, content):
+        return content
+
+    def after_save(self):
+        cachefilename = self.get_cache_filename()
+        if os.path.exists(cachefilename):
+            os.unlink(cachefilename)

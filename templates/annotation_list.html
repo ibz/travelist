@@ -23,7 +23,7 @@ $(document).ready(function() { init_annotation_list({{ trip.id }}); });
 <td>
 <div id="annotation-tabs">
   <ul>
-    {% for content_type in content_type_choices %}
+    {% for content_type in accessible_content_type_choices %}
     <li><a href="#content_type_{{ content_type.0 }}" content_type="{{ content_type.0 }}"><span>{{ content_type.1 }}</span></a></li>
     {% endfor %}
   </ul>

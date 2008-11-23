@@ -4,28 +4,37 @@ from django.contrib import auth
 from django.contrib.auth.decorators import login_required
 from django.views.decorators.http import require_GET, require_POST, require_http_methods
 
+from backpacked import annotationtypes
 from backpacked import annotationui
 from backpacked import models
 from backpacked import utils
 from backpacked import views
 
 def all(request, trip_id):
+    level = request.user.userprofile.level
+    accessible_content_type_choices = [c for c in models.ContentType.choices
+                                       if level in annotationtypes.UI.all[c[0]].user_levels]
+    accessible_content_types = [c[0] for c in accessible_content_type_choices]
+
     trip = shortcuts.get_object_or_404(models.Trip, id=trip_id)
     annotations = list(models.Annotation.objects.filter(trip=trip))
-    grouped_annotations = dict([(c, []) for c in models.ContentType.values])
+    grouped_annotations = dict([(c, []) for c in accessible_content_types])
     for annotation in annotations:
-        grouped_annotations[annotation.content_type].append(annotation)
+        if annotation.content_type in accessible_content_types:
+            grouped_annotations[annotation.content_type].append(annotation)
     annotation_groups = [(k, models.ContentType.get_description(k), v)
                          for k, v in grouped_annotations.items()]
     return views.render("annotation_list.html", request,
-                        {'trip': trip, 'annotation_groups': annotation_groups})
+                        {'trip': trip, 'annotation_groups': annotation_groups,
+                         'accessible_content_type_choices': accessible_content_type_choices})
 
 @require_GET
 def view(request, trip_id, id):
     annotation = shortcuts.get_object_or_404(models.Annotation, id=id)
     if not annotation.is_visible_to(request.user):
         raise http.Http404()
-    return views.render("annotation_view.html", request, {'annotation': annotation})
+
+    return annotation.ui.render(request)
 
 def edit_GET(request, annotation):
     form = annotationui.AnnotationEditForm(annotation=annotation)
@@ -45,6 +54,8 @@ def new(request, trip_id):
     content_type = int(request.GET.get('content_type', 0))
     assert content_type
     annotation = models.Annotation(trip_id=trip_id, content_type=content_type)
+    if request.user.userprofile.level not in annotation.ui.user_levels:
+        return http.HttpResponseForbidden()
     if request.method == 'GET':
         return edit_GET(request, annotation)
     elif request.method == 'POST':
@@ -54,6 +65,8 @@ def new(request, trip_id):
 @require_http_methods(["GET", "POST"])
 def edit(request, trip_id, id):
     annotation = shortcuts.get_object_or_404(models.Annotation, id=id, trip__user=request.user)
+    if request.user.userprofile.level not in annotation.ui.user_levels:
+        return http.HttpResponseForbidden()
     if request.method == 'GET':
         return edit_GET(request, annotation)
     elif request.method == 'POST':

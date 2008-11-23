@@ -122,7 +122,8 @@ class Point(models.Model):
 ContentType = utils.Enum({'TEXT': (1, "Text"),
                           'URL': (2, "URL"),
                           'EXTERNAL_PHOTOS': (3, "Photos"),
-                          'TRANSPORTATION': (4, "Transportation")})
+                          'TRANSPORTATION': (4, "Transportation"),
+                          'GPS': (5, "GPS")})
 
 class Annotation(models.Model):
     trip = models.ForeignKey(Trip)
@@ -178,3 +179,8 @@ class Annotation(models.Model):
             except Point.DoesNotExist:
                 name += "?"
         return name
+
+    def save(self):
+        super(Annotation, self).save()
+
+        self.ui.after_save()
