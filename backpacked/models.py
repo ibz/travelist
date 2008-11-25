@@ -135,6 +135,9 @@ class Annotation(models.Model):
     content = models.TextField(null=True)
     visibility = models.IntegerField(choices=Visibility.choices, default=Visibility.PUBLIC)
 
+    class Meta:
+        ordering = ['content_type', 'point', 'segment', 'date']
+
     @property
     def manager(self):
         from backpacked import annotationtypes
