@@ -34,6 +34,7 @@ class AnnotationManager(object):
     segment_allowed = True
 
     has_extended_content = False
+    edit_content_as_file = False
 
     user_levels = models.UserLevel.values
 
@@ -130,6 +131,7 @@ class GPSAnnotationManager(AnnotationManager):
     user_levels = [models.UserLevel.PRO]
 
     has_extended_content = True
+    edit_content_as_file = True
 
     def get_cache_filename(self):
         if self.annotation.id:
@@ -186,10 +188,10 @@ class GPSAnnotationManager(AnnotationManager):
         return response
 
     def render_content_input(self, name, value, attrs=None):
-        return forms.widgets.Textarea().render(name, value, attrs)
+        return forms.widgets.FileInput().render(name, value, attrs)
 
     def clean_content(self, content):
-        return content
+        return content and content.read() or None
 
     def after_save(self):
         cachefilename = self.get_cache_filename()

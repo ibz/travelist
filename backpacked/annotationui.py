@@ -76,13 +76,17 @@ class AnnotationEditForm(forms.ModelForm):
 
         self.fields['parent'].annotation = annotation
 
+        if annotation.manager.edit_content_as_file:
+            self.fields['content'] = forms.fields.FileField(widget=ContentInput(), required=False)
+
         self.fields['content'].widget.annotation = annotation
         self.fields['content'].label = annotation.content_type_h
-        if annotation.manager.has_extended_content:
-            try:
-                self.initial['content'] = annotation.extended_content.content
-            except models.ExtendedAnnotationContent.DoesNotExist:
-                pass
+        if not annotation.manager.edit_content_as_file:
+            if annotation.manager.has_extended_content:
+                try:
+                    self.initial['content'] = annotation.extended_content.content
+                except models.ExtendedAnnotationContent.DoesNotExist:
+                    pass
 
         if hasattr(annotation.manager, 'exclude_fields'):
             for f in annotation.manager.exclude_fields:
@@ -91,18 +95,21 @@ class AnnotationEditForm(forms.ModelForm):
         self.fields['title'].required = annotation.manager.title_required
 
     def clean_content(self):
-        return self.instance.manager.clean_content(self.cleaned_data['content'])
+        if self.instance.manager.edit_content_as_file:
+            return self.instance.manager.clean_content(self.files.get('content'))
+        else:
+            return self.instance.manager.clean_content(self.cleaned_data['content'])
 
     def save(self):
-        instance = super(AnnotationEditForm, self).save()
-
         if not self.instance.manager.has_extended_content:
-            return instance
+            return super(AnnotationEditForm, self).save()
 
         content = self.cleaned_data.pop('content')
+        instance = super(AnnotationEditForm, self).save()
         try:
             extended_content = models.ExtendedAnnotationContent.objects.get(annotation=instance)
         except models.ExtendedAnnotationContent.DoesNotExist:
             extended_content = models.ExtendedAnnotationContent(annotation_id=instance.id)
-        extended_content.content = content
+        if content is not None:
+            extended_content.content = content
         extended_content.save()

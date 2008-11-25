@@ -13,7 +13,7 @@ $(document).ready(init_annotation_edit);
 <tr>
 <td width="300px">
 <div id="annotation-info-edit" class="edit-box">
-<form method="POST" action="">
+<form method="POST" action="" {% if annotation.manager.edit_content_as_file %}enctype="multipart/form-data"{% endif %}>
 <table width="100%">
 <thead class="edit-box-header"><th><nobr>Edit annotation</nobr></th><td></td></thead>
 {{ form }}

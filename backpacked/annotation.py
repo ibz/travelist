@@ -41,7 +41,7 @@ def edit_GET(request, annotation):
     return views.render("annotation_edit.html", request, {'annotation': annotation, 'form': form})
 
 def edit_POST(request, annotation):
-    form = annotationui.AnnotationEditForm(request.POST, annotation=annotation)
+    form = annotationui.AnnotationEditForm(request.POST, request.FILES, annotation=annotation)
     if form.is_valid():
         form.save()
         return http.HttpResponseRedirect("/trip/%s/annotation/all/" % annotation.trip.id)
