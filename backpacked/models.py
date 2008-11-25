@@ -136,7 +136,7 @@ class Annotation(models.Model):
     visibility = models.IntegerField(choices=Visibility.choices, default=Visibility.PUBLIC)
 
     class Meta:
-        ordering = ['content_type', 'point', 'segment', 'date']
+        ordering = ['content_type', 'point', 'segment', 'title']
 
     @property
     def manager(self):
