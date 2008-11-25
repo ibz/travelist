@@ -75,8 +75,14 @@ class AnnotationEditForm(forms.ModelForm):
             self.initial['parent'] = ""
 
         self.fields['parent'].annotation = annotation
+
         self.fields['content'].widget.annotation = annotation
         self.fields['content'].label = annotation.content_type_h
+        if annotation.manager.has_extended_content:
+            try:
+                self.initial['content'] = annotation.extended_content.content
+            except models.ExtendedAnnotationContent.DoesNotExist:
+                pass
 
         if hasattr(annotation.manager, 'exclude_fields'):
             for f in annotation.manager.exclude_fields:
@@ -86,3 +92,17 @@ class AnnotationEditForm(forms.ModelForm):
 
     def clean_content(self):
         return self.instance.manager.clean_content(self.cleaned_data['content'])
+
+    def save(self):
+        instance = super(AnnotationEditForm, self).save()
+
+        if not self.instance.manager.has_extended_content:
+            return instance
+
+        content = self.cleaned_data.pop('content')
+        try:
+            extended_content = models.ExtendedAnnotationContent.objects.get(annotation=instance)
+        except models.ExtendedAnnotationContent.DoesNotExist:
+            extended_content = models.ExtendedAnnotationContent(annotation_id=instance.id)
+        extended_content.content = content
+        extended_content.save()

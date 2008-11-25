@@ -33,6 +33,8 @@ class AnnotationManager(object):
     point_allowed = True
     segment_allowed = True
 
+    has_extended_content = False
+
     user_levels = models.UserLevel.values
 
     is_photos = False
@@ -57,6 +59,8 @@ class AnnotationManager(object):
 
 class TextAnnotationManager(AnnotationManager):
     content_type = models.ContentType.TEXT
+
+    has_extended_content = True
 
     def render_short(self):
         return safestring.mark_safe("<a href=\"%s\">%s</a>" % (html.escape(self.annotation.url),
@@ -125,6 +129,8 @@ class GPSAnnotationManager(AnnotationManager):
 
     user_levels = [models.UserLevel.PRO]
 
+    has_extended_content = True
+
     def get_cache_filename(self):
         if self.annotation.id:
             return os.path.join(settings.GPS_ANNOTATION_CACHE_PATH, "%s.kmz" % self.annotation.id)
@@ -145,7 +151,7 @@ class GPSAnnotationManager(AnnotationManager):
         try:
             gpxfile = file(gpxfilename, "w")
             try:
-                gpxfile.write(self.annotation.content)
+                gpxfile.write(self.annotation.extended_content.content)
             finally:
                 gpxfile.close()
             subprocess.check_call(["gpsbabel", "-i", "gpx", "-o", "kml", gpxfilename, kmlfilename])

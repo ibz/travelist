@@ -132,7 +132,7 @@ class Annotation(models.Model):
     date = models.DateTimeField(blank=True, null=True)
     title = models.CharField(max_length=30)
     content_type = models.IntegerField(choices=ContentType.choices)
-    content = models.TextField()
+    content = models.TextField(null=True)
     visibility = models.IntegerField(choices=Visibility.choices, default=Visibility.PUBLIC)
 
     @property
@@ -179,3 +179,7 @@ class Annotation(models.Model):
     def save(self):
         super(Annotation, self).save()
         self.manager.after_save()
+
+class ExtendedAnnotationContent(models.Model):
+    annotation = models.OneToOneField(Annotation, primary_key=True, related_name='extended_content')
+    content = models.TextField()
