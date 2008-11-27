@@ -1,6 +1,6 @@
 import re
 
-import geopy
+from geopy.distance import distance
 
 from django import http
 from django import shortcuts
@@ -84,7 +84,7 @@ def details(request, id):
     for i in range(len(points) - 1):
         p1 = points[i]
         p2 = points[i + 1]
-        length = geopy.distance.distance(p1.coords.coords, p2.coords.coords).km
+        length = distance(p1.coords.coords, p2.coords.coords).km
         annotations = p1.segment_annotations
         segment = {'p1': p1, 'p2': p2, 'length': length, 'annotations': annotations}
         segments.append(segment)
