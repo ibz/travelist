@@ -18,14 +18,23 @@ from backpacked import views
 
 import settings
 
-@require_POST
-def login(request):
+def login_GET(request):
+    return views.render("account_login.html", request, {'login_form': accountui.AccountLoginForm()})
+
+def login_POST(request):
     user = auth.authenticate(username=request.POST['username'],
                              password=request.POST['password'])
     if not user.is_active:
         return http.HttpResponseRedirect("/")
     auth.login(request, user)
     return http.HttpResponseRedirect("/")
+
+@require_http_methods(["GET", "POST"])
+def login(request):
+    if request.method == 'GET':
+        return login_GET(request)
+    elif request.method == 'POST':
+        return login_POST(request)
 
 @require_GET
 def logout(request):

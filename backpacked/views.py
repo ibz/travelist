@@ -3,7 +3,6 @@ from django import shortcuts
 from django import template
 from django.views.decorators.http import require_GET, require_POST, require_http_methods
 
-from backpacked import accountui
 from backpacked import models
 
 import settings
@@ -23,4 +22,4 @@ def index(request):
     if request.user.is_authenticated():
         return http.HttpResponseRedirect("/trip/all/")
     else:
-        return render("index.html", request, {'login_form': accountui.AccountLoginForm()})
+        return render("index.html", request)
