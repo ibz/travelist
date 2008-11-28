@@ -10,7 +10,7 @@ MANAGERS = ADMINS
 
 DATABASE_ENGINE = 'postgresql_psycopg2'
 DATABASE_NAME = 'backpacked.it'
-DATABASE_USER = 'bit'
+DATABASE_USER = 'backpacked.it'
 DATABASE_PASSWORD = ''
 DATABASE_HOST = ''
 DATABASE_PORT = '5432'
