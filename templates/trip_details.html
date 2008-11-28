@@ -2,7 +2,7 @@
 <script type="text/javascript">
 $(document).ready(function()
                   {
-                      init_trip_details([{% for p in points %}[{{ p.coords.coords.0 }}, {{ p.coords.coords.1 }}, "{{ p.name }}"]{% if not forloop.last %},{% endif %}{% endfor %}]);
+                      init_trip_details([{% for p in points %}[{{ p.coords.0 }}, {{ p.coords.1 }}, "{{ p.name }}"]{% if not forloop.last %},{% endif %}{% endfor %}]);
                   });
 </script>
 
@@ -18,7 +18,7 @@ $(document).ready(function()
   <ul class="plain-list">
     {% for point in points %}
     <li>
-      {% if point.point_annotations.count or point.date_arrived or point.date_left %}
+      {% if point.annotations or point.date_arrived or point.date_left %}
       <span class="link" onclick="javascript:toggle_annotations('point_{{ forloop.counter }}')">
         <span id="link_point_{{ forloop.counter }}" class="expand-item">+</span>
       {% else %}
@@ -31,7 +31,7 @@ $(document).ready(function()
 	{% if point.date_arrived or point.date_left %}
           <li>{% if point.date_arrived %}{{ point.date_arrived|date }}{% else %}?{% endif %} - {% if point.date_left %}{{ point.date_left|date }}{% else %}?{% endif %}</li>
 	{% endif %}
-        {% for annotation in point.point_annotations %}
+        {% for annotation in point.annotations %}
           <li>{{ annotation.manager.render_short }}</li>
         {% endfor %}
       </ul>
@@ -46,7 +46,7 @@ $(document).ready(function()
     <li>
       <span class="link" onclick="javascript:toggle_annotations('segment_{{ forloop.counter }}')">
         <span id="link_segment_{{ forloop.counter }}" class="expand-item">+</span>
-          {{ segment.p1.name }} - {{ segment.p2.name }}
+          {{ segment.p1_name }} - {{ segment.p2_name }}
       </span>
       <ul id="segment_{{ forloop.counter }}" class="plain-list" style="display: none;">
 	<li>Length: {{ segment.length|floatformat:2 }} km</li>

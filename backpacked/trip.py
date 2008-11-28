@@ -79,15 +79,40 @@ def details(request, id):
     trip = shortcuts.get_object_or_404(models.Trip, id=id)
     if not trip.is_visible_to(request.user):
         raise http.Http404()
-    points = sorted(list(trip.point_set.all()))
-    segments = []
+
+    sort_func = lambda lhs, rhs: cmp(lhs['order_rank'], rhs['order_rank'])
+
+    annotations = trip.annotation_set.all()
+    if trip.user != request.user:
+        annotations = annotations.filter(visibility=models.Visibility.PUBLIC)
+    annotations = list(annotations)
+
+    points = {}
+    for p in trip.point_set.all():
+        points[p.id] = {'id': p.id,
+                        'name': p.name, 'coords': p.coords.coords,
+                        'date_arrived': p.date_arrived, 'date_left': p.date_left, 'visited': p.visited,
+                        'order_rank': p.order_rank,
+                        'annotations': []}
+    for a in annotations:
+        if not a.segment:
+            points[a.point_id]['annotations'].append(a)
+    points = sorted(points.values(), sort_func)
+
+    segments = {}
     for i in range(len(points) - 1):
         p1 = points[i]
         p2 = points[i + 1]
-        length = distance(p1.coords.coords, p2.coords.coords).km
-        annotations = p1.segment_annotations
-        segment = {'p1': p1, 'p2': p2, 'length': length, 'annotations': annotations}
-        segments.append(segment)
+        segments[p1['id']] = {'id': p1['id'],
+                              'p1_name' : p1['name'], 'p2_name': p2['name'],
+                              'length': distance(p1['coords'], p2['coords']).km,
+                              'order_rank': i,
+                              'annotations': []}
+    for a in annotations:
+        if a.segment:
+            segments[a.point_id]['annotations'].append(a)
+    segments = sorted(segments.values(), sort_func)
+
     return views.render("trip_details.html", request, {'trip': trip, 'segments': segments, 'points': points})
 
 def points_GET(request, id):

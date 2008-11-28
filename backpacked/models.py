@@ -111,14 +111,6 @@ class Point(models.Model):
     def __cmp__(self, other):
         return cmp(self.order_rank, other.order_rank)
 
-    @property
-    def point_annotations(self):
-        return self.annotation_set.filter(segment=False)
-
-    @property
-    def segment_annotations(self):
-        return self.annotation_set.filter(segment=True)
-
 ContentType = utils.Enum({'TEXT': (1, "Text"),
                           'URL': (2, "URL"),
                           'EXTERNAL_PHOTOS': (3, "Photos"),
