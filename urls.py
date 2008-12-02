@@ -21,6 +21,18 @@ urlpatterns = patterns('',
       'backpacked.account.confirm_email'),
     (r"^account/details/$",
       'backpacked.account.details'),
+    (r"^(?P<username>\w+)/$",
+      'backpacked.account.profile'),
+
+    (r"^friend/add/$",
+      'backpacked.friend.add'),
+    (r"^friend/all/$",
+      'backpacked.friend.all'),
+
+    (r"^notification/all/$",
+      'backpacked.notification.all'),
+    (r"^notification/(?P<id>\d+)/action/(?P<action_id>\d+)/$",
+       'backpacked.notification.action'),
 
     (r"^trip/all/$",
       'backpacked.trip.all'),

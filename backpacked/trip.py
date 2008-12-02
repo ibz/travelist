@@ -17,7 +17,7 @@ from backpacked import views
 @login_required
 @require_GET
 def all(request):
-    trips = models.Trip.objects.filter(user=request.user).order_by('start_date')
+    trips = models.Trip.objects.filter(user=request.user)
     return views.render("trip_list.html", request, {'trips': trips})
 
 @require_GET

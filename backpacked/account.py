@@ -8,6 +8,7 @@ from django import shortcuts
 from django.contrib import auth
 from django.contrib.auth.decorators import login_required
 from django.core import mail
+from django.db.models import Q
 from django.db.transaction import commit_on_success
 from django.views.decorators.http import require_GET, require_POST, require_http_methods
 
@@ -107,3 +108,30 @@ def details(request):
         return details_GET(request)
     else:
         return details_POST(request)
+
+@require_GET
+def profile(request, username):
+    profile = models.UserProfile.objects.filter(user__username=username).select_related('user').get()
+    user = profile.user
+    is_self = user == request.user
+    if is_self:
+        is_friend = is_friend_pending = False
+    else:
+        try:
+            relationship = user.get_relationship(request.user)
+            is_friend = relationship.status == models.RelationshipStatus.CONFIRMED
+            is_friend_pending = relationship.status == models.RelationshipStatus.PENDING
+        except models.UserRelationship.DoesNotExist:
+            is_friend = is_friend_pending = False
+
+    trips = models.Trip.objects.filter(user=user)
+    if not is_self:
+        if is_friend:
+            trips = trips.filter(visibility__in=[models.Visibility.PUBLIC,
+                                                 models.Visibility.PROTECTED])
+        else:
+            trips = trips.filter(visibility=models.Visibility.PUBLIC)
+    trips = trips[0:5]
+    return views.render("account_profile.html", request, {'profile': profile, 'is_self': is_self,
+                                                          'is_friend': is_friend, 'is_friend_pending': is_friend_pending,
+                                                          'trips': trips})

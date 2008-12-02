@@ -53,6 +53,11 @@ class Enum:
         return [v[0] for v in self.all.values()]
 
     def get_description(self, value):
-        for i in self.choices:
+        for i in self.all.values():
             if i[0] == value:
                 return i[1]
+
+    def get_extra(self, value):
+        for i in self.all.values():
+            if i[0] == value:
+                return i[2:]

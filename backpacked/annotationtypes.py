@@ -20,12 +20,11 @@ def get_manager(content_type):
 class AnnotationManager(object):
     all = {}
 
-    class Meta(type):
-        def __init__(cls, name, bases, dct):
+    class __metaclass__(type):
+        def __init__(cls, name, bases, classdict):
+            type.__init__(cls, name, bases, classdict)
             if hasattr(cls, 'content_type'):
                 AnnotationManager.all[cls.content_type] = cls
-
-    __metaclass__ = Meta
 
     title_required = True
 

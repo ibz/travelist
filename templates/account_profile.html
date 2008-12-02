@@ -1,0 +1,48 @@
+{% extends "content.html" %}
+
+{% block title %}
+{{ profile.user.username }}'s profile
+{% endblock %}
+
+{% block operations %}
+{% if not is_friend and not is_friend_pending and not is_self and not user.is_anonymous %}
+<a class="navigation" href="/friend/add/?username={{ profile.user.username }}">add as friend</a><br />
+{% endif %}
+{% if is_self %}
+<a class="navigation" href="/account/details/">edit profile</a><br />
+{% endif %}
+{% endblock %}
+
+{% block content %}
+{% if profile.name %}
+Real name: {{ profile.name }}<br />
+{% endif %}
+{% if profile.current_location %}
+Living in: {{ profile.current_location.name }}<br />
+{% endif %}
+{% if profile.about %}
+About:<br />
+{{ profile.about }}<br />
+<br />
+{% endif %}
+
+{% if trips %}
+Most recent trips:<br />
+<table id="trip-list" class="data-grid" width="600px">
+  <thead>
+    <td width="50%">Name</td>
+    <td width="25%">Start date</td>
+    <td width="25%">End date</td>
+  </thead>
+  {% for trip in trips %}
+  <tr{% if forloop.first %} class="firstrow"{% endif %}>
+        <td class="firstcolumn"><a href="/trip/{{ trip.id }}/">{{ trip.name }}</a></td>
+        <td>{{ trip.start_date|date }}</td>
+	<td>{{ trip.end_date|date }}</td>
+  </tr>
+  {% endfor %}
+</table>
+{% else %}
+{{ profile.user.username }} has no trips.
+{% endif %}
+{% endblock %}

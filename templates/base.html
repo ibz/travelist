@@ -5,29 +5,22 @@
     <td class="header-left">
       <ul class="horizontal-list">
         {% if not user.is_anonymous %}
-        <li>
-          <a href="/trip/all/">My trips</a>
-        </li>
-        <li>
-          <a href="/account/details/">My details</a>
-        </li>
+        <li><a href="/trip/all/">My trips</a></li>
+	<li><a href="/friend/all/">My friends</a></li>
+	<li><a href="/{{ user.username }}/">View profile</a></li>
+	<li><a href="/account/details/">Edit profile</a></li>
+	<li><a href="/notification/all/">Notifications</a></li>
         {% endif %}
       </ul>
     </td>
     <td class="header-right">
-      <span>
-        {% if not user.is_anonymous %}
-            Logged in as {{ user.username }}.
-        {% endif %}
-      </span>
       <ul class="horizontal-list">
-        <li>
-        {% if not user.is_anonymous %}
-            <a href="/account/logout/">Logout</a>
-        {% else %}
-            <a href="/">Login</a>
-        {% endif %}
-        </li>
+	{% if not user.is_anonymous %}
+	<li>Logged in as {{ user.username }}</li>
+	<li><a href="/account/logout/">Logout</a></li>
+	{% else %}
+        <li><a href="/account/login/">Login</a></li>
+	{% endif %}
       </ul>
     </td>
 </table>

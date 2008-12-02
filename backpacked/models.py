@@ -1,3 +1,5 @@
+from datetime import datetime
+from django.db.models import Q
 from django.contrib.auth.models import User
 from django.contrib.gis.db import models
 
@@ -55,7 +57,7 @@ UserLevel = utils.Enum([(1, "Basic"),
                         (2, "Pro")])
 
 class UserProfile(models.Model):
-    user = models.OneToOneField(User)
+    user = models.OneToOneField(User, primary_key=True)
     level = models.IntegerField(choices=UserLevel.choices, default=UserLevel.BASIC)
     confirmation_key = models.CharField(max_length=40)
     email_confirmed = models.BooleanField(default=False)
@@ -69,7 +71,28 @@ class UserProfile(models.Model):
     def __unicode__(self):
         return self.user.username
 
+RelationshipStatus = utils.Enum([(0, "Pending"),
+                                 (1, "Confirmed")])
+
+class UserRelationship(models.Model):
+    class __metaclass__(models.Model.__metaclass__):
+         def __init__(cls, name, bases, classdict):
+             models.Model.__metaclass__.__init__(cls, name, bases, classdict)
+             # extend django.contrib.auth.models.User class
+             User.get_relationship = lambda self, other: \
+                 UserRelationship.objects.get(Q(lhs=self, rhs=other) | Q(lhs=other, rhs=self))
+             User.get_confirmed_relationships = lambda self: \
+                 UserRelationship.objects.filter(Q(lhs=self) | Q(rhs=self), status=RelationshipStatus.CONFIRMED)
+
+    lhs = models.ForeignKey(User, related_name="userrelationship_lhs_set")
+    rhs = models.ForeignKey(User, related_name="userrelationship_rhs_set")
+    status = models.IntegerField(choices=RelationshipStatus.choices)
+    date_confirmed = models.DateTimeField(null=True)
+    lhs_notes = models.TextField()
+    rhs_notes = models.TextField()
+
 Visibility = utils.Enum({'PUBLIC': (1, "Everyone"),
+                         'PROTECTED': (2, "Me and my friends"),
                          'PRIVATE': (3, "Myself only")})
 
 class Trip(models.Model):
@@ -81,6 +104,9 @@ class Trip(models.Model):
 
     class Admin:
         pass
+
+    class Meta:
+        ordering = ['-start_date']
 
     def __unicode__(self):
         return self.name
@@ -178,3 +204,20 @@ class Annotation(models.Model):
 class ExtendedAnnotationContent(models.Model):
     annotation = models.OneToOneField(Annotation, primary_key=True, related_name='extended_content')
     content = models.TextField()
+
+NotificationType = utils.Enum({'FRIEND_REQUEST': (1, "Friend request"),
+                               'TRIP_SHARE_REQUEST': (2, "Trip share request")})
+
+class Notification(models.Model):
+    user = models.ForeignKey(User)
+    date = models.DateTimeField(default=datetime.now)
+    type = models.IntegerField(choices=NotificationType.choices)
+    content = models.TextField()
+
+    class Meta:
+        ordering = ['-date']
+
+    @property
+    def manager(self):
+        from backpacked import notificationtypes
+        return notificationtypes.get_manager(self.type)(self)
