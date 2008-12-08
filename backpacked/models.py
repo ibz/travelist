@@ -1,4 +1,6 @@
+import os
 from datetime import datetime
+from PIL import Image
 from django.db.models import Q
 from django.contrib.auth.models import User
 from django.contrib.gis.db import models
@@ -56,7 +58,13 @@ class Place(models.Model):
 UserLevel = utils.Enum([(1, "Basic"),
                         (2, "Pro")])
 
+def _get_profile_picture_location(profile, name):
+    username = profile.user.username
+    return "profile_pictures/%s/%s%s" % (username[0], username, os.path.splitext(name)[1])
+
 class UserProfile(models.Model):
+    PICTURE_MAX_SIZE = (100, 100)
+
     user = models.OneToOneField(User, primary_key=True)
     level = models.IntegerField(choices=UserLevel.choices, default=UserLevel.BASIC)
     confirmation_key = models.CharField(max_length=40)
@@ -64,12 +72,24 @@ class UserProfile(models.Model):
     name = models.CharField(max_length=50, blank=True)
     current_location = models.ForeignKey(Place, blank=True, null=True)
     about = models.TextField(blank=True)
+    picture = models.ImageField(blank=True, upload_to=_get_profile_picture_location)
 
     class Admin:
         pass
 
     def __unicode__(self):
         return self.user.username
+
+    def save(self):
+        super(UserProfile, self).save()
+        if self.picture:
+            image = Image.open(self.picture.path)
+            for max in UserProfile.PICTURE_MAX_SIZE:
+                for actual in image.size:
+                    if actual > max:
+                        image.thumbnail(UserProfile.PICTURE_MAX_SIZE)
+                        image.save(self.picture.path)
+                        return
 
 RelationshipStatus = utils.Enum([(0, "Pending"),
                                  (1, "Confirmed")])

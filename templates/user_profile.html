@@ -17,6 +17,9 @@
 {% endblock %}
 
 {% block content %}
+{% if for_user.userprofile.picture %}
+<img src="{{ for_user.userprofile.picture.url }}" /><br />
+{% endif %}
 {% if for_user.userprofile.name %}
 Real name: {{ for_user.userprofile.name }}<br />
 {% endif %}

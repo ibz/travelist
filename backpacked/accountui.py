@@ -10,13 +10,11 @@ class LoginForm(forms.Form):
     password = forms.fields.CharField(widget=forms.widgets.PasswordInput)
 
 class ProfileForm(forms.ModelForm):
-    name = forms.fields.CharField(required=False)
     current_location = placeui.PlaceChoiceField(required=False)
-    about = forms.fields.CharField(widget=forms.widgets.Textarea(), required=False)
 
     class Meta:
         model = models.UserProfile
-        fields = ('name', 'current_location', 'about')
+        fields = ('name', 'current_location', 'about', 'picture')
 
 class RegistrationForm(forms.ModelForm):
     USERNAME_RE = re.compile(r"^\w+$")

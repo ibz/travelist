@@ -96,7 +96,7 @@ def profile_GET(request):
     return views.render("account_profile.html", request, {'form': form})
 
 def profile_POST(request):
-    form = accountui.ProfileForm(request.POST, instance=request.user.get_profile())
+    form = accountui.ProfileForm(request.POST, request.FILES, instance=request.user.get_profile())
     if form.is_valid():
         form.save()
         return http.HttpResponseRedirect("/")
