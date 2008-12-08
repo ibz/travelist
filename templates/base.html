@@ -9,7 +9,6 @@
 	<li><a href="/people/{{ user.username }}/friends/">My friends</a></li>
 	<li><a href="/people/{{ user.username }}/">View profile</a></li>
 	<li><a href="/account/profile/">Edit profile</a></li>
-	<li><a href="/notifications/">Notifications</a></li>
         {% endif %}
       </ul>
     </td>
@@ -17,6 +16,9 @@
       <ul class="horizontal-list">
 	{% if not user.is_anonymous %}
 	<li>Logged in as {{ user.username }}</li>
+    {% if user.notification_set.count %}
+    <li><a href="/notifications/" class="important">Notifications</a></li>
+    {% endif %}
 	<li><a href="/account/logout/">Logout</a></li>
 	{% else %}
         <li><a href="/account/login/">Login</a></li>

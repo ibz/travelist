@@ -9,6 +9,10 @@ a, .link {
  text-decoration: none;
 }
 
+a.important {
+ color: red;
+}
+
 table {
  border-collapse: collapse;
 }

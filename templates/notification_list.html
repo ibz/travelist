@@ -9,6 +9,7 @@ Notifications
 {% endblock %}
 
 {% block content %}
+{% if notifications %}
 <ul id="notification-list" class="plain-list">
   {% for notification in notifications %}
   <li id="notification_{{ notification.id }}">
@@ -19,4 +20,7 @@ Notifications
   </li>
   {% endfor %}
 </ul>
+{% else %}
+You have no notifications.
+{% endif %}
 {% endblock %}

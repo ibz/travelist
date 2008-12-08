@@ -43,7 +43,7 @@ class FriendRequestNotificationManager(NotificationManager):
     def render(self):
         user_id = int(self.notification.content)
         user = models.User.objects.get(id=user_id)
-        return "The user <a href=\"/%(user)s\">%(user)s</a> wants to add you as a friend." % {'user': user.username}
+        return "The user <a href=\"/people/%(user)s/\">%(user)s</a> wants to add you as a friend." % {'user': user.username}
 
     def action(self, action_id):
         action_id = int(action_id)
