@@ -20,7 +20,7 @@ from backpacked import views
 import settings
 
 def login_GET(request):
-    return views.render("account_login.html", request, {'login_form': accountui.AccountLoginForm()})
+    return views.render("account_login.html", request, {'login_form': accountui.LoginForm()})
 
 def login_POST(request):
     user = auth.authenticate(username=request.POST['username'],
@@ -43,12 +43,12 @@ def logout(request):
     return http.HttpResponseRedirect("/")
 
 def register_GET(request):
-    form = accountui.AccountRegistrationForm()
+    form = accountui.RegistrationForm()
     return views.render("account_register.html", request, {'form': form})
 
 def register_POST(request):
     user = auth.models.User(is_staff=False, is_superuser=False, is_active=True)
-    form = accountui.AccountRegistrationForm(request.POST, instance=user)
+    form = accountui.RegistrationForm(request.POST, instance=user)
     if form.is_valid():
         user = form.save()
 
@@ -61,7 +61,7 @@ def register_POST(request):
         email_body = (
 """Hello %(user)s and thanks for signing up for a backpacked.it account!
 To confirm your email address click this link:
-http://backpacked.it/account/confirm-email/%(user)s/?key=%(key)s""" % (
+http://backpacked.it/account/confirm-email/?username=%(user)s&key=%(key)s""" % (
                 {'user': user.username,
                  'key': profile.confirmation_key}))
         mail.send_mail(email_subject,
@@ -83,55 +83,30 @@ def register(request):
         return register_POST(request)
 
 @require_GET
-def confirm_email(request, username):
+def confirm_email(request):
+    username = request.GET['username']
     key = request.GET['key']
     user_profile = shortcuts.get_object_or_404(models.UserProfile, user__username=username, confirmation_key=key)
     user_profile.email_confirmed = True
+    user_profile.save()
     return views.render("account_confirmed_email.html", request)
 
-def details_GET(request):
-    form = accountui.AccountDetailsForm(instance=request.user.get_profile())
-    return views.render("account_details.html", request, {'form': form})
+def profile_GET(request):
+    form = accountui.ProfileForm(instance=request.user.get_profile())
+    return views.render("account_profile.html", request, {'form': form})
 
-def details_POST(request):
-    form = accountui.AccountDetailsForm(request.POST, instance=request.user.get_profile())
+def profile_POST(request):
+    form = accountui.ProfileForm(request.POST, instance=request.user.get_profile())
     if form.is_valid():
         form.save()
         return http.HttpResponseRedirect("/")
     else:
-        return views.render("account_details.html", request, {'form': form})
+        return views.render("account_profile.html", request, {'form': form})
 
 @login_required
 @require_http_methods(["GET", "POST"])
-def details(request):
+def profile(request):
     if request.method == 'GET':
-        return details_GET(request)
+        return profile_GET(request)
     else:
-        return details_POST(request)
-
-@require_GET
-def profile(request, username):
-    profile = models.UserProfile.objects.filter(user__username=username).select_related('user').get()
-    user = profile.user
-    is_self = user == request.user
-    if is_self:
-        is_friend = is_friend_pending = False
-    else:
-        try:
-            relationship = user.get_relationship(request.user)
-            is_friend = relationship.status == models.RelationshipStatus.CONFIRMED
-            is_friend_pending = relationship.status == models.RelationshipStatus.PENDING
-        except models.UserRelationship.DoesNotExist:
-            is_friend = is_friend_pending = False
-
-    trips = models.Trip.objects.filter(user=user)
-    if not is_self:
-        if is_friend:
-            trips = trips.filter(visibility__in=[models.Visibility.PUBLIC,
-                                                 models.Visibility.PROTECTED])
-        else:
-            trips = trips.filter(visibility=models.Visibility.PUBLIC)
-    trips = trips[0:5]
-    return views.render("account_profile.html", request, {'profile': profile, 'is_self': is_self,
-                                                          'is_friend': is_friend, 'is_friend_pending': is_friend_pending,
-                                                          'trips': trips})
+        return profile_POST(request)

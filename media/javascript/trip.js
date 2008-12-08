@@ -24,7 +24,7 @@ function edit_trip_cancel()
 
 function update_trip_details(trip_id)
 {
-    $("#trip-details").load("/trip/" + trip_id + "/details/");
+    $("#trip-details").load("/trips/" + trip_id + "/details/");
 }
 
 function update_trip_info(trip_id)
@@ -36,12 +36,12 @@ function update_trip_info(trip_id)
         $("#trip-info #end-date").html(convertDate("s", "l", trip.end_date));
         $("#trip-info #visibility").html(visibilities[parseInt(trip.visibility)]);
     }
-    $.get("/trip/" + trip_id + "/json/", function(data){ do_update(eval("(" + data + ")")); });
+    $.get("/trips/" + trip_id + "/json/", function(data){ do_update(eval("(" + data + ")")); });
 }
 
 function edit_points(trip_id)
 {
-    $("#trip-details").load("/trip/" + trip_id + "/points/");
+    $("#trip-details").load("/trips/" + trip_id + "/points/");
 }
 
 function toggle_annotations(id)
@@ -206,7 +206,7 @@ function trip_points_save(trip_id)
                                return point_str;
                             });
 
-    $.post("/trip/" + trip_id + "/points/",
+    $.post("/trips/" + trip_id + "/points/",
            {points: point_strs.join(";")},
            function(data) { update_trip_details(trip_id); });
 }

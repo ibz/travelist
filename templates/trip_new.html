@@ -10,13 +10,13 @@ $(document).ready(init_trip_new);
 
 {% block summary %}
 <div id="trip-info-edit" class="edit-box">
-  <form action="/trip/new/" method="POST">
+  <form action="/trips/new/" method="POST">
   <table width="100%">
     <thead class="edit-box-header"><th>Edit trip</th><td></td></thead>
     {{ trip_edit_form }}
   </table>
   <input type="submit" class="button" value="Save" />
-  <input type="button" class="button cancel" value="Cancel" onclick="javascript:window.location='/trip/all/';" />
+  <input type="button" class="button cancel" value="Cancel" onclick="javascript:window.location='/trips/{{ user.username }}/';" />
   </form>
 </div>
 {% endblock %}

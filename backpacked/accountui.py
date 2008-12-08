@@ -5,11 +5,11 @@ from django import forms
 from backpacked import models
 from backpacked import placeui
 
-class AccountLoginForm(forms.Form):
+class LoginForm(forms.Form):
     username = forms.fields.CharField()
     password = forms.fields.CharField(widget=forms.widgets.PasswordInput)
 
-class AccountDetailsForm(forms.ModelForm):
+class ProfileForm(forms.ModelForm):
     name = forms.fields.CharField(required=False)
     current_location = placeui.PlaceChoiceField(required=False)
     about = forms.fields.CharField(widget=forms.widgets.Textarea(), required=False)
@@ -18,7 +18,7 @@ class AccountDetailsForm(forms.ModelForm):
         model = models.UserProfile
         fields = ('name', 'current_location', 'about')
 
-class AccountRegistrationForm(forms.ModelForm):
+class RegistrationForm(forms.ModelForm):
     USERNAME_RE = re.compile(r"^\w+$")
     USERNAME_BLACKLIST = ["admin", "root"] + \
                          ["media", "account", "trip", "place", "annotation", "segment", "point"] + \

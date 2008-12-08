@@ -14,11 +14,34 @@ from backpacked import models
 from backpacked import utils
 from backpacked import views
 
-@login_required
 @require_GET
-def all(request):
-    trips = models.Trip.objects.filter(user=request.user)
-    return views.render("trip_list.html", request, {'trips': trips})
+def user(request, username):
+    for_user = models.User.objects.get(username=username)
+    trips = models.Trip.objects.for_user(owner=for_user, viewer=request.user)
+    return views.render("trip_list.html", request, {'trips': trips, 'is_self': for_user == request.user,
+                                                    'for_user': for_user})
+
+def new_GET(request):
+    trip = models.Trip(user=request.user)
+    form = tripui.TripEditForm(instance=trip)
+    return views.render("trip_new.html", request, {'trip': trip, 'trip_edit_form': form})
+
+def new_POST(request):
+    trip = models.Trip(user=request.user)
+    form = tripui.TripEditForm(request.POST, instance=trip)
+    if form.is_valid():
+        trip = form.save()
+        return http.HttpResponseRedirect("/trips/%s/" % trip.id)
+    else:
+        return http.HttpResponseBadRequest()
+
+@login_required
+@require_http_methods(["GET", "POST"])
+def new(request):
+    if request.method == 'GET':
+        return new_GET(request)
+    elif request.method == 'POST':
+        return new_POST(request)
 
 @require_GET
 def view(request, id):
@@ -38,28 +61,6 @@ def edit(request, id):
         return http.HttpResponse()
     else:
         return http.HttpResponseBadRequest()
-
-def new_GET(request):
-    trip = models.Trip(user=request.user)
-    form = tripui.TripEditForm(instance=trip)
-    return views.render("trip_new.html", request, {'trip': trip, 'trip_edit_form': form})
-
-def new_POST(request):
-    trip = models.Trip(user=request.user)
-    form = tripui.TripEditForm(request.POST, instance=trip)
-    if form.is_valid():
-        trip = form.save()
-        return http.HttpResponseRedirect("/trip/%s/" % trip.id)
-    else:
-        return http.HttpResponseBadRequest()
-
-@login_required
-@require_http_methods(["GET", "POST"])
-def new(request):
-    if request.method == 'GET':
-        return new_GET(request)
-    elif request.method == 'POST':
-        return new_POST(request)
 
 @require_GET
 def serialize(request, id, format):
@@ -172,4 +173,4 @@ def points(request, id):
 def delete(request, id):
     trip = shortcuts.get_object_or_404(models.Trip, id=id, user=request.user)
     trip.delete()
-    return http.HttpResponseRedirect("/trip/all/")
+    return http.HttpResponseRedirect("/trips/%s/" % request.user.username)

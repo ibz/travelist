@@ -44,7 +44,7 @@ def edit_POST(request, annotation):
     form = annotationui.AnnotationEditForm(request.POST, request.FILES, annotation=annotation)
     if form.is_valid():
         form.save()
-        return http.HttpResponseRedirect("/trip/%s/annotation/all/" % annotation.trip.id)
+        return http.HttpResponseRedirect("/trips/%s/annotations/" % annotation.trip.id)
     else:
         return views.render("annotation_edit.html", request, {'annotation': annotation, 'form': form})
 
@@ -77,4 +77,4 @@ def edit(request, trip_id, id):
 def delete(request, trip_id, id):
     annotation = shortcuts.get_object_or_404(models.Annotation, id=id, trip__user=request.user)
     annotation.delete()
-    return http.HttpResponseRedirect("/trip/%s/annotation/all/" % trip_id)
+    return http.HttpResponseRedirect("/trips/%s/annotations/" % trip_id)

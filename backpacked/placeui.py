@@ -13,9 +13,7 @@ class PlaceInput(forms.widgets.Widget):
 """<input type="text" value="%(loc_name)s" id="id_%(name)s_name" />
 <input type="hidden" value="%(loc_id)s" name="%(name)s"%(attrs)s />
 <script type="text/javascript">
-$("#id_%(name)s_name").autocomplete("/place/search/",
-    {minChars: 2, matchSubset: false,
-     onItemSelect: function(li) { $("#id_%(name)s").attr('value', li.extra[0]); }});
+autoCompletePlace("#id_%(name)s_name", "#id_%(name)s", null);
 </script>
 """
             % {'loc_name': loc_name,

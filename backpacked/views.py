@@ -20,6 +20,6 @@ def render(template_file, request, context=None):
 @require_GET
 def index(request):
     if request.user.is_authenticated():
-        return http.HttpResponseRedirect("/trip/all/")
+        return http.HttpResponseRedirect("/trips/%s/" % request.user.username)
     else:
         return render("index.html", request)

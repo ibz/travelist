@@ -1,11 +1,11 @@
 {% extends "content.html" %}
 
 {% block title %}
-My trips
+{% if is_self %}My{% else %}{{ for_user }}&apos;s{% endif %} trips
 {% endblock %}
 
 {% block operations %}
-<a class="navigation" href="/trip/new/">add trip</a>
+{% if is_self %}<a class="navigation" href="/trips/new/">add trip</a>{% endif %}
 {% endblock %}
 
 {% block content %}
@@ -14,18 +14,22 @@ My trips
     <td width="50%">Name</td>
     <td width="15%">Start date</td>
     <td width="15%">End date</td>
+    {% if is_self %}
     <td width="12%" class="lastcolumn">Visibility</td>
     <td width="7%" class="operations"></td>
+    {% endif %}
   </thead>
   {% for trip in trips %}
   <tr{% if forloop.first %} class="firstrow"{% endif %}>
-        <td class="firstcolumn"><a href="/trip/{{ trip.id }}/">{{ trip.name }}</a></td>
+        <td class="firstcolumn"><a href="/trips/{{ trip.id }}/">{{ trip.name }}</a></td>
         <td>{{ trip.start_date|date }}</td>
 	<td>{{ trip.end_date|date }}</td>
+    {% if is_self %}
 	<td class="lastcolumn">{{ trip.visibility_h }}</td>
 	<td class="operations">
-          <a href="/trip/{{ trip.id }}/delete/" onclick="javascript:return confirm('Really delete {{ trip.name }}?');">delete</a>
+          <a href="/trips/{{ trip.id }}/delete/" onclick="javascript:return confirm('Really delete {{ trip.name }}?');">delete</a>
 	</td>
+    {% endif %}
   </tr>
   {% endfor %}
 </table>

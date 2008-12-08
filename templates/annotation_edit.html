@@ -19,7 +19,7 @@ $(document).ready(init_annotation_edit);
 {{ form }}
 </table>
 <input type="submit" class="button" value="{% if annotation.id %}Save{% else %}Create{% endif %}" />
-<input type="button" class="button cancel" value="Cancel" onclick="javascript:window.location='/trip/{{ annotation.trip.id }}/annotation/all/';" />
+<input type="button" class="button cancel" value="Cancel" onclick="javascript:window.location='/trips/{{ annotation.trip.id }}/annotations/';" />
 </div>
 </form>
 </td>

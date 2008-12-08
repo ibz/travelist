@@ -78,11 +78,25 @@ class UserRelationship(models.Model):
     class __metaclass__(models.Model.__metaclass__):
          def __init__(cls, name, bases, classdict):
              models.Model.__metaclass__.__init__(cls, name, bases, classdict)
+
              # extend django.contrib.auth.models.User class
              User.get_relationship = lambda self, other: \
                  UserRelationship.objects.get(Q(lhs=self, rhs=other) | Q(lhs=other, rhs=self))
              User.get_confirmed_relationships = lambda self: \
                  UserRelationship.objects.filter(Q(lhs=self) | Q(rhs=self), status=RelationshipStatus.CONFIRMED)
+             def get_relationship_status(self, other):
+                 is_self = self == other
+                 if is_self:
+                     is_friend = is_friend_pending = False
+                 else:
+                     try:
+                         relationship = self.get_relationship(other)
+                         is_friend = relationship.status == RelationshipStatus.CONFIRMED
+                         is_friend_pending = relationship.status == RelationshipStatus.PENDING
+                     except UserRelationship.DoesNotExist:
+                         is_friend = is_friend_pending = False
+                 return is_self, is_friend, is_friend_pending
+             User.get_relationship_status = get_relationship_status
 
     lhs = models.ForeignKey(User, related_name="userrelationship_lhs_set")
     rhs = models.ForeignKey(User, related_name="userrelationship_rhs_set")
@@ -95,12 +109,24 @@ Visibility = utils.Enum({'PUBLIC': (1, "Everyone"),
                          'PROTECTED': (2, "Me and my friends"),
                          'PRIVATE': (3, "Myself only")})
 
+class TripManager(models.Manager):
+    def for_user(self, owner, viewer):
+        is_self, is_friend, _ = owner.get_relationship_status(viewer)
+        trips = self.filter(user=owner)
+        if not is_self:
+            if is_friend:
+                trips = trips.filter(visibility__in=[Visibility.PUBLIC, Visibility.PROTECTED])
+            else:
+                trips = trips.filter(visibility=Visibility.PUBLIC)
+        return trips
+
 class Trip(models.Model):
     user = models.ForeignKey(User)
     name = models.CharField(max_length=200)
     start_date = models.DateField()
     end_date = models.DateField()
     visibility = models.IntegerField(choices=Visibility.choices, default=Visibility.PUBLIC)
+    objects = TripManager()
 
     class Admin:
         pass
@@ -180,7 +206,7 @@ class Annotation(models.Model):
 
     @property
     def url(self):
-        return "/trip/%s/annotation/%s/" % (self.trip.id, self.id)
+        return "/trips/%s/annotations/%s/" % (self.trip.id, self.id)
 
     @property
     def parent_name(self):

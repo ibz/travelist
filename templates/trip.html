@@ -20,7 +20,7 @@ $(document).unload(cleanupMap);
   Owned by: {% ifequal user.id trip.user_id %}me{% else %}{{ trip.user.username }}{% endifequal %}<br />
 </div>
 <div id="trip-info-edit" class="edit-box" style="display: none;">
-  <form action="/trip/{{ trip.id }}/edit/" method="POST">
+  <form action="/trips/{{ trip.id }}/edit/" method="POST">
   <table width="100%">
     <thead class="edit-box-header"><th>Edit trip</th><td></td></thead>
     {{ trip_edit_form }}
@@ -34,7 +34,7 @@ $(document).unload(cleanupMap);
 {% block operations %}
   {% ifequal user.id trip.user_id %}
   <a id="trip-info-edit-link" class="navigation" href="javascript:edit_trip();">edit trip</a><br />
-  <a class="navigation" href="/trip/{{ trip.id }}/annotation/all/">edit annotations</a>
+  <a class="navigation" href="/trips/{{ trip.id }}/annotations/">edit annotations</a>
   {% endifequal %}
 {% endblock %}
 

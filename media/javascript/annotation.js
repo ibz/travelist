@@ -1,7 +1,7 @@
 function update_new_annotation_link(trip_id, tab_index)
 {
     var content_type_id = content_types_list[tab_index];
-    $("#new-annotation-link").attr({href: "/trip/" + trip_id + "/annotation/new/?content_type=" + content_type_id});
+    $("#new-annotation-link").attr({href: "/trips/" + trip_id + "/annotations/new/?content_type=" + content_type_id});
     $("#new-annotation-link").text("add new " + content_types[content_type_id]);
 }
 

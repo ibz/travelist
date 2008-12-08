@@ -1,13 +1,16 @@
 
 function autoCompletePlace(name, id, coords)
 {
-    $(name).autocomplete("/place/search/",
+    $(name).autocomplete("/places/search/",
                          {minChars: 2,
 			  matchSubset: false,
 			  onItemSelect: function(li) {
 			      $(id).attr('value', li.extra[0]);
                               $(name).attr('value', li.extra[1]);
-                              $(coords).attr('value', li.extra[2]);
+                              if(coords)
+                              {
+                                  $(coords).attr('value', li.extra[2]);
+                              }
                           }});
 }
 
