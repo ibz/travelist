@@ -60,10 +60,10 @@ UserLevel = utils.Enum([(1, "Basic"),
 
 def _get_profile_picture_location(profile, name):
     username = profile.user.username
-    return "profile_pictures/%s/%s%s" % (username[0], username, os.path.splitext(name)[1])
+    return "pp/%s/%s%s" % (username[0], username, os.path.splitext(name)[1])
 
 class UserProfile(models.Model):
-    PICTURE_MAX_SIZE = (100, 100)
+    PICTURE_MAX_SIZE = (125, 125) # NB: Don't forget to edit CSS when changing this!
 
     user = models.OneToOneField(User, primary_key=True)
     level = models.IntegerField(choices=UserLevel.choices, default=UserLevel.BASIC)
@@ -107,6 +107,8 @@ class UserRelationship(models.Model):
              def get_relationship_status(self, other):
                  is_self = self == other
                  if is_self:
+                     is_friend = is_friend_pending = False
+                 elif self.is_anonymous() or other.is_anonymous():
                      is_friend = is_friend_pending = False
                  else:
                      try:

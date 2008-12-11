@@ -7,8 +7,8 @@ def get_manager(type):
     return NotificationManager.all[type]
 
 Action = utils.Enum({'OK': (1, "OK", True),
-                     'ACCEPT': (2, "Accept", True),
-                     'REJECT': (3, "Reject", False)})
+                     'ACCEPT': (2, "Accept", "positive"),
+                     'REJECT': (3, "Reject", "negative")})
 
 class NotificationManager(object):
     all = {}

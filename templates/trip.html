@@ -1,4 +1,4 @@
-{% extends "content.html" %}
+{% extends "page.html" %}
 
 {% block htmlhead %}
 <script src="http://maps.google.com/maps?file=api&amp;v=2&amp;key={{ settings.GOOGLE_MAPS_API_KEY }}" type="text/javascript"></script>
@@ -12,37 +12,23 @@ $(document).ready(function() { init_trip({{ trip.id }}, {% if trip.point_set.cou
 $(document).unload(cleanupMap);
 {% endblock %}
 
-{% block summary %}
-<div id="trip-info">
-  Started on: <span id="start-date"></span><br />
-  Ended on: <span id="end-date"></span><br />
-  Visibility: <span id="visibility"></span><br />
+{% block content %}
+<div class="column span-10 prepend-top append-bottom">
+  <h2>{{ trip.name }}</h2>
+</div>
+<div id="trip-info" class="column span-7 prepend-top append-bottom">
+  Started on: {{ trip.start_date|date }}<br />
+  Ended on: {{ trip.end_date|date }}<br />
+  Visibility: {{ trip.visibility_h }}<br />
   Owned by: {% ifequal user.id trip.user_id %}me{% else %}{{ trip.user.username }}{% endifequal %}<br />
 </div>
-<div id="trip-info-edit" class="edit-box" style="display: none;">
-  <form action="/trips/{{ trip.id }}/edit/" method="POST">
-  <table width="100%">
-    <thead class="edit-box-header"><th>Edit trip</th><td></td></thead>
-    {{ trip_edit_form }}
-  </table>
-  <input type="submit" class="button" value="Save" />
-  <input type="button" class="button cancel" value="Cancel" onclick="javascript:edit_trip_cancel();">
-  </form>
-</div>
-{% endblock %}
-
-{% block operations %}
+<div class="column span-7 prepend-top append-bottom last right">
   {% ifequal user.id trip.user_id %}
-  <a id="trip-info-edit-link" class="navigation" href="javascript:edit_trip();">edit trip</a><br />
-  <a class="navigation" href="/trips/{{ trip.id }}/annotations/">edit annotations</a>
+  <a href="/trips/{{ trip.id }}/edit/">edit trip</a><br />
+  <a href="javascript:delete_trip({{ trip.id }});">delete trip</a><br />
   {% endifequal %}
-{% endblock %}
-
-{% block content %}
-<table width="1000px">
-  <tr>
-    <td width="400px" valign="top"><div id="trip-details"></div></td>
-    <td valign="top"><div id="map" class="map" style="width: 600px; height: 400px"></div></td>
-  </tr>
-</table>
+</div>
+<hr />
+<div id="trip-details" class="column span-10 prepend-top"></div>
+<div class="column span-14 prepend-top last"><div id="map"></div></div>
 {% endblock %}

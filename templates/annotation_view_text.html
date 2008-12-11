@@ -1,11 +1,11 @@
-{% extends "base.html" %}
+{% extends "page.html" %}
 
-{% block body %}
+{% block content %}
 
 <p>
 {{ annotation.extended_content.content }}
 </p>
 
-<a class="navigation" href="/trips/{{ annotation.trip.id }}/annotations/">Back to annotation list</a>
+<a href="/trips/{{ annotation.trip.id }}/">Back to trip</a>
 
 {% endblock %}

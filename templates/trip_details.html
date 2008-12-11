@@ -1,3 +1,5 @@
+{% load call %}
+
 <script src="{{ MEDIA_URL }}javascript/trip.js" type="text/javascript"></script>
 <script type="text/javascript">
 $(document).ready(function()
@@ -14,26 +16,22 @@ $(document).ready(function()
 </ul>
 
 <div id="points">
+  {% ifequal user.id trip.user_id %}
   <a href="javascript:edit_points({{ trip.id }});">edit points</a>
+  {% endifequal %}
   <ul class="plain-list">
     {% for point in points %}
     <li>
-      {% if point.annotations or point.date_arrived or point.date_left %}
       <span class="link" onclick="javascript:toggle_annotations('point_{{ forloop.counter }}')">
         <span id="link_point_{{ forloop.counter }}" class="expand-item">+</span>
-      {% else %}
-      <span>
-        <span class="expand-item-disabled">+</span>
-      {% endif %}
         {{ point.name }} {% if point.visited %}(visited){% endif %}
       </span>
       <ul id="point_{{ forloop.counter }}" class="plain-list" style="display: none;">
-	{% if point.date_arrived or point.date_left %}
-          <li>{% if point.date_arrived %}{{ point.date_arrived|date }}{% else %}?{% endif %} - {% if point.date_left %}{{ point.date_left|date }}{% else %}?{% endif %}</li>
-	{% endif %}
-        {% for annotation in point.annotations %}
-          <li>{{ annotation.manager.render_short }}</li>
-        {% endfor %}
+        {% call "_trip_details_annotation_types.html" with choices=point_annotation_type_choices parent_type="p" parent=point %}
+        {% if point.date_arrived or point.date_left %}
+        <li>{% if point.date_arrived %}{{ point.date_arrived|date }}{% else %}?{% endif %} - {% if point.date_left %}{{ point.date_left|date }}{% else %}?{% endif %}</li>
+        {% endif %}
+        {% call "_trip_details_annotations.html" with annotations=point.annotations %}
       </ul>
     </li>
     {% endfor %}
@@ -49,10 +47,9 @@ $(document).ready(function()
           {{ segment.p1_name }} - {{ segment.p2_name }}
       </span>
       <ul id="segment_{{ forloop.counter }}" class="plain-list" style="display: none;">
-	<li>Length: {{ segment.length|floatformat:2 }} km</li>
-	{% for annotation in segment.annotations %}
-	<li>{{ annotation.manager.render_short }}</li>
-	{% endfor %}
+        {% call "_trip_details_annotation_types.html" with choices=segment_annotation_type_choices parent_type="s" parent=segment %}
+        <li>Length: {{ segment.length|floatformat:2 }} km</li>
+        {% call "_trip_details_annotations.html" with annotations=segment.annotations %}
       </ul>
     </li>
     {% endfor %}

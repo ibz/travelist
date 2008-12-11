@@ -63,8 +63,8 @@ class TextAnnotationManager(AnnotationManager):
     has_extended_content = True
 
     def render_short(self):
-        return safestring.mark_safe("<a href=\"%s\">%s</a>" % (html.escape(self.annotation.url),
-                                                               html.escape(self.annotation.title)))
+        return safestring.mark_safe("<a href=\"%s\">Text: %s</a>" % (html.escape(self.annotation.url),
+                                                                     html.escape(self.annotation.title)))
 
     def render(self, request):
         return views.render("annotation_view_text.html", request, {'annotation': self.annotation})
@@ -79,8 +79,8 @@ class UrlAnnotationManager(AnnotationManager):
     content_type = models.ContentType.URL
 
     def render_short(self):
-        return safestring.mark_safe("<a href=\"%s\">%s</a>" % (html.escape(self.annotation.content),
-                                                               html.escape(self.annotation.title)))
+        return safestring.mark_safe("<a href=\"%s\">URL: %s</a>" % (html.escape(self.annotation.content),
+                                                                    html.escape(self.annotation.title)))
 
     def render_content_input(self, name, value, attrs=None):
         return forms.widgets.TextInput().render(name, value, attrs)
@@ -92,6 +92,10 @@ class ExternalPhotosAnnotationManager(UrlAnnotationManager):
     content_type = models.ContentType.EXTERNAL_PHOTOS
 
     is_photos = True
+
+    def render_short(self):
+        return safestring.mark_safe("<a href=\"%s\">Photos: %s</a>" % (html.escape(self.annotation.content),
+                                                                       html.escape(self.annotation.title)))
 
 Transportation = utils.Enum([(0, "Unspecified"),
                              (1, "Airplane"),

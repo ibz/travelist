@@ -14,45 +14,53 @@ $(document).ready(function()
                   });
 </script>
 <div id="edit-points" class="edit-box">
-<div class="edit-box-header">Points</div>
+{% if points %}
+<h4>Rearrange the points by dragging them with the mouse</h4>
+{% else %}
+<h4>Add all the places you've been through. Include the starting and ending point.</h4>
+{% endif %}
 <ul id="sort-points" class="sortable-list">
 </ul>
 
 <ul style="display: none;">
   <li id="point-template">
-    <table class="point-view">
-      <tr>
-	<td><span class="point-name"></span></td>
-	<td align="right"><a class="point-edit-link">edit</a></td>
-      </tr>
-      <tr>
-	<td><span class="point-details"></span></td>
-	<td align="right"><a class="point-delete-link">delete</a></td>
-      </tr>
-    </table>
-    <table class="point-edit" style="display: none;">
-      <tr>
-	<td>
-	  <label>Arrived:</label><input type="text" class="date-arrived" size="10" />
-	  <label>Left:</label><input type="text" class="date-left" size="10" />
-	</td>
-	<td align="right"><input type="button" class="point-edit-save button" value="save" /></td>
-      </tr>
-      <tr>
-	<td><input type="checkbox" class="visited" value="visited" /><label class="visited-label">visited</label></td>
-	<td align="right"><input type="button" class="point-edit-cancel button cancel" value="cancel" /></td>
-      </tr>
-    </table>
+    <div class="point-view">
+      <div>
+        <div class="point-name"></div>
+        <div class="point-details"></div>
+      </div>
+      <div class="operations">
+    	<a class="point-edit-link">edit</a><br />
+        <a class="point-delete-link">delete</a>
+      </div>
+    </div>
+    <div class="point-edit" style="display: none;">
+      <div class="values">
+        <div>
+          <label>Arrived:</label> <input type="text" class="date-arrived" size="10" />
+          <label>Left:</label> <input type="text" class="date-left" size="10" />
+        </div>
+        <div>
+          <input type="checkbox" class="visited" value="visited" /> <label class="visited-label">visited</label>
+        </div>
+      </div>
+      <div class="operations">
+        <input type="button" class="point-edit-save button positive" value="save" /><br />
+        <input type="button" class="point-edit-cancel button negative" value="cancel" />
+      </div>
+    </div>
   </li>
 </ul>
 
+<p>
 <input type="text" id="new-place-name" />
 <input type="hidden" id="new-place-id" />
 <input type="hidden" id="new-place-coords" />
-<input type="button" class="button" value="Add" onclick="javascript:add_new_point();" />
+<input type="button" class="button positive" value="Add" onclick="javascript:add_new_point();" />
+</p>
 
 <p>
-<input type="button" class="button" value="Save" onclick="javascript:trip_points_save({{ trip.id }});" />
-<input type="button" class="button cancel" value="Cancel" onclick="javascript:trip_points_cancel({{ trip.id }});" />
+<input type="button" class="button positive" value="Save" onclick="javascript:trip_points_save({{ trip.id }});" />
+<input type="button" class="button negative" value="Cancel" onclick="javascript:trip_points_cancel({{ trip.id }});" />
 </p>
 </div>

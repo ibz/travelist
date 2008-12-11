@@ -1,12 +1,18 @@
 {% extends "plain.html" %}
 
 {% block htmlbody %}
+<div class="container">
+<div class="column span-8 prepend-4 prepend-top last">
 <h1>backpacked.it</h1>
 <form method="POST" action="">
-<table>
-{{ login_form }}
-</table>
-<input type="submit" class="button" value="Login" />
-<a href="/account/register">Register</a>
+<fieldset>
+<legend>Login</legend>
+{{ form.as_p }}
+<p>
+<input type="submit" class="submit button positive" value="Login" />
+<a href="/account/register/">Register</a>
+</p>
 </form>
+</div>
+</div>
 {% endblock %}

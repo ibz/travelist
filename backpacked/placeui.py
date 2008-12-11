@@ -4,14 +4,17 @@ from backpacked import models
 
 class PlaceInput(forms.widgets.Widget):
     def render(self, name, value, attrs=None):
+        if not attrs:
+            attrs = {}
+        attrs['class'] = 'text'
         if value:
             loc = models.Place.objects.get(id=value)
             loc_id, loc_name = loc.id, loc.name
         else:
             loc_id, loc_name = "", ""
         return (
-"""<input type="text" value="%(loc_name)s" id="id_%(name)s_name" />
-<input type="hidden" value="%(loc_id)s" name="%(name)s"%(attrs)s />
+"""<input type="text" value="%(loc_name)s" id="id_%(name)s_name"%(attrs)s />
+<input type="hidden" value="%(loc_id)s" name="%(name)s" />
 <script type="text/javascript">
 autoCompletePlace("#id_%(name)s_name", "#id_%(name)s", null);
 </script>

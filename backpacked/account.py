@@ -20,15 +20,15 @@ from backpacked import views
 import settings
 
 def login_GET(request):
-    return views.render("account_login.html", request, {'login_form': accountui.LoginForm()})
+    return views.render("account_login.html", request, {'form': accountui.LoginForm()})
 
 def login_POST(request):
-    user = auth.authenticate(username=request.POST['username'],
-                             password=request.POST['password'])
-    if not user.is_active:
+    form = accountui.LoginForm(request.POST)
+    if form.is_valid():
+        auth.login(request, form.cleaned_data['user'])
         return http.HttpResponseRedirect("/")
-    auth.login(request, user)
-    return http.HttpResponseRedirect("/")
+    else:
+        return views.render("account_login.html", request, {'form': form})
 
 @require_http_methods(["GET", "POST"])
 def login(request):

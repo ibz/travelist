@@ -1,36 +1,30 @@
-{% extends "content.html" %}
-
-{% block title %}
-{% if is_self %}My{% else %}{{ for_user }}&apos;s{% endif %} trips
-{% endblock %}
-
-{% block operations %}
-{% if is_self %}<a class="navigation" href="/trips/new/">add trip</a>{% endif %}
-{% endblock %}
+{% extends "page.html" %}
 
 {% block content %}
-<table id="trip-list" class="data-grid" width="1000px">
+<div class="column span-14 prepend-5 prepend-top">
+{% if trips %}
+<h3>{% if is_self %}My{% else %}{{ for_user.username }}&apos;s{% endif %} trips</h3>
+<table id="trip-list" class="data-grid prepend-top">
   <thead>
-    <td width="50%">Name</td>
-    <td width="15%">Start date</td>
-    <td width="15%">End date</td>
-    {% if is_self %}
-    <td width="12%" class="lastcolumn">Visibility</td>
-    <td width="7%" class="operations"></td>
-    {% endif %}
+    <td width="40%">Name</td>
+    <td width="30%">Started on</td>
+    <td width="30%" class="lastcolumn">Ended on</td>
   </thead>
   {% for trip in trips %}
   <tr{% if forloop.first %} class="firstrow"{% endif %}>
-        <td class="firstcolumn"><a href="/trips/{{ trip.id }}/">{{ trip.name }}</a></td>
-        <td>{{ trip.start_date|date }}</td>
-	<td>{{ trip.end_date|date }}</td>
-    {% if is_self %}
-	<td class="lastcolumn">{{ trip.visibility_h }}</td>
-	<td class="operations">
-          <a href="/trips/{{ trip.id }}/delete/" onclick="javascript:return confirm('Really delete {{ trip.name }}?');">delete</a>
-	</td>
-    {% endif %}
+    <td class="firstcolumn"><a href="/trips/{{ trip.id }}/">{{ trip.name }}</a></td>
+    <td>{{ trip.start_date|date }}</td>
+    <td class="lastcolumn">{{ trip.end_date|date }}</td>
   </tr>
   {% endfor %}
 </table>
+{% else %}
+{% if is_self %}You have no trips.{% else %}User {{ for_user.username }} has no trips.{% endif %}
+{% endif %}
+</div>
+{% if is_self %}
+<div class="column span-3 prepend-2 prepend-top last">
+  <a href="/trips/new/" class="large" style="position: relative; top: 100px;">add a trip</a>
+</div>
+{% endif %}
 {% endblock %}

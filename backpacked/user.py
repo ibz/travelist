@@ -1,6 +1,8 @@
 from django import http
 from django.contrib.auth.decorators import login_required
 from django.db.transaction import commit_on_success
+from django.utils import html
+from django.utils import safestring
 from django.views.decorators.http import require_GET, require_POST, require_http_methods
 
 from backpacked import models
@@ -11,10 +13,10 @@ def profile(request, username):
     profile = models.UserProfile.objects.filter(user__username=username).select_related('user').get()
     for_user = profile.user
     is_self, is_friend, is_friend_pending = for_user.get_relationship_status(request.user)
-    trips = models.Trip.objects.for_user(owner=for_user, viewer=request.user)[0:5]
+    trips = models.Trip.objects.for_user(owner=for_user, viewer=request.user)
     return views.render("user_profile.html", request, {'for_user': for_user, 'is_self': is_self,
                                                        'is_friend': is_friend, 'is_friend_pending': is_friend_pending,
-                                                       'trips': trips})
+                                                       'trip_count': trips.count(), 'trips': trips[0:5]})
 
 @login_required
 @require_GET
@@ -24,7 +26,7 @@ def friends(request, username):
     friend_ids = [r.lhs_id != user.id and str(r.lhs_id) or str(r.rhs_id)
                   for r in relationships]
     if friend_ids:
-        friends = models.UserProfile.objects.extra(where=["user_id IN (%s)" % ",".join(friend_ids)]).select_related('user')
+        friends = [p.user for p in models.UserProfile.objects.extra(where=["user_id IN (%s)" % ",".join(friend_ids)]).select_related('user')]
     else:
         friends = []
     return views.render("user_friends.html", request, {'friends': friends})

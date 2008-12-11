@@ -9,6 +9,7 @@ from django.contrib.auth.decorators import login_required
 from django.utils import simplejson
 from django.views.decorators.http import require_GET, require_POST, require_http_methods
 
+from backpacked import annotationtypes
 from backpacked import tripui
 from backpacked import models
 from backpacked import utils
@@ -21,46 +22,54 @@ def user(request, username):
     return views.render("trip_list.html", request, {'trips': trips, 'is_self': for_user == request.user,
                                                     'for_user': for_user})
 
-def new_GET(request):
-    trip = models.Trip(user=request.user)
-    form = tripui.TripEditForm(instance=trip)
-    return views.render("trip_new.html", request, {'trip': trip, 'trip_edit_form': form})
+def new_GET(request, trip):
+    form = tripui.EditForm(instance=trip)
+    return views.render("trip_edit.html", request, {'trip': trip, 'form': form})
 
-def new_POST(request):
-    trip = models.Trip(user=request.user)
-    form = tripui.TripEditForm(request.POST, instance=trip)
+def new_POST(request, trip):
+    form = tripui.EditForm(request.POST, instance=trip)
     if form.is_valid():
         trip = form.save()
         return http.HttpResponseRedirect("/trips/%s/" % trip.id)
     else:
-        return http.HttpResponseBadRequest()
+        return views.render("trip_edit.html", request, {'trip': trip, 'form': form})
 
 @login_required
 @require_http_methods(["GET", "POST"])
 def new(request):
+    trip = models.Trip(user=request.user)
     if request.method == 'GET':
-        return new_GET(request)
+        return new_GET(request, trip)
     elif request.method == 'POST':
-        return new_POST(request)
+        return new_POST(request, trip)
 
 @require_GET
 def view(request, id):
     trip = shortcuts.get_object_or_404(models.Trip, id=id)
     if not trip.is_visible_to(request.user):
         raise http.Http404()
-    form = tripui.TripEditForm(instance=trip)
-    return views.render("trip.html", request, {'trip': trip, 'trip_edit_form': form})
+    return views.render("trip.html", request, {'trip': trip})
 
-@login_required
-@require_POST
-def edit(request, id):
-    trip = shortcuts.get_object_or_404(models.Trip, id=id, user=request.user)
-    form = tripui.TripEditForm(request.POST, instance=trip)
+def edit_GET(request, trip):
+    form = tripui.EditForm(instance=trip)
+    return views.render("trip_edit.html", request, {'trip': trip, 'form': form})
+
+def edit_POST(request, trip):
+    form = tripui.EditForm(request.POST, instance=trip)
     if form.is_valid():
         trip = form.save()
-        return http.HttpResponse()
+        return http.HttpResponseRedirect("/trips/%s/" % trip.id)
     else:
-        return http.HttpResponseBadRequest()
+        return views.render("trip_edit.html", request, {'trip': trip, 'form': form})
+
+@login_required
+@require_http_methods(["GET", "POST"])
+def edit(request, id):
+    trip = shortcuts.get_object_or_404(models.Trip, id=id, user=request.user)
+    if request.method == 'GET':
+        return edit_GET(request, trip)
+    elif request.method == 'POST':
+        return edit_POST(request, trip)
 
 @require_GET
 def serialize(request, id, format):
@@ -114,7 +123,20 @@ def details(request, id):
             segments[a.point_id]['annotations'].append(a)
     segments = sorted(segments.values(), sort_func)
 
-    return views.render("trip_details.html", request, {'trip': trip, 'segments': segments, 'points': points})
+    point_annotation_type_choices, segment_annotation_type_choices = [], []
+    if trip.user == request.user:
+        level = request.user.userprofile.level
+        for content_type in models.ContentType.choices:
+            manager = annotationtypes.get_manager(content_type[0])
+            if level in manager.user_levels:
+                if manager.point_allowed:
+                    point_annotation_type_choices.append(content_type)
+                if manager.segment_allowed:
+                    segment_annotation_type_choices.append(content_type)
+
+    return views.render("trip_details.html", request, {'trip': trip, 'segments': segments, 'points': points,
+                                                       'point_annotation_type_choices': point_annotation_type_choices,
+                                                       'segment_annotation_type_choices': segment_annotation_type_choices})
 
 def points_GET(request, id):
     trip = shortcuts.get_object_or_404(models.Trip, id=id, user=request.user)
@@ -169,8 +191,8 @@ def points(request, id):
         return points_POST(request, id)
 
 @login_required
-@require_GET
+@require_POST
 def delete(request, id):
     trip = shortcuts.get_object_or_404(models.Trip, id=id, user=request.user)
     trip.delete()
-    return http.HttpResponseRedirect("/trips/%s/" % request.user.username)
+    return http.HttpResponse()

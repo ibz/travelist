@@ -1,13 +1,8 @@
-{% extends "content.html" %}
-
-{% block title %}
-My Friends
-{% endblock %}
+{% extends "page.html" %}
+{% load call %}
 
 {% block content %}
-<ul id="friend-list" class="plain-list">
-  {% for friend in friends %}
-  <li id="friend_{{ friend.user_id }}"><a href="/people/{{ friend.user.username }}/">{% if friend.name %}{{ friend.name }}{% else %}{{ friend.user.username }}{% endif %}</a></li>
-  {% endfor %}
-</ul>
+{% for friend in friends %}
+  {% call "user_badge.html" with user=friend is_self=0 is_friend=1 is_friend_pending=0 %}
+{% endfor %}
 {% endblock %}

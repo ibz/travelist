@@ -1,0 +1,26 @@
+<div class="column span-14 prepend-5 append-5 prepend-top last">
+  <div class="column span-4 append-bottom">
+    <div><img class="user-image" src="{% if user.userprofile.picture %}{{ user.userprofile.picture.url }}{% else %}{{ MEDIA_URL }}pp/default.png{% endif %}" /></div>
+  </div>
+  <div class="column span-8">
+    <h4>{{ user.username }}</h4>
+    <div>
+      {% if user.userprofile.name %}<strong>{{ user.userprofile.name }}</strong>{% endif %}
+      {% if user.userprofile.current_location %}{{ user.userprofile.current_location.name }}, {{ user.userprofile.current_location.country.name }}{% endif %}
+    </div>
+    <div>{% if user.userprofile.about %}{{ user.userprofile.about }}{% endif %}</div>
+    <div><a href="/trips/{{ user.username }}/">{{ trip_count }} trips</a></div>
+  </div>
+  <div class="column span-2 small last">
+    {% if not is_friend and not is_friend_pending and not is_self and not user.is_anonymous %}
+      <a href="/people/{{ user.username }}/relationship/">add as friend</a><br />
+    {% endif %}
+    {% if is_self %}
+      <a href="/account/profile/">edit</a><br />
+    {% endif %}
+    {% if not is_self %}
+      <a href="/people/{{ user.username }}/friends/">view friends</a><br />
+    {% endif %}
+  </div>
+  <hr />
+</div>

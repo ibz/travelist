@@ -1,31 +1,45 @@
 import re
 
 from django import forms
+from django.contrib import auth
 
 from backpacked import models
 from backpacked import placeui
+from backpacked import ui
 
-class LoginForm(forms.Form):
-    username = forms.fields.CharField()
-    password = forms.fields.CharField(widget=forms.widgets.PasswordInput)
+class LoginForm(ui.Form):
+    username = forms.fields.CharField(required=False, widget=forms.widgets.TextInput(attrs={'class': 'text'}))
+    password = forms.fields.CharField(required=False, widget=forms.widgets.PasswordInput(attrs={'class': 'text'}))
 
-class ProfileForm(forms.ModelForm):
+    def clean(self):
+        user = auth.authenticate(username=self.cleaned_data.get('username'),
+                                 password=self.cleaned_data.get('password'))
+        if not user:
+            raise forms.util.ValidationError("The username or password is invalid.")
+        if not user.is_active:
+            raise forms.util.ValidationError("The user account has been disabled.")
+        self.cleaned_data['user'] = user
+        return self.cleaned_data
+
+class ProfileForm(ui.ModelForm):
+    name = forms.fields.CharField(widget=forms.widgets.TextInput(attrs={'class': 'text'}))
     current_location = placeui.PlaceChoiceField(required=False)
+    about = forms.fields.CharField(widget=forms.widgets.Textarea(attrs={'class': 'text'}))
 
     class Meta:
         model = models.UserProfile
         fields = ('name', 'current_location', 'about', 'picture')
 
-class RegistrationForm(forms.ModelForm):
-    USERNAME_RE = re.compile(r"^\w+$")
+class RegistrationForm(ui.ModelForm):
+    USERNAME_RE = re.compile(r"^[^\d]\w*$")
     USERNAME_BLACKLIST = ["admin", "root"] + \
                          ["media", "account", "trip", "place", "annotation", "segment", "point"] + \
                          ["faq", "friend", "contact", "feed", "settings", "help", "profile", "explore"]
 
-    username = forms.fields.CharField()
-    email = forms.fields.EmailField()
-    password = forms.fields.CharField(widget=forms.widgets.PasswordInput)
-    alpha_code = forms.fields.CharField()
+    username = forms.fields.CharField(widget=forms.widgets.TextInput(attrs={'class': 'text'}))
+    email = forms.fields.EmailField(widget=forms.widgets.TextInput(attrs={'class': 'text'}))
+    password = forms.fields.CharField(widget=forms.widgets.PasswordInput(attrs={'class': 'text'}))
+    alpha_code = forms.fields.CharField(widget=forms.widgets.TextInput(attrs={'class': 'text'}))
 
     class Meta:
         model = models.User
@@ -34,7 +48,7 @@ class RegistrationForm(forms.ModelForm):
     def clean_username(self):
         username = self.cleaned_data['username']
         if not self.USERNAME_RE.match(username):
-            raise forms.util.ValidationError("The username should contain only letters, digits and underscores.")
+            raise forms.util.ValidationError("The username should contain only letters, digits and underscores and cannot start with a digit.")
         if username in self.USERNAME_BLACKLIST:
             raise forms.util.ValidationError("That username is not available.")
         try:

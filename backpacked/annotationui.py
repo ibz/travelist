@@ -3,12 +3,14 @@ import re
 from django import forms
 
 from backpacked import models
+from backpacked import ui
 
 import settings
 
 class ContentInput(forms.widgets.Widget):
     def render(self, name, value, attrs=None):
-        return self.annotation.manager.render_content_input(name, value, attrs)
+        final_attrs = self.build_attrs(attrs)
+        return self.annotation.manager.render_content_input(name, value, final_attrs)
 
 class ParentField(forms.fields.ChoiceField):
     def _get_annotation(self):
@@ -30,6 +32,8 @@ class ParentField(forms.fields.ChoiceField):
     annotation = property(_get_annotation, _set_annotation)
 
 class NoWidget(forms.widgets.Widget):
+    is_hidden = True
+
     def render(*_, **__):
         return ""
 
@@ -53,12 +57,12 @@ class SegmentInput(NoWidget):
             assert parent_re.match(parent)
             return parent[0] == "s"
 
-class AnnotationEditForm(forms.ModelForm):
-    title = forms.fields.CharField(max_length=30)
-    date = forms.fields.DateField(widget=forms.widgets.DateTimeInput(format=settings.DATE_FORMAT_SHORT_PY), required=False)
+class EditForm(ui.ModelForm):
+    title = forms.fields.CharField(max_length=30, widget=forms.widgets.TextInput(attrs={'class': 'title'}))
+    date = forms.fields.DateField(widget=forms.widgets.DateTimeInput(format=settings.DATE_FORMAT_SHORT_PY, attrs={'class': 'text'}), required=False)
     parent = ParentField()
     visibility = forms.fields.ChoiceField(choices=models.Visibility.choices)
-    content = forms.fields.CharField(widget=ContentInput())
+    content = forms.fields.CharField(widget=ContentInput(attrs={'class': 'text'}))
     point = forms.fields.Field(widget=PointInput(), label="")
     segment = forms.fields.Field(widget=SegmentInput(), label="")
 
@@ -66,15 +70,18 @@ class AnnotationEditForm(forms.ModelForm):
         fields = ('title', 'date', 'parent', 'visibility', 'content') + \
                  ('point', 'segment') # editable through the 'parent' field
 
-    def __init__(self, data=None, files=None, annotation=None):
-        super(AnnotationEditForm, self).__init__(data, files, instance=annotation)
+    def __init__(self, data=None, files=None, annotation=None, initial=None, edit_parent=True):
+        super(EditForm, self).__init__(data, files, initial=initial, instance=annotation)
 
-        if annotation.point_id:
-            self.initial['parent'] = "%s_%s" % (annotation.segment and "s" or "p", annotation.point_id)
+        if edit_parent:
+            if not 'parent' in self.initial:
+                if annotation.point_id:
+                    self.initial['parent'] = "%s_%s" % (annotation.segment and "s" or "p", annotation.point_id)
+                else:
+                    self.initial['parent'] = ""
+            self.fields['parent'].annotation = annotation
         else:
-            self.initial['parent'] = ""
-
-        self.fields['parent'].annotation = annotation
+            self.fields['parent'].widget = forms.widgets.HiddenInput()
 
         if annotation.manager.edit_content_as_file:
             self.fields['content'] = forms.fields.FileField(widget=ContentInput(), required=False)
@@ -102,10 +109,10 @@ class AnnotationEditForm(forms.ModelForm):
 
     def save(self):
         if not self.instance.manager.has_extended_content:
-            return super(AnnotationEditForm, self).save()
+            return super(EditForm, self).save()
 
         content = self.cleaned_data.pop('content')
-        instance = super(AnnotationEditForm, self).save()
+        instance = super(EditForm, self).save()
         try:
             extended_content = models.ExtendedAnnotationContent.objects.get(annotation=instance)
         except models.ExtendedAnnotationContent.DoesNotExist:

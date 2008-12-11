@@ -33,7 +33,6 @@ urlpatterns = patterns('',
     (r"^trips/(?P<id>\d+)/delete/$", 'backpacked.trip.delete'),
     (r"^trips/(?P<username>\w+)/$", 'backpacked.trip.user'),
 
-    (r"^trips/(?P<trip_id>\d+)/annotations/$", 'backpacked.annotation.all'),
     (r"^trips/(?P<trip_id>\d+)/annotations/(?P<id>\d+)/$", 'backpacked.annotation.view'),
     (r"^trips/(?P<trip_id>\d+)/annotations/new/$", 'backpacked.annotation.new'),
     (r"^trips/(?P<trip_id>\d+)/annotations/(?P<id>\d+)/edit/$", 'backpacked.annotation.edit'),

@@ -1,0 +1,33 @@
+{% extends "plain.html" %}
+
+{% block htmlbody %}
+<div class="container">
+<div class="column span-24 header last">
+  <div class="column span-12">
+    <ul class="horizontal-list">
+      {% if not user.is_anonymous %}
+      <li><a href="/trips/{{ user.username }}/">My trips</a></li>
+      <li><a href="/people/{{ user.username }}/friends/">My friends</a></li>
+      {% endif %}
+    </ul>
+  </div>
+  <div class="column span-12 last right">
+    <ul class="horizontal-list">
+      {% if not user.is_anonymous %}
+      <li>Logged in as <a href="/people/{{ user.username }}/">{{ user.username }}</a></li>
+      <li><a href="/account/profile/">Edit profile</a></li>
+      {% if user.notification_set.count %}
+      <li><a href="/notifications/" class="notice">Notifications</a></li>
+      {% endif %}
+      <li><a href="/account/logout/">Logout</a></li>
+      {% else %}
+      <li><a href="/account/login/">Login</a></li>
+      {% endif %}
+    </ul>
+  </div>
+  </div>
+<div class="column span-24 last">
+{% block content %}{% endblock %}
+</div>
+</div>
+{% endblock %}

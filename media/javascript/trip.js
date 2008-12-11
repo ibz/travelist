@@ -1,42 +1,6 @@
-function edit_trip()
-{
-    $("#trip-info").hide();
-    $("#trip-info-edit").show();
-    $("#trip-info-edit-link").effect('transfer', {to: "#trip-info-edit"}, 500);
-    $("#operations").hide();
-    $("#trip-info-edit #id_name").focus();
-}
-
-function edit_trip_saved(trip_id)
-{
-    $("#trip-info").show();
-    $("#operations").show();
-    $("#trip-info-edit").hide();
-    update_trip_info(trip_id);
-}
-
-function edit_trip_cancel()
-{
-    $("#trip-info-edit").hide();
-    $("#operations").show();
-    $("#trip-info").show();
-}
-
 function update_trip_details(trip_id)
 {
     $("#trip-details").load("/trips/" + trip_id + "/details/");
-}
-
-function update_trip_info(trip_id)
-{
-    function do_update(trip)
-    {
-        $("#title").html(trip.name);
-        $("#trip-info #start-date").html(convertDate("s", "l", trip.start_date));
-        $("#trip-info #end-date").html(convertDate("s", "l", trip.end_date));
-        $("#trip-info #visibility").html(visibilities[parseInt(trip.visibility)]);
-    }
-    $.get("/trips/" + trip_id + "/json/", function(data){ do_update(eval("(" + data + ")")); });
 }
 
 function edit_points(trip_id)
@@ -52,12 +16,37 @@ function toggle_annotations(id)
     a.textContent = ul.style.display == 'none' ? "+" : "-";
 }
 
+function delete_annotation(trip_id, id)
+{
+    if(!confirm("Are you sure you want to delete this annotation?"))
+    {
+        return;
+    }
+    $.post("/trips/" + trip_id + "/annotations/" + id + "/delete/", {},
+           function()
+           {
+               $("#trip-details-tabs #annotation_" + id).remove();
+           });
+}
+
+function delete_trip(id)
+{
+    if(!confirm("You will lose all the data associated with this trip and there is no way to undo this operation. Really continue?"))
+    {
+        return;
+    }
+    $.post("/trips/" + id + "/delete/", {},
+           function()
+           {
+               window.location = "/";
+           });
+}
+
 function init_trip(trip_id, has_points)
 {
     $("#trip-info-edit > form").ajaxForm({success: function() { edit_trip_saved(trip_id); }});
     $("#trip-info-edit #id_start_date").datepicker({dateFormat: date_format_short});
     $("#trip-info-edit #id_end_date").datepicker({dateFormat: date_format_short});
-    update_trip_info(trip_id);
     if(!has_points)
     {
         edit_points(trip_id);
@@ -71,13 +60,14 @@ function init_trip(trip_id, has_points)
 function init_trip_details(point_data)
 {
     $("#trip-details-tabs > ul").tabs();
+    $("#trip-details-tabs .annotation").hover(function() { $(this).addClass('hover'); }, function() { $(this).removeClass('hover'); });
     initTripMap("map", point_data);
 }
 
 function init_trip_new()
 {
-    $("#trip-info-edit #id_start_date").datepicker({dateFormat: date_format_short});
-    $("#trip-info-edit #id_end_date").datepicker({dateFormat: date_format_short});
+    $("form#trip-info #id_start_date").datepicker({dateFormat: date_format_short});
+    $("form#trip-info #id_end_date").datepicker({dateFormat: date_format_short});
 }
 
 function add_point(point_id, name)
@@ -125,9 +115,11 @@ function add_new_point()
 function edit_point(id)
 {
     var point = $("#point_" + id);
+    var view = point.find(".point-view");
     var edit = point.find(".point-edit");
     edit.show();
-    point.find(".point-view").effect('transfer', {to: edit}, 500);
+    view.find(".operations").hide();
+    view.effect('transfer', {to: edit}, 500);
     point.addClass("edit-mode");
     var data = points[id];
     edit.find(".date-arrived").val(data.date_arrived);
@@ -138,18 +130,22 @@ function edit_point(id)
 function edit_point_save(id)
 {
     var point = $("#point_" + id).removeClass("edit-mode");
-    var edit = point.find(".point-edit").hide();
+    var edit = point.find(".point-edit");
     var date_arrived = edit.find(".date-arrived").val();
     var date_left = edit.find(".date-left").val();
     var visited = edit.find(".visited").attr('checked');
-
+    point.find(".point-view .operations").show();
+    edit.hide();
     set_point_details(id, date_arrived, date_left, visited);
     set_point_data(id, {date_arrived: date_arrived, date_left: date_left, visited: visited}, true);
 }
 
 function edit_point_cancel(id)
 {
-    $("#point_" + id).removeClass("edit-mode").find(".point-edit").hide();
+    var point = $("#point_" + id);
+    point.removeClass("edit-mode");
+    point.find(".point-view .operations").show();
+    point.find(".point-edit").hide();
 }
 
 function set_point_details(id, date_arrived, date_left, visited)

@@ -1,9 +1,12 @@
-{% extends "base.html" %}
-{% block body %}
+{% extends "page.html" %}
+{% block content %}
+<div class="column span-10 prepend-7 prepend-top">
 <form method="POST" action="" enctype="multipart/form-data">
-<table>
-{{ form }}
-</table>
-<input type="submit" class="button" value="Save" />
+<fieldset>
+<legend>Edit profile</legend>
+{{ form.as_p }}
+<p><input type="submit" class="submit button positive" value="Save" /></p>
+</fieldset>
 </form>
+</div>
 {% endblock %}

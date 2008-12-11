@@ -1,54 +1,26 @@
-{% extends "content.html" %}
-
-{% block title %}
-{{ for_user.username }}&apos;s profile
-{% endblock %}
-
-{% block operations %}
-{% if not is_friend and not is_friend_pending and not is_self and not user.is_anonymous %}
-<a class="navigation" href="/people/{{ for_user.username }}/relationship/">add as friend</a><br />
-{% endif %}
-{% if is_self %}
-<a class="navigation" href="/account/profile/">edit profile</a><br />
-{% endif %}
-{% if not is_self %}
-<a class="navigation" href="/people/{{ for_user.username }}/friends/">view {{ for_user.username }}&apos;s friends</a><br />
-{% endif %}
-{% endblock %}
+{% extends "page.html" %}
+{% load call %}
 
 {% block content %}
-{% if for_user.userprofile.picture %}
-<img src="{{ for_user.userprofile.picture.url }}" /><br />
-{% endif %}
-{% if for_user.userprofile.name %}
-Real name: {{ for_user.userprofile.name }}<br />
-{% endif %}
-{% if for_user.userprofile.current_location %}
-Living in: {{ for_user.userprofile.current_location.name }}<br />
-{% endif %}
-{% if for_user.userprofile.about %}
-About:<br />
-{{ for_user.userprofile.about }}<br />
-<br />
-{% endif %}
+{% call "user_badge.html" with user=for_user %}
 
 {% if trips %}
-Most recent trips:<br />
-<table id="trip-list" class="data-grid" width="600px">
+<div class="column span-14 prepend-5 append-5 prepend-top last">
+<div>Most recent trips:</div>
+<table id="trip-list" class="data-grid" style="width: 400px">
   <thead>
-    <td width="50%">Name</td>
-    <td width="25%">Start date</td>
-    <td width="25%">End date</td>
+    <td width="40%">Name</td>
+    <td width="30%">Started on</td>
+    <td width="30%" class="lastcolumn">Ended on</td>
   </thead>
   {% for trip in trips %}
   <tr{% if forloop.first %} class="firstrow"{% endif %}>
-        <td class="firstcolumn"><a href="/trips/{{ trip.id }}/">{{ trip.name }}</a></td>
-        <td>{{ trip.start_date|date }}</td>
-	<td>{{ trip.end_date|date }}</td>
+    <td><a href="/trips/{{ trip.id }}/">{{ trip.name }}</a></td>
+    <td>{{ trip.start_date|date }}</td>
+    <td class="lastcolumn">{{ trip.end_date|date }}</td>
   </tr>
   {% endfor %}
 </table>
-{% else %}
-{{ for_user.username }} has no trips.
+</div>
 {% endif %}
 {% endblock %}
