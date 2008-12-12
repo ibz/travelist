@@ -47,4 +47,5 @@ def relationship(request, username):
     relationship.save()
     notification = models.Notification(user=other_user, type=models.NotificationType.FRIEND_REQUEST, content=str(this_user.id))
     notification.save()
+    notification.manager.send_email()
     return http.HttpResponseRedirect("/people/%s/" % other_user.username)

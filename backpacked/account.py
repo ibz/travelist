@@ -57,7 +57,7 @@ def register_POST(request):
         profile = models.UserProfile(user=user, confirmation_key=confirmation_key)
         profile.save()
 
-        email_subject = "Your new backpacked.it account confirmation"
+        email_subject = "Email address confirmation"
         email_body = (
 """Hello %(user)s and thanks for signing up for a backpacked.it account!
 To confirm your email address click this link:

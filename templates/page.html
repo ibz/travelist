@@ -17,7 +17,7 @@
       <li>Logged in as <a href="/people/{{ user.username }}/">{{ user.username }}</a></li>
       <li><a href="/account/profile/">Edit profile</a></li>
       {% if user.notification_set.count %}
-      <li><a href="/notifications/" class="notice">Notifications</a></li>
+      <li><a href="/notifications/" class="important">Notifications</a></li>
       {% endif %}
       <li><a href="/account/logout/">Logout</a></li>
       {% else %}

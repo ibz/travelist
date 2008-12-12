@@ -1,7 +1,11 @@
 from datetime import datetime
 
+from django.core import mail
+
 from backpacked import models
 from backpacked import utils
+
+import settings
 
 def get_manager(type):
     return NotificationManager.all[type]
@@ -29,6 +33,9 @@ class NotificationManager(object):
         return [(a, Action.get_description(a), Action.get_extra(a))
                 for a in self.available_actions]
 
+    def send_email(self):
+        raise NotImplementedError()
+
     def render(self):
         raise NotImplementedError()
 
@@ -39,6 +46,20 @@ class FriendRequestNotificationManager(NotificationManager):
     type = models.NotificationType.FRIEND_REQUEST
 
     available_actions = [Action.ACCEPT, Action.REJECT]
+
+    def send_email(self):
+        email_subject = "Friend request"
+        email_body = (
+"""Hello, %(user)s.
+%(requesting_user)s wants to add you as a friend on backpacked.it.
+You can accept or reject this request by visiting this link: http://backpacked.it/notifications/
+""" % (
+                {'user': self.notification.user.username,
+                 'requesting_user': models.User.objects.get(id=int(self.notification.content)).username}))
+        mail.send_mail(email_subject,
+                       email_body,
+                       settings.CUSTOMER_EMAIL,
+                       [self.notification.user.email])
 
     def render(self):
         user_id = int(self.notification.content)

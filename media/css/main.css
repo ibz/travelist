@@ -3,6 +3,10 @@ a {
     text-decoration: none;
 }
 
+a.important {
+    color: red;
+}
+
 textarea {
     height: 100px;
 }
