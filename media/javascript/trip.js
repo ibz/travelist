@@ -42,14 +42,21 @@ function delete_trip(id)
            });
 }
 
-function init_trip(trip_id, has_points)
+function init_trip(trip_id, has_points, allow_edit)
 {
     $("#trip-info-edit > form").ajaxForm({success: function() { edit_trip_saved(trip_id); }});
     $("#trip-info-edit #id_start_date").datepicker({dateFormat: date_format_short});
     $("#trip-info-edit #id_end_date").datepicker({dateFormat: date_format_short});
     if(!has_points)
     {
-        edit_points(trip_id);
+        if(allow_edit)
+        {
+            edit_points(trip_id);
+        }
+        else
+        {
+            $("#map").hide();
+        }
     }
     else
     {

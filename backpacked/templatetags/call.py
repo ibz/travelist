@@ -40,9 +40,9 @@ def do_call(parser, token):
    if len(bits) != 2:
        raise template.TemplateSyntaxError("%r tag takes one argument: the name of the template to be included" % bits[0])
    path = parser.compile_filter(bits[1])
+   args = []
+   kwargs = {}
    if argslist:
-       args = []
-       kwargs = {}
        for arg in argslist:
            if '=' in arg:
                k, v = arg.split('=', 1)
