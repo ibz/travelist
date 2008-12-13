@@ -3,9 +3,11 @@ from django.contrib import admin
 
 import settings
 
+admin.autodiscover()
+
 urlpatterns = patterns('',
-    (r"^admin/(?P<url>.*)$", admin.site.root),
-    (r'^media/(?P<path>.*)$', 'django.views.static.serve', {'document_root': settings.MEDIA_ROOT}),
+    (r"^_admin/(.*)$", admin.site.root),
+    (r"^media/(?P<path>.*)$", 'django.views.static.serve', {'document_root': settings.MEDIA_ROOT}),
 
     (r"^$", 'backpacked.views.index'),
 

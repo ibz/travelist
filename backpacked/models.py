@@ -11,8 +11,8 @@ class Country(models.Model):
     code = models.CharField(max_length=2)
     name = models.CharField(max_length=100)
 
-    class Admin:
-        pass
+    class Meta:
+        verbose_name_plural = "countries"
 
     def __unicode__(self):
         return self.name
@@ -25,9 +25,6 @@ class AdministrativeDivision(models.Model):
     class Meta:
         unique_together = (('country', 'code'),)
 
-    class Admin:
-        pass
-
     def __unicode__(self):
         return self.name
 
@@ -39,9 +36,6 @@ class Place(models.Model):
     country = models.ForeignKey(Country)
     administrative_division = models.ForeignKey(AdministrativeDivision, null=True)
     coords = models.PointField()
-
-    class Admin:
-        pass
 
     def __unicode__(self):
         return self.name
@@ -73,9 +67,6 @@ class UserProfile(models.Model):
     current_location = models.ForeignKey(Place, blank=True, null=True)
     about = models.TextField(blank=True)
     picture = models.ImageField(blank=True, upload_to=_get_profile_picture_location)
-
-    class Admin:
-        pass
 
     def __unicode__(self):
         return self.user.username
@@ -149,9 +140,6 @@ class Trip(models.Model):
     end_date = models.DateField()
     visibility = models.IntegerField(choices=Visibility.choices, default=Visibility.PUBLIC)
     objects = TripManager()
-
-    class Admin:
-        pass
 
     class Meta:
         ordering = ['-start_date']
