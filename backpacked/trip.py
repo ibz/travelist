@@ -72,19 +72,6 @@ def edit(request, id):
         return edit_POST(request, trip)
 
 @require_GET
-def serialize(request, id, format):
-    assert format == 'json'
-    trip = shortcuts.get_object_or_404(models.Trip, id=id)
-    if not trip.is_visible_to(request.user):
-        raise http.Http404()
-    data = {'id': trip.id,
-            'name': trip.name,
-            'start_date': utils.format_date(trip.start_date),
-            'end_date': utils.format_date(trip.end_date),
-            'visibility': trip.visibility}
-    return http.HttpResponse(simplejson.dumps(data))
-
-@require_GET
 def details(request, id):
     trip = shortcuts.get_object_or_404(models.Trip, id=id)
     if not trip.is_visible_to(request.user):
@@ -94,7 +81,11 @@ def details(request, id):
 
     annotations = trip.annotation_set.all()
     if trip.user != request.user:
-        annotations = annotations.filter(visibility=models.Visibility.PUBLIC)
+        _, is_friend, _ = trip.user.get_relationship_status(request.user)
+        if is_friend:
+            annotations = annotations.filter(visibility__in=[models.Visibility.PUBLIC, models.Visibility.PROTECTED])
+        else:
+            annotations = annotations.filter(visibility=models.Visibility.PUBLIC)
     annotations = list(annotations)
 
     points = {}

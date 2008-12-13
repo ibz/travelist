@@ -27,7 +27,6 @@ urlpatterns = patterns('',
 
     (r"^trips/new/$", 'backpacked.trip.new'),
     (r"^trips/(?P<id>\d+)/$", 'backpacked.trip.view'),
-    (r"^trips/(?P<id>\d+)/(?P<format>json)/$", 'backpacked.trip.serialize'),
     (r"^trips/(?P<id>\d+)/details/$", 'backpacked.trip.details'),
     (r"^trips/(?P<id>\d+)/points/$", 'backpacked.trip.points'),
     (r"^trips/(?P<id>\d+)/edit/$", 'backpacked.trip.edit'),

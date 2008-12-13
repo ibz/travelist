@@ -122,11 +122,25 @@ Visibility = utils.Enum({'PUBLIC': (1, "Everyone"),
                          'PROTECTED': (2, "Me and my friends"),
                          'PRIVATE': (3, "Myself only")})
 
+def is_visible(visibility, user, other):
+    if visibility == Visibility.PUBLIC:
+        return True
+    elif visibility == Visibility.PROTECTED:
+        if user == other:
+            return True
+        else:
+            _, is_friend, _ = user.get_relationship_status(other)
+            return is_friend
+    elif visibility == Visibility.PRIVATE:
+        return user == other
+    else:
+        raise ValueError()
+
 class TripManager(models.Manager):
     def for_user(self, owner, viewer):
-        is_self, is_friend, _ = owner.get_relationship_status(viewer)
         trips = self.filter(user=owner)
-        if not is_self:
+        if owner != viewer:
+            _, is_friend, _ = owner.get_relationship_status(viewer)
             if is_friend:
                 trips = trips.filter(visibility__in=[Visibility.PUBLIC, Visibility.PROTECTED])
             else:
@@ -152,10 +166,7 @@ class Trip(models.Model):
         return Visibility.get_description(self.visibility)
 
     def is_visible_to(self, user):
-        if self.visibility == Visibility.PRIVATE and self.user != user:
-            return False
-        else:
-            return True
+        return is_visible(self.visibility, self.user, user)
 
 class Point(models.Model):
     trip = models.ForeignKey(Trip)
@@ -209,10 +220,7 @@ class Annotation(models.Model):
         return Visibility.get_description(self.visibility)
 
     def is_visible_to(self, user):
-        if self.visibility == Visibility.PRIVATE and self.user != user:
-            return False
-        else:
-            return True
+        return is_visible(self.visibility, self.trip.user, user) and is_visible(self.trip.visibility, self.trip.user, user)
 
     @property
     def url(self):
