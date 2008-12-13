@@ -7,7 +7,6 @@ admin.autodiscover()
 
 urlpatterns = patterns('',
     (r"^_admin/(.*)$", admin.site.root),
-    (r"^media/(?P<path>.*)$", 'django.views.static.serve', {'document_root': settings.MEDIA_ROOT}),
 
     (r"^$", 'backpacked.views.index'),
 
@@ -40,3 +39,8 @@ urlpatterns = patterns('',
     (r"^trips/(?P<trip_id>\d+)/annotations/(?P<id>\d+)/edit/$", 'backpacked.annotation.edit'),
     (r"^trips/(?P<trip_id>\d+)/annotations/(?P<id>\d+)/delete/$", 'backpacked.annotation.delete'),
 )
+
+if settings.DEBUG:
+    urlpatterns += patterns('',
+        (r"^media/(?P<path>.*)$", 'django.views.static.serve', {'document_root': settings.MEDIA_ROOT}),
+    )
