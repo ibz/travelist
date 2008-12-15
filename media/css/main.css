@@ -124,8 +124,9 @@ img.user-image {
     height: 450px;
 }
 
-#trip-details-tabs div {
-    min-height: 400px;
+#trip-details-tabs > div {
+    height: 400px;
+    overflow: auto;
 }
 
 #trip-details-tabs .annotation {
