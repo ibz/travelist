@@ -19,7 +19,6 @@ $(document).unload(cleanupMap);
 <div id="trip-info" class="column span-7 prepend-top append-bottom">
   Started on: {{ trip.start_date|date }}<br />
   Ended on: {{ trip.end_date|date }}<br />
-  Visibility: {{ trip.visibility_h }}<br />
   Owned by: {% ifequal user.id trip.user_id %}me{% else %}{{ trip.user.username }}{% endifequal %}<br />
 </div>
 <div class="column span-7 prepend-top append-bottom last right">
