@@ -11,7 +11,6 @@ from django.test.client import Client
 
 from backpacked import views
 from backpacked import account
-from backpacked import forms
 from backpacked import utils
 from backpacked import models
 from backpacked.models import Place
