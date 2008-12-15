@@ -1,6 +1,7 @@
 from django import forms
 
 from backpacked import models
+from backpacked import ui
 
 class PlaceInput(forms.widgets.Widget):
     def render(self, name, value, attrs=None):
@@ -37,3 +38,10 @@ class PlaceChoiceField(forms.fields.ChoiceField):
         except models.Place.DoesNotExist:
             raise forms.util.ValidationError(self.error_messages['invalid_choice'])
 
+class SuggestionForm(ui.ModelForm):
+    name = forms.fields.CharField(widget=forms.widgets.TextInput(attrs={'class': 'text'}))
+    comments = forms.fields.CharField(widget=forms.widgets.Textarea())
+
+    class Meta:
+        model = models.PlaceSuggestion
+        fields = ('name', 'comments')

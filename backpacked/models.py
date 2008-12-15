@@ -15,7 +15,7 @@ class Country(models.Model):
         verbose_name_plural = "countries"
 
     def __unicode__(self):
-        return self.name
+        return "%s (%s)" % (self.name, self.code)
 
 class AdministrativeDivision(models.Model):
     code = models.CharField(max_length=20)
@@ -26,7 +26,7 @@ class AdministrativeDivision(models.Model):
         unique_together = (('country', 'code'),)
 
     def __unicode__(self):
-        return self.name
+        return "%s (%s)" % (self.name, self.code)
 
 class Place(models.Model):
     source = models.IntegerField() # 1 = manual, 2 = geonames
@@ -48,6 +48,15 @@ class Place(models.Model):
                 name += ", %s" % self.administrative_division.name
         name += ", %s" % self.country.name
         return name
+
+class PlaceSuggestion(models.Model):
+    user = models.ForeignKey(User)
+    date = models.DateTimeField(auto_now=True)
+    name = models.CharField(max_length=100)
+    comments = models.TextField()
+
+    def __unicode__(self):
+        return self.name
 
 UserLevel = utils.Enum([(1, "Basic"),
                         (2, "Pro")])

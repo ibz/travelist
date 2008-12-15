@@ -53,14 +53,30 @@ $(document).ready(function()
 </ul>
 
 <p>
+<div id="suggest-place" style="display: none;">
+<label for="suggest-name">Place name:</label><br />
+<input type="text" class="text" id="suggest-name" name="suggest-name" /><br />
+<label for="suggest-comments">Comments (country, link to Wikipedia, etc.):</label><br />
+<textarea id="suggest-comments" name="suggest-comments" cols="10" /><br />
+<div id="suggest-activity" style="display: none;"><img src="{{ MEDIA_URL }}images/ajax.gif" /></div>
+<div id="suggest-buttons">
+<input type="button" class="button positive" value="Suggest" onclick="suggest_place_ok();" />
+<input type="button" class="button negative" value="Cancel" onclick="suggest_place_cancel();" />
+</div>
+</div>
+</p>
+
+<div id="add-place">
+<p>
+<div id="suggest-place-message">Can't find the place you're looking for? Suggest it <a href="javascript:suggest_place();">here</a>.</div>
 <input type="text" id="new-place-name" />
 <input type="hidden" id="new-place-id" />
 <input type="hidden" id="new-place-coords" />
-<input type="button" class="button positive" value="Add" onclick="javascript:add_new_point();" />
+<input type="button" class="button positive" value="Add" onclick="javascript:add_new_point();" /><br />
 </p>
-
 <p>
 <input type="button" class="button positive" value="Save" onclick="javascript:trip_points_save({{ trip.id }});" />
 <input type="button" class="button negative" value="Cancel" onclick="javascript:trip_points_cancel({{ trip.id }});" />
 </p>
+</div>
 </div>

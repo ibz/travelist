@@ -8,6 +8,48 @@ function edit_points(trip_id)
     $("#trip-details").load("/trips/" + trip_id + "/points/");
 }
 
+function suggest_place()
+{
+    $("#suggest-place").show();
+    $("#add-place,#suggest-place-message").hide();
+}
+
+function suggest_place_ok()
+{
+    var name = $("#suggest-name").val();
+    var comments = $("#suggest-comments").val();
+    if (!name || !comments)
+    {
+        alert("Please fil in the place name and comments!");
+        return;
+    }
+    $("#suggest-buttons").hide();
+    $("#suggest-activity").show();
+    $.ajax({
+        type: "POST",
+        url: "/places/suggest/",
+        data: "name=" + name + "&comments=" + comments,
+        success: function()
+        {
+            $("#suggest-name,#suggest-comments").val("");
+            $("#suggest-place").hide();
+            $("#add-place,#suggest-place-message").show();
+            $("#suggest-buttons").show();
+            $("#suggest-activity").hide();
+        },
+        error: function()
+        {
+            $("#suggest-buttons").show();
+            $("#suggest-activity").hide();
+        }});
+}
+
+function suggest_place_cancel()
+{
+    $("#suggest-place").hide();
+    $("#add-place,#suggest-place-message").show();
+}
+
 function toggle_annotations(id)
 {
     var ul = document.getElementById(id);
