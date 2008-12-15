@@ -1,3 +1,7 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
 <script src="{{ MEDIA_URL }}javascript/trip.js" type="text/javascript"></script>
 <script type="text/javascript">
 var last_id = 0;
@@ -13,6 +17,8 @@ $(document).ready(function()
                                        ]);
                   });
 </script>
+</head>
+<body>
 <div id="edit-points" class="edit-box">
 {% if points %}
 <h4>Rearrange the points by dragging them with the mouse</h4>
@@ -80,3 +86,5 @@ $(document).ready(function()
 </p>
 </div>
 </div>
+</body>
+</html>
