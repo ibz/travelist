@@ -22,9 +22,9 @@ class LoginForm(ui.Form):
         return self.cleaned_data
 
 class ProfileForm(ui.ModelForm):
-    name = forms.fields.CharField(widget=forms.widgets.TextInput(attrs={'class': 'text'}))
+    name = forms.fields.CharField(required=False, widget=forms.widgets.TextInput(attrs={'class': 'text'}))
     current_location = placeui.PlaceChoiceField(required=False)
-    about = forms.fields.CharField(widget=forms.widgets.Textarea(attrs={'class': 'text'}))
+    about = forms.fields.CharField(required=False, widget=forms.widgets.Textarea(attrs={'class': 'text'}))
 
     class Meta:
         model = models.UserProfile

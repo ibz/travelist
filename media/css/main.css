@@ -11,6 +11,10 @@ textarea {
     height: 100px;
 }
 
+form p {
+    margin: 1em 0 1em 0;
+}
+
 a:focus,
 a:hover {
     color: #0187C5;
