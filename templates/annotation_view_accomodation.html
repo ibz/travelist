@@ -11,5 +11,5 @@
 {% if content.address %}<li>Address: {{ content.address }}</li>{% endif %}
 {% if content.phone_number %}<li>Phone number: {{ content.phone_number }}</li>{% endif %}
 {% if content.rating %}<li>Rating: {{ content.rating_h }}</li>{% endif %}
-{% if content.comments %}<li>Comments: <br /> {{ content.comments }}</li>{% endif %}
+{% if content.comments %}<li>Comments: <br /> {{ content.comments|linebreaksbr }}</li>{% endif %}
 </ul>

@@ -99,19 +99,19 @@ class AnnotationManager(object):
     def after_save(self):
         pass
 
-class TextAnnotationManager(AnnotationManager):
-    content_type = models.ContentType.TEXT
-
-    has_extended_content = True
+class ActivityAnnotationManager(AnnotationManager):
+    content_type = models.ContentType.ACTIVITY
 
     widget = forms.widgets.Textarea()
 
     def render_short(self):
-        return "<a href=\"%s\">Text: %s</a>" % (html.escape(self.annotation.url),
-                                                html.escape(self.annotation.title))
+        t = template.loader.get_template("annotation_view_activity.html")
+        c = template.Context({'annotation': self.annotation})
 
-    def render(self, request):
-        return views.render("annotation_view_text.html", request, {'annotation': self.annotation})
+        return t.render(c)
+
+    def clean_content(self, content):
+        return re.sub("\r", "", content)
 
 class UrlAnnotationManager(AnnotationManager):
     content_type = models.ContentType.URL
@@ -333,11 +333,6 @@ class AccomodationAnnotationManager(AnnotationManager):
         c = template.Context({'annotation': self.annotation, 'content': content})
 
         return t.render(c)
-
-    def render(self, request):
-        content = AccomodationSerializer().deserialize(self.annotation.content)
-        return views.render("annotation_view_accomodation.html", request, {'annotation': self.annotation,
-                                                                           'content': content})
 
     def clean_content(self, content):
         if not content.get('name'):

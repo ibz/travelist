@@ -193,7 +193,7 @@ class Point(models.Model):
     def __cmp__(self, other):
         return cmp(self.order_rank, other.order_rank)
 
-ContentType = utils.Enum({'TEXT': (1, "Text"),
+ContentType = utils.Enum({'ACTIVITY': (1, "Activity"),
                           'URL': (2, "URL"),
                           'EXTERNAL_PHOTOS': (3, "Photos"),
                           'TRANSPORTATION': (4, "Transportation"),
