@@ -7,11 +7,6 @@ from backpacked import ui
 
 import settings
 
-class ContentInput(forms.widgets.Widget):
-    def render(self, name, value, attrs=None):
-        final_attrs = self.build_attrs(attrs)
-        return self.annotation.manager.render_content_input(name, value, final_attrs)
-
 class ParentField(forms.fields.ChoiceField):
     def _get_annotation(self):
         return self._annotation
@@ -62,7 +57,7 @@ class EditForm(ui.ModelForm):
     date = forms.fields.DateField(widget=forms.widgets.DateTimeInput(format=settings.DATE_FORMAT_SHORT_PY, attrs={'class': 'text'}), required=False)
     parent = ParentField()
     visibility = forms.fields.ChoiceField(choices=models.Visibility.choices)
-    content = forms.fields.CharField(widget=ContentInput(attrs={'class': 'text'}))
+    content = forms.fields.Field()
     point = forms.fields.Field(widget=PointInput(), label="")
     segment = forms.fields.Field(widget=SegmentInput(), label="")
 
@@ -86,8 +81,11 @@ class EditForm(ui.ModelForm):
         if annotation.manager.edit_content_as_file:
             self.fields['content'] = forms.fields.FileField(widget=ContentInput(), required=False)
 
-        self.fields['content'].widget.annotation = annotation
-        self.fields['content'].label = annotation.content_type_h
+        self.fields['content'].widget = annotation.manager.widget
+        if annotation.manager.show_content_label:
+            self.fields['content'].label = annotation.content_type_h
+        else:
+            self.fields['content'].label = ""
         if not annotation.manager.edit_content_as_file:
             if annotation.manager.has_extended_content:
                 try:
@@ -105,7 +103,7 @@ class EditForm(ui.ModelForm):
         if self.instance.manager.edit_content_as_file:
             return self.instance.manager.clean_content(self.files.get('content'))
         else:
-            return self.instance.manager.clean_content(self.cleaned_data['content'])
+            return self.instance.manager.clean_content(self.cleaned_data.get('content'))
 
     def save(self):
         if not self.instance.manager.has_extended_content:

@@ -1,0 +1,11 @@
+{% extends "page.html" %}
+
+{% block content %}
+
+<p>
+{% if content.name %}Name: {{ content.name }}<br />{% endif %}
+</p>
+
+<a href="/trips/{{ annotation.trip.id }}/">Back to trip</a>
+
+{% endblock %}

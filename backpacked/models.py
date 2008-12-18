@@ -197,7 +197,8 @@ ContentType = utils.Enum({'TEXT': (1, "Text"),
                           'URL': (2, "URL"),
                           'EXTERNAL_PHOTOS': (3, "Photos"),
                           'TRANSPORTATION': (4, "Transportation"),
-                          'GPS': (5, "GPS")})
+                          'GPS': (5, "GPS"),
+                          'ACCOMODATION': (6, "Accomodation")})
 
 class Annotation(models.Model):
     trip = models.ForeignKey(Trip)
