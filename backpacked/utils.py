@@ -1,3 +1,4 @@
+import re
 from datetime import datetime
 
 from django import template
@@ -35,10 +36,17 @@ class Enum:
         if isinstance(all, dict):
             self.all = all
         else:
-            self.all = dict((e[1].upper(), e) for e in all)
+            name = lambda desc: re.sub("[^A-Z0-9_]", "X", re.sub(" ", "_", desc.upper()))
+            self.all = dict((name(e[1]), e) for e in all)
 
     def __getattr__(self, name):
         return self.all[name][0]
+
+    def __call__(self, value):
+        value = int(value)
+        if value not in self.values:
+            raise ValueError()
+        return value
 
     @property
     def choices(self):

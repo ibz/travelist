@@ -11,7 +11,7 @@ $(document).ready(init_annotation_edit);
 {% block content %}
 <div class="container">
 <div class="column span-10 prepend-4 prepend-top last">
-<form method="POST" action="" {% if annotation.manager.edit_content_as_file %}enctype="multipart/form-data"{% endif %}>
+<form id="annotation-info-edit" method="POST" action="" {% if annotation.manager.edit_content_as_file %}enctype="multipart/form-data"{% endif %}>
 <fieldset>
 <legend>Edit {{ annotation.content_type_h }}</legend>
 {{ form.as_p }}

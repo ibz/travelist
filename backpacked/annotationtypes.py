@@ -3,11 +3,10 @@ import re
 import subprocess
 from tempfile import mkdtemp
 
-from django.utils import html
-from django.utils import safestring
-
 from django import http
 from django import forms
+from django import template
+from django.utils import html
 
 from backpacked import models
 from backpacked import utils
@@ -20,6 +19,7 @@ def get_manager(content_type):
 
 class ContentSerializer:
     multiline_fields = []
+    typed_fields = {}
 
     def serialize(self, content):
         pairs = [[k, v] for k, v in content.items() if v]
@@ -34,6 +34,8 @@ class ContentSerializer:
     def deserialize(self, content):
         if content is None:
             return {}
+        if isinstance(content, dict):
+            return content
         value = {}
         current = None
         for line in content.split("\n"):
@@ -42,6 +44,12 @@ class ContentSerializer:
                 value[k] = v
                 if k in self.multiline_fields:
                     current = k
+                else:
+                    t = self.typed_fields.get(k)
+                    if callable(t):
+                        value[k] = t(value[k])
+                    if isinstance(t, utils.Enum):
+                        value["%s_h" % k] = t.get_description(value[k])
             else:
                 if line:
                     value[current] += "\n" + line
@@ -99,8 +107,8 @@ class TextAnnotationManager(AnnotationManager):
     widget = forms.widgets.Textarea()
 
     def render_short(self):
-        return safestring.mark_safe("<a href=\"%s\">Text: %s</a>" % (html.escape(self.annotation.url),
-                                                                     html.escape(self.annotation.title)))
+        return "<a href=\"%s\">Text: %s</a>" % (html.escape(self.annotation.url),
+                                                html.escape(self.annotation.title))
 
     def render(self, request):
         return views.render("annotation_view_text.html", request, {'annotation': self.annotation})
@@ -111,8 +119,8 @@ class UrlAnnotationManager(AnnotationManager):
     widget = forms.widgets.TextInput()
 
     def render_short(self):
-        return safestring.mark_safe("<a href=\"%s\">URL: %s</a>" % (html.escape(self.annotation.content),
-                                                                    html.escape(self.annotation.title)))
+        return "<a href=\"%s\">URL: %s</a>" % (html.escape(self.annotation.content),
+                                               html.escape(self.annotation.title))
 
     def clean_content(self, content):
         return forms.fields.URLField().clean(content)
@@ -123,8 +131,8 @@ class ExternalPhotosAnnotationManager(UrlAnnotationManager):
     is_photos = True
 
     def render_short(self):
-        return safestring.mark_safe("<a href=\"%s\">Photos: %s</a>" % (html.escape(self.annotation.content),
-                                                                       html.escape(self.annotation.title)))
+        return "<a href=\"%s\">Photos: %s</a>" % (html.escape(self.annotation.content),
+                                                  html.escape(self.annotation.title))
 
 Transportation = utils.Enum([(0, "Unspecified"),
                              (1, "Airplane"),
@@ -202,8 +210,8 @@ class GPSAnnotationManager(AnnotationManager):
         title = "GPS"
         if self.annotation.title:
             title += ": %s" % self.annotation.title
-        return safestring.mark_safe("<a href=\"%s\">%s</a>" % (html.escape(self.annotation.url),
-                                                               html.escape(title)))
+        return "<a href=\"%s\">%s</a>" % (html.escape(self.annotation.url),
+                                          html.escape(title))
 
     def render(self, request):
         self.ensure_cache_file()
@@ -228,11 +236,35 @@ class GPSAnnotationManager(AnnotationManager):
         if os.path.exists(cachefilename):
             os.unlink(cachefilename)
 
+AccomodationType = utils.Enum([(0, ""),
+                               (1, "* Hotel"),
+                               (2, "** Hotel"),
+                               (3, "*** Hotel"),
+                               (4, "**** Hotel"),
+                               (5, "***** Hotel"),
+                               (6, "Hostel"),
+                               (7, "Bungalow")])
+
+AccomodationRoomType = utils.Enum([(0, ""),
+                                   (1, "Single room"),
+                                   (2, "Double room"),
+                                   (3, "Dorm"),
+                                   (4, "Suite")])
+
+AccomodationRating = utils.Enum([(-2, "Very poor"),
+                                 (-1, "Poor"),
+                                 (0, "Average"),
+                                 (1, "Good"),
+                                 (2, "Very good")])
+
 class AccomodationSerializer(ContentSerializer):
     multiline_fields = ['comments']
+    typed_fields = {'type': AccomodationType,
+                    'room_type': AccomodationRoomType,
+                    'rating': AccomodationRating}
 
 class AccomodationInput(forms.widgets.Widget):
-    subfields = ['name', 'type', 'room_type', 'URL', 'address', 'phone_number', 'rating', 'comments']
+    subfields = ['name', 'type', 'room_type', 'URL', 'email', 'address', 'phone_number', 'rating', 'comments']
 
     def render_one(self, label, widget, name, value, attrs=None):
         return "<label for=\"%s\">%s:</label><br />%s" % (name, label, widget.render(name, value, attrs))
@@ -243,8 +275,8 @@ class AccomodationInput(forms.widgets.Widget):
 
     def render_basic(self, name, value, attrs=None):
         basic = [('name', "Name", forms.widgets.TextInput(attrs={'class': 'text'})),
-                 ('type', "Type", forms.widgets.Select(choices=ACCOMODATION_TYPE_CHOICES)),
-                 ('room_type', "Room type", forms.widgets.Select(choices=ACCOMODATION_ROOM_TYPE_CHOICES))]
+                 ('type', "Type", forms.widgets.Select(choices=AccomodationType.choices)),
+                 ('room_type', "Room type", forms.widgets.Select(choices=AccomodationRoomType.choices))]
         return self.render_set(basic, name, value, attrs) + "<br />" \
             "<a href=\"javascript:accomodation_toggle_contact();\">toggle contact details</a>" \
             " | " \
@@ -253,15 +285,16 @@ class AccomodationInput(forms.widgets.Widget):
     def render_contact(self, name, value, attrs=None):
         contact = [('URL', "URL", forms.widgets.TextInput(attrs={'class': 'text'})),
                    ('address', "Address", forms.widgets.TextInput(attrs={'class': 'text'})),
+                   ('email', "Email", forms.widgets.TextInput(attrs={'class': 'text'})),
                    ('phone_number', "Phone number", forms.widgets.TextInput(attrs={'class': 'text'}))]
         return "<div id=\"accomodation-contact\" style=\"display: none;\">%s</div>" \
             % self.render_set(contact, name, value, attrs)
 
     def render_rating_stars(self, value):
-        ratings = [-2, -1, 0, 1, 2]
-        checked = lambda r: value and r == int(value) and "checked=\"checked\"" or ""
-        return "".join(["<input name=\"content_rating\" type=\"radio\" class=\"star\" value=\"%s\" %s />" % (r, checked(r))
-                        for r in ratings])
+        checked = lambda r: value and r == value and "checked=\"checked\"" or ""
+        return "".join(["<input name=\"content_rating\" type=\"radio\" class=\"star\" value=\"%s\" title=\"%s\" %s />" \
+                            % (r, AccomodationRating.get_description(r), checked(r))
+                        for r in sorted(AccomodationRating.values)])
 
     def render_rating(self, name, value, attrs=None):
         rating = [('comments', "Comments", forms.widgets.Textarea())]
@@ -277,21 +310,6 @@ class AccomodationInput(forms.widgets.Widget):
 
     def value_from_datadict(self, data, files, name):
         return dict([(field, data.get("content_%s" % field)) for field in self.subfields])
-
-ACCOMODATION_TYPE_CHOICES = [(0, ""),
-                             (1, "* Hotel"),
-                             (2, "** Hotel"),
-                             (3, "*** Hotel"),
-                             (4, "**** Hotel"),
-                             (5, "***** Hotel"),
-                             (6, "Hostel"),
-                             (7, "Bungalow")]
-
-ACCOMODATION_ROOM_TYPE_CHOICES = [(0, ""),
-                                  (1, "Single room"),
-                                  (2, "Double room"),
-                                  (3, "Dorm"),
-                                  (4, "Suite")]
 
 class AccomodationAnnotationManager(AnnotationManager):
     content_type = models.ContentType.ACCOMODATION
@@ -310,8 +328,11 @@ class AccomodationAnnotationManager(AnnotationManager):
 
     def render_short(self):
         content = AccomodationSerializer().deserialize(self.annotation.content)
-        return safestring.mark_safe("<a href=\"%s\">Accomodation: %s</a>" \
-                                    % (html.escape(self.annotation.url), html.escape(content['name'])))
+
+        t = template.loader.get_template("annotation_view_accomodation.html")
+        c = template.Context({'annotation': self.annotation, 'content': content})
+
+        return t.render(c)
 
     def render(self, request):
         content = AccomodationSerializer().deserialize(self.annotation.content)
@@ -319,4 +340,8 @@ class AccomodationAnnotationManager(AnnotationManager):
                                                                            'content': content})
 
     def clean_content(self, content):
+        if not content.get('name'):
+            raise forms.util.ValidationError("The name is mandatory.")
+        if content.get('URL'):
+            content['URL'] = forms.fields.URLField().clean(content['URL'])
         return AccomodationSerializer().serialize(content)

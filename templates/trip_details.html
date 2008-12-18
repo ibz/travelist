@@ -27,8 +27,8 @@ $(document).ready(function()
   <ul class="plain-list">
     {% for point in points %}
     <li>
-      <span class="link" onclick="javascript:toggle_annotations('point_{{ forloop.counter }}')">
-        <span id="link_point_{{ forloop.counter }}" class="expand-item">+</span>
+      <span class="expand-item" onclick="javascript:toggle_details('point_{{ forloop.counter }}')">
+        <span id="link_point_{{ forloop.counter }}">+</span>
         {{ point.name }} {% if point.visited %}(visited){% endif %}
       </span>
       <ul id="point_{{ forloop.counter }}" class="plain-list" style="display: none;">
@@ -47,8 +47,8 @@ $(document).ready(function()
   <ul class="plain-list">
     {% for segment in segments %}
     <li>
-      <span class="link" onclick="javascript:toggle_annotations('segment_{{ forloop.counter }}')">
-        <span id="link_segment_{{ forloop.counter }}" class="expand-item">+</span>
+      <span class="expand-item" onclick="javascript:toggle_details('segment_{{ forloop.counter }}')">
+        <span id="link_segment_{{ forloop.counter }}">+</span>
           {{ segment.p1_name }} - {{ segment.p2_name }}
       </span>
       <ul id="segment_{{ forloop.counter }}" class="plain-list" style="display: none;">

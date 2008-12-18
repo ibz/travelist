@@ -54,7 +54,6 @@ a:hover {
 }
 
 ul .expand-item {
- font-size: large;
  color: #5F99CF;
  cursor: pointer;
  text-decoration: bold;
@@ -145,6 +144,7 @@ img.user-image {
 #trip-details-tabs .annotation.hover .operations {
     display: inline;
     position: absolute;
+    top: 0px;
     left: 200px;
     width: 100px;
     text-align: right;

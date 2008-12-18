@@ -50,7 +50,7 @@ function suggest_place_cancel()
     $("#add-place,#suggest-place-message").show();
 }
 
-function toggle_annotations(id)
+function toggle_details(id)
 {
     var ul = document.getElementById(id);
     ul.style.display = ul.style.display == 'none' ? 'block' : 'none';

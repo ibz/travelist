@@ -1,6 +1,6 @@
 {% for annotation in annotations %}
 <li id="annotation_{{ annotation.id }}" class="annotation">
-  {{ annotation.manager.render_short }}
+  {% autoescape off %}{{ annotation.manager.render_short }}{% endautoescape %}
   {% ifequal user.id trip.user_id %}
   <span class="operations">
     <a href="/trips/{{ trip.id }}/annotations/{{ annotation.id }}/edit/">edit</a> |
