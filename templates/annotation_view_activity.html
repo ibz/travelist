@@ -1,6 +1,6 @@
 <span class="expand-item" onclick="javascript:toggle_details('annotation_details_{{ annotation.id }}');">
   <span id="link_annotation_details_{{ annotation.id }}">+</span>
-  Activity: {{ annotation.title }} {% if annotation.date %}({{ annotation.date|date }}){% endif %}
+  {{ annotation.manager.display_name }}
 </span>
 <ul id="annotation_details_{{ annotation.id }}" class="plain-list" style="display: none;">
   <li>{{ annotation.content|linebreaksbr }}</li>

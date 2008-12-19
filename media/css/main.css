@@ -150,6 +150,14 @@ img.user-image {
     text-align: right;
 }
 
+#trip-details-tabs .annotation-types {
+    padding-bottom: 10px;
+}
+
+#trip-details-tabs .annotation-types .type-list {
+    font-weight: bold;
+}
+
 #sort-points li {
     width: 380px;
 }

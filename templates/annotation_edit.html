@@ -13,10 +13,10 @@ $(document).ready(init_annotation_edit);
 <div class="column span-10 prepend-4 prepend-top last">
 <form id="annotation-info-edit" method="POST" action="" {% if annotation.manager.edit_content_as_file %}enctype="multipart/form-data"{% endif %}>
 <fieldset>
-<legend>Edit {{ annotation.content_type_h }}</legend>
+<legend>{% if annotation.id %}Edit{% else %}Add{% endif %} {{ annotation.content_type_h }}</legend>
 {{ form.as_p }}
 <p>
-<input type="submit" class="submit button positive" value="{% if annotation.id %}Save{% else %}Create{% endif %}" />
+<input type="submit" class="submit button positive" value="{% if annotation.id %}Save{% else %}Add{% endif %}" />
 <input type="button" class="button negative" value="Cancel" onclick="javascript:window.location='/trips/{{ annotation.trip_id }}/';" />
 </p>
 </fieldset>

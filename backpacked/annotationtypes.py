@@ -128,6 +128,13 @@ class ActivityAnnotationManager(AnnotationManager):
 
     can_attach_cost = True
 
+    @property
+    def display_name(self):
+        display = "Activity: %s" % self.annotation.title
+        if self.annotation.date:
+            display += " (%s)" % utils.format_date_human(self.annotation.date)
+        return display
+
     def render_short(self):
         t = template.loader.get_template("annotation_view_activity.html")
         c = template.Context({'annotation': self.annotation})
@@ -184,10 +191,10 @@ class TransportationAnnotationManager(AnnotationManager):
 
     @property
     def display_name(self):
-        return Transportation.get_description(int(self.annotation.content))
+        return "Transportation: %s" % Transportation.get_description(int(self.annotation.content))
 
     def render_short(self):
-        return "Transportation: %s" % Transportation.get_description(int(self.annotation.content))
+        return self.display_name
 
     def clean_content(self, content):
         return str(forms.fields.ChoiceField(choices=Transportation.choices).clean(content))
@@ -386,7 +393,8 @@ class CostWidget(CompositeContentWidget):
         annotations = self.annotation.point.annotation_set
         annotations = annotations.filter(content_type__in=AnnotationManager.cost_content_types(),
                                          segment=self.annotation.segment)
-        annotation_choices = [(a.id, a.manager.display_name) for a in annotations]
+        annotation_choices = [("", "")]
+        annotation_choices.extend([(a.id, a.manager.display_name) for a in annotations])
 
         widgets = [('value', "Value", forms.widgets.TextInput(attrs={'class': 'text'})),
                    ('currency', "Currency", forms.widgets.TextInput(attrs={'class': 'text'})),
@@ -408,9 +416,10 @@ class CostAnnotationManager(AnnotationManager):
     def render_short(self):
         content = CostSerializer().deserialize(self.annotation.content)
 
+        parent = content.has_key('parent') and models.Annotation.objects.get(id=content['parent']) or None
         t = template.loader.get_template("annotation_view_cost.html")
         c = template.Context({'annotation': self.annotation, 'content': content,
-                              'parent': models.Annotation.objects.get(id=content['parent'])})
+                              'parent': parent})
 
         return t.render(c)
 
