@@ -431,3 +431,24 @@ class CostAnnotationManager(AnnotationManager):
         except ValueError:
             raise forms.util.ValidationError("The value is invalid.")
         return CostSerializer().serialize(content)
+
+class NoteAnnotationManager(AnnotationManager):
+    content_type = models.ContentType.NOTE
+
+    widget = forms.widgets.Textarea
+
+    @property
+    def display_name(self):
+        display = "Note: %s" % self.annotation.title
+        if self.annotation.date:
+            display += " (%s)" % utils.format_date_human(self.annotation.date)
+        return display
+
+    def render_short(self):
+        t = template.loader.get_template("annotation_view_note.html")
+        c = template.Context({'annotation': self.annotation})
+
+        return t.render(c)
+
+    def clean_content(self, content):
+        return re.sub("\r", "", content)

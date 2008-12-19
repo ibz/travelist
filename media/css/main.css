@@ -151,11 +151,14 @@ img.user-image {
 }
 
 #trip-details-tabs .annotation-types {
-    padding-bottom: 10px;
+    padding-bottom: 2em;
+    position: relative;
 }
 
 #trip-details-tabs .annotation-types .type-list {
     font-weight: bold;
+    position: absolute;
+    left: 2em;
 }
 
 #sort-points li {
