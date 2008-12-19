@@ -32,7 +32,7 @@ $(document).ready(function()
         {{ point.name }} {% if point.visited %}(visited){% endif %}
       </span>
       <ul id="point_{{ forloop.counter }}" class="plain-list" style="display: none;">
-        {% call "_trip_details_annotation_types.html" with choices=point_annotation_type_choices parent_type="p" parent=point %}
+        {% call "_trip_details_annotation_types.html" with choices=point_annotation_type_choices point_id=point.id segment=0 %}
         {% if point.date_arrived or point.date_left %}
         <li>{% if point.date_arrived %}{{ point.date_arrived|date }}{% else %}?{% endif %} - {% if point.date_left %}{{ point.date_left|date }}{% else %}?{% endif %}</li>
         {% endif %}
@@ -52,7 +52,7 @@ $(document).ready(function()
           {{ segment.p1_name }} - {{ segment.p2_name }}
       </span>
       <ul id="segment_{{ forloop.counter }}" class="plain-list" style="display: none;">
-        {% call "_trip_details_annotation_types.html" with choices=segment_annotation_type_choices parent_type="s" parent=segment %}
+        {% call "_trip_details_annotation_types.html" with choices=segment_annotation_type_choices point_id=segment.id segment=1 %}
         <li>Length: {{ segment.length|floatformat:2 }} km</li>
         {% call "_trip_details_annotations.html" with annotations=segment.annotations %}
       </ul>

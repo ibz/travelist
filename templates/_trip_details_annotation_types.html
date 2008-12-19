@@ -1,3 +1,3 @@
 {% ifequal user.id trip.user_id %}
-<li>add {% for c in choices %}<a href="/trips/{{ trip.id }}/annotations/new/?content_type={{ c.0 }}&parent={{ parent_type }}_{{ parent.id }}">{{ c.1 }}</a>{% if not forloop.last %} | {% endif %} {% endfor %}</li>
+<li>add {% for c in choices %}<a href="/trips/{{ trip.id }}/annotations/new/?content_type={{ c.0 }}&point_id={{ point_id }}&segment={{ segment }}">{{ c.1 }}</a>{% if not forloop.last %}, {% endif %} {% endfor %}</li>
 {% endifequal %}

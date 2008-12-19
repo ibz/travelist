@@ -18,9 +18,7 @@ def view(request, trip_id, id):
     return annotation.manager.render(request)
 
 def new_GET(request, annotation):
-    parent = request.GET.get('parent')
-    assert parent
-    form = annotationui.EditForm(annotation=annotation, initial={'parent': parent}, edit_parent=False)
+    form = annotationui.EditForm(annotation=annotation)
     return views.render("annotation_edit.html", request, {'annotation': annotation, 'form': form})
 
 def new_POST(request, annotation):
@@ -36,9 +34,16 @@ def new_POST(request, annotation):
 def new(request, trip_id):
     content_type = int(request.GET.get('content_type', 0))
     assert content_type
-    annotation = models.Annotation(trip_id=trip_id, content_type=content_type)
-    if request.user.userprofile.level not in annotation.manager.user_levels:
+    point_id = int(request.GET.get('point_id', 0))
+    assert point_id
+    segment = bool(int(request.GET.get('segment', 0)))
+
+    if request.user.userprofile.level not in annotationtypes.get_manager(content_type).user_levels:
         return http.HttpResponseForbidden()
+
+    annotation = models.Annotation(trip_id=trip_id, content_type=content_type,
+                                   point=models.Point.objects.get(id=point_id), segment=segment)
+
     if request.method == 'GET':
         return new_GET(request, annotation)
     elif request.method == 'POST':

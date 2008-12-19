@@ -57,6 +57,17 @@ class ContentSerializer:
                     current = None
         return value
 
+class CompositeContentWidget(forms.widgets.Widget):
+    def render_one(self, label, widget, name, value, attrs=None):
+        return "<label for=\"%s\">%s:</label><br />%s" % (name, label, widget.render(name, value, attrs))
+
+    def render_set(self, widget_set, name, value, attrs):
+        return "<br />".join([self.render_one(w[1], w[2], "%s_%s" % (name, w[0]), value.get(w[0]), attrs)
+                              for w in widget_set])
+
+    def value_from_datadict(self, data, files, name):
+        return dict([(field, data.get("%s_%s" % (name, field))) for field in self.subfields])
+
 class AnnotationManager(object):
     all = {}
 
@@ -82,10 +93,21 @@ class AnnotationManager(object):
 
     is_photos = False
 
+    can_attach_cost = False
+
     widget = None
+
+    @classmethod
+    def cost_content_types(_):
+        return [c for c in models.ContentType.values
+                if get_manager(c).can_attach_cost]
 
     def __init__(self, annotation):
         self.annotation = annotation
+
+    @property
+    def display_name(self):
+        return self.annotation.title
 
     def render_short(self):
         raise NotImplementedError()
@@ -102,7 +124,9 @@ class AnnotationManager(object):
 class ActivityAnnotationManager(AnnotationManager):
     content_type = models.ContentType.ACTIVITY
 
-    widget = forms.widgets.Textarea()
+    widget = forms.widgets.Textarea
+
+    can_attach_cost = True
 
     def render_short(self):
         t = template.loader.get_template("annotation_view_activity.html")
@@ -116,7 +140,7 @@ class ActivityAnnotationManager(AnnotationManager):
 class UrlAnnotationManager(AnnotationManager):
     content_type = models.ContentType.URL
 
-    widget = forms.widgets.TextInput()
+    widget = lambda _: forms.widgets.TextInput(attrs={'class': 'text'})
 
     def render_short(self):
         return "<a href=\"%s\">URL: %s</a>" % (html.escape(self.annotation.content),
@@ -154,7 +178,13 @@ class TransportationAnnotationManager(AnnotationManager):
     trip_allowed = False
     point_allowed = False
 
-    widget = forms.widgets.Select(choices=Transportation.choices)
+    widget = lambda _: forms.widgets.Select(choices=Transportation.choices)
+
+    can_attach_cost = True
+
+    @property
+    def display_name(self):
+        return Transportation.get_description(int(self.annotation.content))
 
     def render_short(self):
         return "Transportation: %s" % Transportation.get_description(int(self.annotation.content))
@@ -172,7 +202,17 @@ class GPSAnnotationManager(AnnotationManager):
     has_extended_content = True
     edit_content_as_file = True
 
-    widget = forms.widgets.FileInput()
+    widget = forms.widgets.FileInput
+
+    @property
+    def display_name(self):
+        display = "GPS"
+        if self.annotation.title:
+            display += ": %s" % self.annotation.title
+        return html.escape(display)
+
+    def render_short(self):
+        return "<a href=\"%s\">%s</a>" % (html.escape(self.annotation.url), self.display_name)
 
     def get_cache_filename(self):
         if self.annotation.id:
@@ -205,13 +245,6 @@ class GPSAnnotationManager(AnnotationManager):
                 if os.path.exists(f):
                     os.unlink(f)
             os.rmdir(tempdir)
-
-    def render_short(self):
-        title = "GPS"
-        if self.annotation.title:
-            title += ": %s" % self.annotation.title
-        return "<a href=\"%s\">%s</a>" % (html.escape(self.annotation.url),
-                                          html.escape(title))
 
     def render(self, request):
         self.ensure_cache_file()
@@ -263,15 +296,8 @@ class AccomodationSerializer(ContentSerializer):
                     'room_type': AccomodationRoomType,
                     'rating': AccomodationRating}
 
-class AccomodationInput(forms.widgets.Widget):
+class AccomodationInput(CompositeContentWidget):
     subfields = ['name', 'type', 'room_type', 'URL', 'email', 'address', 'phone_number', 'rating', 'comments']
-
-    def render_one(self, label, widget, name, value, attrs=None):
-        return "<label for=\"%s\">%s:</label><br />%s" % (name, label, widget.render(name, value, attrs))
-
-    def render_set(self, widget_set, name, value, attrs):
-        return "<br />".join([self.render_one(w[1], w[2], "%s_%s" % (name, w[0]), value.get(w[0]), attrs)
-                              for w in widget_set])
 
     def render_basic(self, name, value, attrs=None):
         basic = [('name', "Name", forms.widgets.TextInput(attrs={'class': 'text'})),
@@ -308,9 +334,6 @@ class AccomodationInput(forms.widgets.Widget):
         render_funcs = [self.render_basic, self.render_contact, self.render_rating]
         return "".join([render_func(name, value, attrs) for render_func in render_funcs])
 
-    def value_from_datadict(self, data, files, name):
-        return dict([(field, data.get("content_%s" % field)) for field in self.subfields])
-
 class AccomodationAnnotationManager(AnnotationManager):
     content_type = models.ContentType.ACCOMODATION
 
@@ -324,7 +347,16 @@ class AccomodationAnnotationManager(AnnotationManager):
 
     show_content_label = False
 
-    widget = AccomodationInput()
+    widget = AccomodationInput
+
+    can_attach_cost = True
+
+    @property
+    def display_name(self):
+        display = "Accomodation"
+        if self.annotation.date:
+            display += " (%s)" % utils.format_date_human(self.annotation.date)
+        return display
 
     def render_short(self):
         content = AccomodationSerializer().deserialize(self.annotation.content)
@@ -340,3 +372,53 @@ class AccomodationAnnotationManager(AnnotationManager):
         if content.get('URL'):
             content['URL'] = forms.fields.URLField().clean(content['URL'])
         return AccomodationSerializer().serialize(content)
+
+class CostSerializer(ContentSerializer):
+    multiline_fields = ['comments']
+    typed_fields = {'value': float}
+
+class CostWidget(CompositeContentWidget):
+    subfields = ['value', 'currency', 'parent', 'comments']
+
+    def render(self, name, value, attrs=None):
+        value = CostSerializer().deserialize(value)
+
+        annotations = self.annotation.point.annotation_set
+        annotations = annotations.filter(content_type__in=AnnotationManager.cost_content_types(),
+                                         segment=self.annotation.segment)
+        annotation_choices = [(a.id, a.manager.display_name) for a in annotations]
+
+        widgets = [('value', "Value", forms.widgets.TextInput(attrs={'class': 'text'})),
+                   ('currency', "Currency", forms.widgets.TextInput(attrs={'class': 'text'})),
+                   ('parent', "Attach to", forms.widgets.Select(choices=annotation_choices)),
+                   ('comments', "Comments", forms.widgets.Textarea())]
+        return self.render_set(widgets, name, value, attrs)
+
+class CostAnnotationManager(AnnotationManager):
+    content_type = models.ContentType.COST
+
+    exclude_fields = ['title']
+
+    title_required = False
+
+    show_content_label = False
+
+    widget = CostWidget
+
+    def render_short(self):
+        content = CostSerializer().deserialize(self.annotation.content)
+
+        t = template.loader.get_template("annotation_view_cost.html")
+        c = template.Context({'annotation': self.annotation, 'content': content,
+                              'parent': models.Annotation.objects.get(id=content['parent'])})
+
+        return t.render(c)
+
+    def clean_content(self, content):
+        if not content.get('value') or not content.get('currency'):
+            raise forms.util.ValidationError("Value and currency are mandatory.")
+        try:
+            float(content['value'])
+        except ValueError:
+            raise forms.util.ValidationError("The value is invalid.")
+        return CostSerializer().serialize(content)

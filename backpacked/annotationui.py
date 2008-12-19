@@ -7,81 +7,31 @@ from backpacked import ui
 
 import settings
 
-class ParentField(forms.fields.ChoiceField):
-    def _get_annotation(self):
-        return self._annotation
-
-    def _set_annotation(self, annotation):
-        self._annotation = annotation
-        points = sorted(list(annotation.trip.point_set.all()))
-        choices = []
-        if annotation.manager.trip_allowed:
-            choices += [("", "")]
-        if annotation.manager.point_allowed:
-            choices += [("p_%s" % p.id, p.name) for p in points]
-        if annotation.manager.segment_allowed:
-            for i in range(len(points) - 1):
-                choices.append(("s_%s" % points[i].id, "%s - %s" % (points[i].name, points[i + 1].name)))
-        self.choices = choices
-
-    annotation = property(_get_annotation, _set_annotation)
-
 class NoWidget(forms.widgets.Widget):
     is_hidden = True
 
     def render(*_, **__):
         return ""
 
-parent_re = re.compile(r"^[ps]_\d+$")
-
-class PointInput(NoWidget):
-    def value_from_datadict(self, data, *_):
-        parent = data.get('parent')
-        if not parent:
-            return None
-        else:
-            assert parent_re.match(parent)
-            return models.Point.objects.get(id=int(parent[2:]))
-
-class SegmentInput(NoWidget):
-    def value_from_datadict(self, data, *_):
-        parent = data.get('parent')
-        if not parent:
-            return False
-        else:
-            assert parent_re.match(parent)
-            return parent[0] == "s"
-
 class EditForm(ui.ModelForm):
     title = forms.fields.CharField(max_length=30, widget=forms.widgets.TextInput(attrs={'class': 'title'}))
     date = forms.fields.DateField(widget=forms.widgets.DateTimeInput(format=settings.DATE_FORMAT_SHORT_PY, attrs={'class': 'text'}), required=False)
-    parent = ParentField()
     visibility = forms.fields.ChoiceField(choices=models.Visibility.choices)
+    point = forms.models.ModelChoiceField(models.Point.objects, required=False, widget=forms.widgets.HiddenInput(), label="")
+    segment = forms.fields.BooleanField(required=False, widget=forms.widgets.HiddenInput(), label="")
     content = forms.fields.Field()
-    point = forms.fields.Field(widget=PointInput(), label="")
-    segment = forms.fields.Field(widget=SegmentInput(), label="")
 
     class Meta:
-        fields = ('title', 'date', 'parent', 'visibility', 'content') + \
-                 ('point', 'segment') # editable through the 'parent' field
+        fields = ('title', 'date', 'visibility', 'point', 'segment', 'content')
 
-    def __init__(self, data=None, files=None, annotation=None, initial=None, edit_parent=True):
+    def __init__(self, data=None, files=None, annotation=None, initial=None):
         super(EditForm, self).__init__(data, files, initial=initial, instance=annotation)
-
-        if edit_parent:
-            if not 'parent' in self.initial:
-                if annotation.point_id:
-                    self.initial['parent'] = "%s_%s" % (annotation.segment and "s" or "p", annotation.point_id)
-                else:
-                    self.initial['parent'] = ""
-            self.fields['parent'].annotation = annotation
-        else:
-            self.fields['parent'].widget = forms.widgets.HiddenInput()
 
         if annotation.manager.edit_content_as_file:
             self.fields['content'] = forms.fields.FileField(widget=ContentInput(), required=False)
 
-        self.fields['content'].widget = annotation.manager.widget
+        self.fields['content'].widget = annotation.manager.widget()
+        self.fields['content'].widget.annotation = annotation
         if annotation.manager.show_content_label:
             self.fields['content'].label = annotation.content_type_h
         else:
