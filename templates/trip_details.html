@@ -65,7 +65,7 @@ $(document).ready(function()
   <ul class="plain-list">
     {% for annotation in trip.annotation_set.all %}
     {% if annotation.manager.is_photos %}
-    <li>{{ annotation.manager.render_short }}</li>
+    <li>{% autoescape off %}{{ annotation.manager.render_short }}{% endautoescape %}</li>
     {% endif %}
     {% endfor %}
   </ul>

@@ -7,6 +7,7 @@ from django import http
 from django import forms
 from django import template
 from django.utils import html
+from django.utils import simplejson
 
 from backpacked import models
 from backpacked import utils
@@ -17,45 +18,15 @@ import settings
 def get_manager(content_type):
     return AnnotationManager.all[content_type]
 
-class ContentSerializer:
-    multiline_fields = []
-    typed_fields = {}
+def serialize(content):
+    return simplejson.dumps(content)
 
-    def serialize(self, content):
-        pairs = [[k, v] for k, v in content.items() if v]
-        for pair in pairs:
-            pair[1] = re.sub("\r", "", pair[1])
-            if pair[0] in self.multiline_fields:
-                pair[1] = re.sub("([\n]+)|$", "\n", pair[1])
-            else:
-                pair[1] = re.sub("\n", " ", pair[1])
-        return "\n".join(["%s:%s" % tuple(pair) for pair in pairs])
-
-    def deserialize(self, content):
-        if content is None:
-            return {}
-        if isinstance(content, dict):
-            return content
-        value = {}
-        current = None
-        for line in content.split("\n"):
-            if not current:
-                k, v = line.split(":", 1)
-                value[k] = v
-                if k in self.multiline_fields:
-                    current = k
-                else:
-                    t = self.typed_fields.get(k)
-                    if callable(t):
-                        value[k] = t(value[k])
-                    if isinstance(t, utils.Enum):
-                        value["%s_h" % k] = t.get_description(value[k])
-            else:
-                if line:
-                    value[current] += "\n" + line
-                else:
-                    current = None
-        return value
+def deserialize(content):
+    if content is None:
+        return {}
+    if isinstance(content, dict):
+        return content
+    return simplejson.loads(content)
 
 class CompositeContentWidget(forms.widgets.Widget):
     def render_one(self, label, widget, name, value, attrs=None):
@@ -297,12 +268,6 @@ AccomodationRating = utils.Enum([(-2, "Very poor"),
                                  (1, "Good"),
                                  (2, "Very good")])
 
-class AccomodationSerializer(ContentSerializer):
-    multiline_fields = ['comments']
-    typed_fields = {'type': AccomodationType,
-                    'room_type': AccomodationRoomType,
-                    'rating': AccomodationRating}
-
 class AccomodationInput(CompositeContentWidget):
     subfields = ['name', 'type', 'room_type', 'URL', 'email', 'address', 'phone_number', 'rating', 'comments']
 
@@ -337,7 +302,7 @@ class AccomodationInput(CompositeContentWidget):
                         self.render_set(rating, name, value, attrs))
 
     def render(self, name, value, attrs=None):
-        value = AccomodationSerializer().deserialize(value)
+        value = deserialize(value)
         render_funcs = [self.render_basic, self.render_contact, self.render_rating]
         return "".join([render_func(name, value, attrs) for render_func in render_funcs])
 
@@ -366,7 +331,10 @@ class AccomodationAnnotationManager(AnnotationManager):
         return display
 
     def render_short(self):
-        content = AccomodationSerializer().deserialize(self.annotation.content)
+        content = deserialize(self.annotation.content)
+        for k, t in [('type', AccomodationType), ('room_type', AccomodationRoomType), ('rating', AccomodationRating)]:
+            if content.has_key(k):
+                content["%s_h" % k] = t.get_description(content[k])
 
         t = template.loader.get_template("annotation_view_accomodation.html")
         c = template.Context({'annotation': self.annotation, 'content': content})
@@ -378,17 +346,20 @@ class AccomodationAnnotationManager(AnnotationManager):
             raise forms.util.ValidationError("The name is mandatory.")
         if content.get('URL'):
             content['URL'] = forms.fields.URLField().clean(content['URL'])
-        return AccomodationSerializer().serialize(content)
-
-class CostSerializer(ContentSerializer):
-    multiline_fields = ['comments']
-    typed_fields = {'value': float}
+        for k in ['type', 'room_type', 'rating']:
+            if content.has_key(k):
+                try:
+                    content[k] = int(content[k])
+                except ValueError:
+                    del content[k]
+        content['comments'] = re.sub("\r", "", content['comments'])
+        return serialize(content)
 
 class CostWidget(CompositeContentWidget):
     subfields = ['value', 'currency', 'parent', 'comments']
 
     def render(self, name, value, attrs=None):
-        value = CostSerializer().deserialize(value)
+        value = deserialize(value)
 
         annotations = self.annotation.point.annotation_set
         annotations = annotations.filter(content_type__in=AnnotationManager.cost_content_types(),
@@ -414,9 +385,9 @@ class CostAnnotationManager(AnnotationManager):
     widget = CostWidget
 
     def render_short(self):
-        content = CostSerializer().deserialize(self.annotation.content)
+        content = deserialize(self.annotation.content)
+        parent = content.get('parent') and models.Annotation.objects.get(id=content['parent']) or None
 
-        parent = content.has_key('parent') and models.Annotation.objects.get(id=content['parent']) or None
         t = template.loader.get_template("annotation_view_cost.html")
         c = template.Context({'annotation': self.annotation, 'content': content,
                               'parent': parent})
@@ -427,10 +398,11 @@ class CostAnnotationManager(AnnotationManager):
         if not content.get('value') or not content.get('currency'):
             raise forms.util.ValidationError("Value and currency are mandatory.")
         try:
-            float(content['value'])
+            content['value'] = float(content['value'])
         except ValueError:
             raise forms.util.ValidationError("The value is invalid.")
-        return CostSerializer().serialize(content)
+        content['comments'] = re.sub("\r", "", content['comments'])
+        return serialize(content)
 
 class NoteAnnotationManager(AnnotationManager):
     content_type = models.ContentType.NOTE
