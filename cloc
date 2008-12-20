@@ -1,4 +1,4 @@
 #!/bin/sh
 
-cloc --exclude-dir=lib,media/javascript/lib,media/css/lib,.bzr .
+cloc --exclude-dir=lib,scripts/lib,media/javascript/lib,media/javascript/c,media/css/lib,media/css/c,.bzr .
 
