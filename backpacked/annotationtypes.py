@@ -29,12 +29,21 @@ def deserialize(content):
     return simplejson.loads(content)
 
 class CompositeContentWidget(forms.widgets.Widget):
-    def render_one(self, label, widget, name, value, attrs=None):
-        return "<label for=\"%s\">%s:</label><br />%s" % (name, label, widget.render(name, value, attrs))
+    def render_one(self, label, widget, name, value, attrs=None, template=None):
+        if not template:
+            template = "%s"
+        return template % ("<label for=\"%s\">%s:</label><br />%s" % (name, label, widget.render(name, value, attrs)))
 
-    def render_set(self, widget_set, name, value, attrs):
-        return "<br />".join([self.render_one(w[1], w[2], "%s_%s" % (name, w[0]), value.get(w[0]), attrs)
-                              for w in widget_set])
+    def render_set(self, widgets, name, value, attrs):
+        strs = []
+        for widget in widgets:
+            name_ = "%s_%s" % (name, widget[0])
+            value_ = value.get(widget[0])
+            attrs_ = attrs.copy()
+            attrs_['id'] = "id_%s" % name_
+            template_ = len(widget) >= 4 and widget[3] or None
+            strs.append(self.render_one(widget[1], widget[2], name_, value_, attrs_, template_))
+        return "<br />".join(strs)
 
     def value_from_datadict(self, data, files, name):
         return dict([(field, data.get("%s_%s" % (name, field))) for field in self.subfields])
@@ -136,15 +145,48 @@ class ExternalPhotosAnnotationManager(UrlAnnotationManager):
         return "<a href=\"%s\">Photos: %s</a>" % (html.escape(self.annotation.content),
                                                   html.escape(self.annotation.title))
 
-Transportation = utils.Enum([(0, "Unspecified"),
-                             (1, "Airplane"),
-                             (2, "Bike"),
-                             (3, "Boat"),
-                             (4, "Bus"),
-                             (5, "Car"),
-                             (6, "Motorcycle"),
-                             (7, "Train"),
-                             (8, "Walk")])
+class Transportation:
+    Means = utils.Enum([(0, "Unspecified"),
+                        (1, "Airplane"),
+                        (2, "Bike"),
+                        (3, "Boat / Ferry"),
+                        (4, "Bus"),
+                        (5, "Car"),
+                        (6, "Motorcycle"),
+                        (7, "Train"),
+                        (8, "Walk")])
+
+    Class = utils.Enum([(0, "Unspecified"),
+                        (1, "First class"),
+                        (2, "Second class"),
+                        (3, "Third class"),
+                        (4, "First class sleeper"),
+                        (5, "Second class sleeper"),
+                        (6, "Third class sleeper"),
+                        (7, "Economy"),
+                        (8, "Business class")])
+
+    ClassMapping = {Means.AIRPLANE: [Class.ECONOMY, Class.BUSINESS_CLASS],
+                    Means.BOAT_X_FERRY: [Class.FIRST_CLASS, Class.SECOND_CLASS, Class.THIRD_CLASS,
+                                         Class.FIRST_CLASS_SLEEPER, Class.SECOND_CLASS_SLEEPER, Class.THIRD_CLASS_SLEEPER],
+                    Means.TRAIN: [Class.FIRST_CLASS, Class.SECOND_CLASS, Class.THIRD_CLASS,
+                                  Class.FIRST_CLASS_SLEEPER, Class.SECOND_CLASS_SLEEPER, Class.THIRD_CLASS_SLEEPER]}
+
+class TransportationWidget(CompositeContentWidget):
+    subfields = ['means', 'class', 'comments']
+
+    def render(self, name, value, attrs=None):
+        value = deserialize(value)
+
+        widgets = [('means', "Means", forms.widgets.Select(choices=Transportation.Means.choices)),
+                   ('class', "Class", forms.widgets.Select(), "<span id=\"content_class\">%s</span>"),
+                   ('comments', "Comments", forms.widgets.Textarea())]
+
+        return self.render_set(widgets, name, value, attrs) \
+            + "<script type=\"text/javascript\">init_annotation_edit_transportation(%s, %s, %s);</script>" \
+            % (simplejson.dumps(dict(Transportation.Class.choices)),
+               simplejson.dumps(Transportation.ClassMapping),
+               value['class'])
 
 class TransportationAnnotationManager(AnnotationManager):
     content_type = models.ContentType.TRANSPORTATION
@@ -156,19 +198,37 @@ class TransportationAnnotationManager(AnnotationManager):
     trip_allowed = False
     point_allowed = False
 
-    widget = lambda _: forms.widgets.Select(choices=Transportation.choices)
+    show_content_label = False
+
+    widget = TransportationWidget
 
     can_attach_cost = True
 
     @property
     def display_name(self):
-        return "Transportation: %s" % Transportation.get_description(int(self.annotation.content))
+        content = deserialize(self.annotation.content)
+        return "Transportation: %s" % Transportation.Means.get_description(content['means'])
 
     def render_short(self):
-        return self.display_name
+        content = deserialize(self.annotation.content)
+        for k, t in [('means', Transportation.Means), ('class', Transportation.Class)]:
+            if content.has_key(k):
+                content["%s_h" % k] = t.get_description(content[k])
+
+        t = template.loader.get_template("annotation_view_transportation.html")
+        c = template.Context({'annotation': self.annotation, 'content': content})
+
+        return t.render(c)
 
     def clean_content(self, content):
-        return str(forms.fields.ChoiceField(choices=Transportation.choices).clean(content))
+        for k in ['means', 'class']:
+            if content.has_key(k):
+                try:
+                    content[k] = int(content[k])
+                except ValueError:
+                    del content[k]
+        content['comments'] = re.sub("\r", "", content['comments'])
+        return serialize(content)
 
 class GPSAnnotationManager(AnnotationManager):
     content_type = models.ContentType.GPS
