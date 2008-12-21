@@ -1,5 +1,7 @@
 import re
 
+from PIL import Image
+
 from django import forms
 from django.contrib import auth
 
@@ -22,6 +24,8 @@ class LoginForm(ui.Form):
         return self.cleaned_data
 
 class ProfileForm(ui.ModelForm):
+    PICTURE_MAX_SIZE = (125, 125) # NB: Don't forget to edit CSS when changing this!
+
     name = forms.fields.CharField(required=False, widget=forms.widgets.TextInput(attrs={'class': 'text'}))
     current_location = placeui.PlaceChoiceField(required=False)
     about = forms.fields.CharField(required=False, widget=forms.widgets.Textarea(attrs={'class': 'text'}))
@@ -29,6 +33,16 @@ class ProfileForm(ui.ModelForm):
     class Meta:
         model = models.UserProfile
         fields = ('name', 'current_location', 'about', 'picture')
+
+    def save(self, commit=True):
+        profile = super(ProfileForm, self).save(commit=False)
+        if self.cleaned_data.get('picture'):
+            image = Image.open(profile.picture.path)
+            image.thumbnail(self.PICTURE_MAX_SIZE, Image.ANTIALIAS)
+            image.save(profile.picture_thumbnail_path, quality=85, optimize=True)
+        if commit:
+            profile.save()
+        return profile
 
 class RegistrationForm(ui.ModelForm):
     USERNAME_RE = re.compile(r"^[^\d]\w*$")
@@ -62,8 +76,8 @@ class RegistrationForm(ui.ModelForm):
             raise forms.util.ValidationError("The alpha code is invalid.")
 
     def save(self, commit=True):
-        user = super(forms.ModelForm, self).save(commit=False)
-        user.set_password(self.cleaned_data["password"])
+        user = super(RegistrationForm, self).save(commit=False)
+        user.set_password(self.cleaned_data['password'])
         if commit:
             user.save()
         return user

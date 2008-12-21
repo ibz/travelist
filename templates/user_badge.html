@@ -1,6 +1,6 @@
 <div class="column span-14 prepend-5 append-5 prepend-top last">
   <div class="column span-4 append-bottom">
-    <div><img class="user-image" src="{% if for_user.userprofile.picture %}{{ for_user.userprofile.picture.url }}{% else %}{{ MEDIA_URL }}pp/default.png{% endif %}" /></div>
+    <div><img class="user-image" src="{% if for_user.userprofile.picture %}{{ for_user.userprofile.picture_thumbnail_url }}{% else %}{{ MEDIA_URL }}pp/default.png{% endif %}" /></div>
   </div>
   <div class="column span-8">
     <h4>{{ for_user.username }}</h4>

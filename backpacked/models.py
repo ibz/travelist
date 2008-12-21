@@ -1,6 +1,6 @@
 import os
 from datetime import datetime
-from PIL import Image
+
 from django.db.models import Q
 from django.contrib.auth.models import User
 from django.contrib.gis.db import models
@@ -66,8 +66,6 @@ def _get_profile_picture_location(profile, name):
     return "pp/%s/%s%s" % (username[0], username, os.path.splitext(name)[1])
 
 class UserProfile(models.Model):
-    PICTURE_MAX_SIZE = (125, 125) # NB: Don't forget to edit CSS when changing this!
-
     user = models.OneToOneField(User, primary_key=True)
     level = models.IntegerField(choices=UserLevel.choices, default=UserLevel.BASIC)
     confirmation_key = models.CharField(max_length=40)
@@ -80,16 +78,20 @@ class UserProfile(models.Model):
     def __unicode__(self):
         return self.user.username
 
-    def save(self):
-        super(UserProfile, self).save()
+    @property
+    def picture_thumbnail_path(self):
         if self.picture:
-            image = Image.open(self.picture.path)
-            for max in UserProfile.PICTURE_MAX_SIZE:
-                for actual in image.size:
-                    if actual > max:
-                        image.thumbnail(UserProfile.PICTURE_MAX_SIZE)
-                        image.save(self.picture.path)
-                        return
+            split = os.path.splitext(self.picture.path)
+            return "".join([split[0], ".thumbnail", split[1]])
+
+    @property
+    def picture_thumbnail_url(self):
+        if self.picture:
+            try:
+                dot_index = self.picture.url.rindex(".")
+            except ValueError:
+                return "%s.thumbnail" % self.picture.url
+            return "%s.thumbnail%s" % (self.picture.url[:dot_index], self.picture.url[dot_index:])
 
 RelationshipStatus = utils.Enum([(0, "Pending"),
                                  (1, "Confirmed")])
