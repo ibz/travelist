@@ -34,7 +34,7 @@ class CachedFileNode(template.Node):
             return path
 
         file, ext = os.path.splitext(path)
-        newpath = "".join([file, ".%s" % version, ext])
+        newpath = "".join([file, ".v-%s" % version, ext])
 
         return newpath
 
