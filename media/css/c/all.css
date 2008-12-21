@@ -1,0 +1,539 @@
+.ui-wrapper { border: 1px solid #50A029; }
+.ui-wrapper input, .ui-wrapper textarea { border: 0; }
+@import "flora.css";
+
+/* Caution! Ensure accessibility in print and other media types... */
+@media projection, screen { /* Use class for showing/hiding tab content, so that visibility can be better controlled in different media types... */
+    .ui-tabs-hide {
+        display: none !important;
+    }
+}
+
+/* Hide useless elements in print layouts... */
+@media print {
+    .ui-tabs-nav {
+        display: none;
+    }
+}
+
+/* Skin */
+.ui-tabs-nav, .ui-tabs-panel {
+    font-family: "Trebuchet MS", Trebuchet, Verdana, Helvetica, Arial, sans-serif;
+    font-size: 12px;
+}
+.ui-tabs-nav {
+    list-style: none;
+    margin: 0;
+    padding: 0 0 0 3px;
+}
+.ui-tabs-nav:after { /* clearing without presentational markup, IE gets extra treatment */
+    display: block;
+    clear: both;
+    content: " ";
+}
+.ui-tabs-nav li {
+    float: left;
+    margin: 0 0 0 2px;
+    font-weight: bold;
+}
+.ui-tabs-nav a, .ui-tabs-nav a span {
+    float: left; /* fixes dir=ltr problem and other quirks IE */
+    padding: 0 12px;
+    background: url(/media/css/lib/jquery/i/tabs.png) no-repeat;
+}
+.ui-tabs-nav a {
+    margin: 5px 0 0; /* position: relative makes opacity fail for disabled tab in IE */
+    padding-left: 0;
+    background-position: 100% 0;
+    text-decoration: none;
+    white-space: nowrap; /* @ IE 6 */
+    outline: 0; /* @ Firefox, prevent dotted border after click */    
+}
+.ui-tabs-nav a:link, .ui-tabs-nav a:visited {
+    color: #fff;
+}
+.ui-tabs-nav .ui-tabs-selected a {
+    position: relative;
+    top: 1px;
+    z-index: 2;
+    margin-top: 0;
+    background-position: 100% -23px;
+}
+.ui-tabs-nav a span {
+    padding-top: 1px;
+    padding-right: 0;
+    height: 20px;
+    background-position: 0 0;
+    line-height: 20px;
+}
+.ui-tabs-nav .ui-tabs-selected a span {
+    padding-top: 0;
+    height: 27px;
+    background-position: 0 -23px;
+    line-height: 27px;
+}
+.ui-tabs-nav .ui-tabs-selected a:link, .ui-tabs-nav .ui-tabs-selected a:visited,
+.ui-tabs-nav .ui-tabs-disabled a:link, .ui-tabs-nav .ui-tabs-disabled a:visited { /* @ Opera, use pseudo classes otherwise it confuses cursor... */
+    cursor: text;
+}
+.ui-tabs-nav a:hover, .ui-tabs-nav a:focus, .ui-tabs-nav a:active,
+.ui-tabs-nav .ui-tabs-unselect a:hover, .ui-tabs-nav .ui-tabs-unselect a:focus, .ui-tabs-nav .ui-tabs-unselect a:active { /* @ Opera, we need to be explicit again here now... */
+    cursor: pointer;
+}
+.ui-tabs-disabled {
+    opacity: .4;
+    filter: alpha(opacity=40);
+}
+.ui-tabs-nav .ui-tabs-disabled a:link, .ui-tabs-nav .ui-tabs-disabled a:visited {
+    color: #000;
+}
+.ui-tabs-panel {
+    border: 1px solid #519e2d;
+    padding: 10px;
+    background: #fff; /* declare background color for container to avoid distorted fonts in IE while fading */
+}
+/*.ui-tabs-loading em {
+    padding: 0 0 0 20px;
+    background: url(loading.gif) no-repeat 0 50%;
+}*/
+
+/* Additional IE specific bug fixes... */
+* html .ui-tabs-nav { /* auto clear @ IE 6 & IE 7 Quirks Mode */
+    display: inline-block;
+}
+*:first-child+html .ui-tabs-nav  { /* auto clear @ IE 7 Standards Mode - do not group selectors, otherwise IE 6 will ignore complete rule (because of the unknown + combinator)... */
+    display: inline-block;
+}
+.ac_results {
+	padding: 0px;
+	border: 1px solid WindowFrame;
+	background-color: Window;
+	overflow: hidden;
+}
+
+.ac_results ul {
+	width: 100%;
+	list-style-position: outside;
+	list-style: none;
+	padding: 0;
+	margin: 0;
+}
+
+.ac_results iframe {
+	display:none;/*sorry for IE5*/
+	display/**/:block;/*sorry for IE5*/
+	position:absolute;
+	top:0;
+	left:0;
+	z-index:-1;
+	filter:mask();
+	width:3000px;
+	height:3000px;
+}
+
+.ac_results li {
+	margin: 0px;
+	padding: 2px 5px;
+	cursor: pointer;
+	display: block;
+	width: 100%;
+	font: menu;
+	font-size: 12px;
+	overflow: hidden;
+}
+
+.ac_loading {
+	background : Window url('./indicator.gif') right center no-repeat;
+}
+
+.ac_over {
+	background-color: Highlight;
+	color: HighlightText;
+}
+/* jQuery.Rating Plugin CSS - http://www.fyneworks.com/jquery/star-rating/ */
+div.rating{cursor:pointer;margin:2em;clear:both;display:block}
+div.rating:after{content:'.';display:block;height:0;width:0;clear:both;visibility:hidden}
+div.cancel,div.star{float:left;width:17px;height:15px;text-indent:-999em;cursor:pointer;display:block;background:transparent;overflow:hidden}
+div.cancel,div.cancel a{background:url('/media/css/lib/jquery/i/delete.gif') no-repeat 0 -16px}
+div.star,div.star a{background:url('/media/css/lib/jquery/i/star.gif') no-repeat 0 0px}
+div.cancel a,div.star a{display:block;width:16px;height:100%;background-position:0 0px;border:1 solid #FF0000}
+div.star_on a{background-position:0 -16px!important}
+div.star_hover a,div.star_live a:hover{background-position:0 -32px}
+/* Read Only CSS */
+div.star_readonly a,div.star_readonly a:hover{cursor:default !important}
+/* Partial Star CSS */
+div.star{background:transparent!important;overflow:hidden!important}
+/* END jQuery.Rating Plugin CSS *//*
+   
+ * Smoothness Theme for jQuery UI Datepicker
+ * Generated by Theme Roller ( http://ui.jquery.com/themeroller/ )
+ * Authors: 
+ *		Filament Group ( http://www.filamentgroup.com )
+ * 		Marc Grabanski ( http://marcgrabanski.com/ )
+*/
+#ui-datepicker-div,
+#ui-datepicker-div table,
+.ui-datepicker-div,
+.ui-datepicker-div table,
+.ui-datepicker-inline,
+.ui-datepicker-inline table {
+	font-size: 12px !important;
+}
+.ui-datepicker-div, .ui-datepicker-inline, #ui-datepicker-div {
+	/*resets*/margin: 0; padding: 0; border: 0; outline: 0; line-height: 1.3; text-decoration: none; font-size: 100%; list-style: none;
+	font-family: Verdana, Arial, sans-serif;
+	background: #ffffff;
+	font-size: 1.1em;
+	border: 4px solid #d3d3d3;
+	width: 15.5em;
+	padding: 2.5em .5em .5em .5em;
+	position: relative;
+}
+#ui-datepicker-div {
+	z-index: 9999; /*must have*/
+	display: none;
+	background: #ffffff;
+}
+.ui-datepicker-inline {
+	float: left;
+	display: block;
+}
+.ui-datepicker-control {
+	display: none;
+}
+.ui-datepicker-current {
+	display: none;
+}
+.ui-datepicker-next, .ui-datepicker-prev {
+	position: absolute;
+	left: .5em;
+	top: .5em;
+	background: #e6e6e6 url(i/e6e6e6_40x100_textures_02_glass_75.png) 0 50% repeat-x;
+}
+.ui-datepicker-next {
+	left: 14.6em;
+}
+.ui-datepicker-next:hover, .ui-datepicker-prev:hover {
+	background: #dadada url(i/dadada_40x100_textures_02_glass_75.png) 0 50% repeat-x;
+}
+.ui-datepicker-next a, .ui-datepicker-prev a {
+	text-indent: -999999px;
+	width: 1.3em;
+	height: 1.4em;
+	display: block;
+	font-size: 1em;
+	background: url(i/888888_7x7_arrow_left.gif) 50% 50% no-repeat;
+	border: 1px solid #d3d3d3;
+	cursor: pointer;
+}
+.ui-datepicker-next a {
+	background: url(i/888888_7x7_arrow_right.gif) 50% 50% no-repeat;
+}
+.ui-datepicker-prev a:hover {
+	background: url(i/454545_7x7_arrow_left.gif) 50% 50% no-repeat;
+}
+.ui-datepicker-next a:hover {
+	background: url(i/454545_7x7_arrow_right.gif) 50% 50% no-repeat;
+}
+.ui-datepicker-prev a:active {
+	background: url(i/222222_7x7_arrow_left.gif) 50% 50% no-repeat;
+}
+.ui-datepicker-next a:active {
+	background: url(i/222222_7x7_arrow_right.gif) 50% 50% no-repeat;
+}
+.ui-datepicker-header select {
+	border: 1px solid #d3d3d3;
+	color: #555555;
+	background: #e6e6e6;
+	font-size: 1em;
+	line-height: 1.4em;
+	position: absolute;
+	top: .5em;
+	margin: 0 !important;
+	
+}
+.ui-datepicker-header select.ui-datepicker-new-month {
+width: 7em;
+left: 2.2em;
+}
+.ui-datepicker-header select.ui-datepicker-new-year {
+width: 5em;
+left: 9.4em;
+}
+table.ui-datepicker {
+	width: 15.5em;
+	text-align: right;
+}
+table.ui-datepicker td a {
+	padding: .1em .3em .1em 0;
+	display: block;
+	color: #555555;
+	background: #e6e6e6 url(i/e6e6e6_40x100_textures_02_glass_75.png) 0 50% repeat-x;
+	cursor: pointer;
+	border: 1px solid #ffffff;
+}
+table.ui-datepicker td a:hover {
+	border: 1px solid #999999;
+	color: #212121;
+	background: #dadada url(i/dadada_40x100_textures_02_glass_75.png) 0 50% repeat-x;
+}
+table.ui-datepicker td a:active {
+	border: 1px solid #dddddd;
+	color: #222222;
+	background: #ffffff url(i/ffffff_40x100_textures_02_glass_65.png) 0 50% repeat-x;
+}
+table.ui-datepicker .ui-datepicker-title-row td {
+	padding: .3em 0;
+	text-align: center;
+	font-size: .9em;
+	color: #222222;
+	text-transform: uppercase;
+	/*border-bottom: 1px solid #d3d3d3;*/
+}
+
+table.ui-datepicker .ui-datepicker-title-row td a {
+	color: #222222;
+}
+
+/* ___________ IE6 IFRAME FIX ________ */
+.ui-datepicker-cover {
+    display: none; /*sorry for IE5*/
+    display/**/: block; /*sorry for IE5*/
+    position: absolute; /*must have*/
+    z-index: -1; /*must have*/
+    filter: mask(); /*must have*/
+    top: -4px; /*must have*/
+    left: -4px; /*must have*/
+    width: 200px; /*must have*/
+    height: 200px; /*must have*/
+}a {
+    color: #0187C5;
+    text-decoration: none;
+}
+
+a.important {
+    color: red;
+}
+
+textarea {
+    height: 100px;
+    width: 350px;
+}
+
+form p {
+    margin: 1em 0 1em 0;
+}
+
+a:focus,
+a:hover {
+    color: #0187C5;
+    text-decoration: underline;
+}
+
+.right {
+    text-align: right;
+}
+
+.header {
+    background-color: #CEE3F8;
+    border-bottom: 1px solid #5F99CF;
+}
+
+/* Lists */
+
+.plain-list {
+ list-style-type: none;
+}
+
+.horizontal-list {
+    display: inline;
+    list-style-type: none;
+}
+
+.horizontal-list li {
+    display: inline;
+    padding: 5px;
+}
+
+.sortable-list {
+ list-style: none;
+ padding: 0;
+ margin: 0;
+}
+
+ul .expand-item {
+ color: #5F99CF;
+ cursor: pointer;
+ text-decoration: bold;
+}
+
+/* Tables */
+
+.data-grid thead {
+ background-color: #CEE3F8;
+ color: #5F99CF;
+ text-decoration: bold;
+}
+
+.data-grid .firstrow td {
+ border-top: 1px solid #5F99CF;
+}
+
+.data-grid .lastcolumn {
+ border-right: 1px solid #5F99CF;
+}
+
+/* Forms */
+
+form fieldset {
+    border: 1px solid #5F99CF;
+}
+
+form legend {
+    background-color: #CEE3F8;
+    color: #fff;
+    border: 1px solid #5F99CF;
+    padding: 2px 6px;
+}
+
+form .errorlist {
+    padding: .8em;
+    margin-bottom: 1em;
+    border: 2px solid #ddd;
+    background: #FBE3E4;
+    color: #8a1f11;
+    border-color: #FBC2C4;
+    list-style-type: none;
+}
+
+/* Buttons */
+
+input.button.positive {
+    color: #FFFFFF;
+    background-color: #5F99CF;
+    border-color: #D9DFEA #0E1F5B #0E1F5B #D9DFEA;
+    border-width: 1px;
+}
+
+input.button.negative {
+    color: #000000;
+    background-color: #F0F0F0;
+    border-color: #E7E7E7 #666666 #666666 #E7E7E7;
+    border-width: 1px;
+}
+
+/* User */
+
+img.user-image {
+    border: 1px solid #CCCCCC;
+    padding: 1px;
+}
+
+/* Trip */
+#map {
+    border: 2px solid #5F99CF;
+    width: 550px;
+    height: 450px;
+}
+
+#trip-details-tabs > div {
+    height: 400px;
+    overflow: auto;
+}
+
+#trip-details-tabs .annotation {
+    position: relative;
+}
+
+#trip-details-tabs .annotation .operations {
+    display: none;
+}
+
+#trip-details-tabs .annotation.hover .operations {
+    display: inline;
+    position: absolute;
+    top: 0px;
+    left: 200px;
+    width: 100px;
+    text-align: right;
+}
+
+#trip-details-tabs .annotation-types {
+    padding-bottom: 2em;
+    position: relative;
+}
+
+#trip-details-tabs .annotation-types .type-list {
+    font-weight: bold;
+    position: absolute;
+    left: 2em;
+}
+
+#sort-points li {
+    width: 380px;
+}
+
+#sort-points li .point-view,
+#sort-points li .point-edit {
+    margin-bottom: 5px;
+    height: 4.5em;
+    background-color: #CEE3F8;
+    border: 1px solid #5F99CF;
+    cursor: pointer;
+    position: relative;
+    padding-left: 10px;
+}
+
+#sort-points li .point-view .operations,
+#sort-points li .point-edit .operations {
+    position: absolute;
+    top: 0px;
+    left: 270px;
+    width: 100px;
+    text-align: right;
+    line-height: 2.25em;
+}
+
+#sort-points li .point-view .point-name {
+    font-size: 1.2em;
+    line-height: 2.5em;
+}
+
+#sort-points li .point-edit {
+    background-color: #E6F7D4;
+}
+
+#sort-points li .point-edit .values {
+    line-height: 2.5em;
+}
+
+#sort-points li .point-edit .operations input {
+    margin: 3px;
+}
+
+#sort-points li.edit-mode {
+    border: 1px dashed #5F99CF;
+    margin-bottom: 5px;
+}
+
+#sort-points li.edit-mode .point-view,
+#sort-points li.edit-mode .point-edit {
+    margin: 5px;
+}
+
+/* jQuery Tabs & Sortable */
+
+.ui-tabs-panel {
+    border-left: 0;
+    border-bottom: 0;
+    border-top: 1px solid #5F99CF;
+    border-right: 1px solid #5F99CF;
+}
+
+.ui-placeholder {
+    background: #E6F7D4;
+}
+
+.ui-effects-transfer {
+    border: 2px solid #5F99CF;
+}
