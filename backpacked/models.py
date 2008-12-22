@@ -51,7 +51,7 @@ class Place(models.Model):
 
 class PlaceSuggestion(models.Model):
     user = models.ForeignKey(User)
-    date = models.DateTimeField(auto_now=True)
+    date = models.DateTimeField(auto_now_add=True)
     name = models.CharField(max_length=100)
     comments = models.TextField()
 
@@ -74,6 +74,7 @@ class UserProfile(models.Model):
     current_location = models.ForeignKey(Place, blank=True, null=True)
     about = models.TextField(blank=True)
     picture = models.ImageField(blank=True, upload_to=_get_profile_picture_location)
+    date_modified = models.DateTimeField(auto_now=True)
 
     def __unicode__(self):
         return self.user.username
@@ -164,6 +165,8 @@ class Trip(models.Model):
     start_date = models.DateField()
     end_date = models.DateField()
     visibility = models.IntegerField(choices=Visibility.choices, default=Visibility.PUBLIC)
+    date_added = models.DateTimeField(auto_now_add=True)
+    date_modified = models.DateTimeField(auto_now=True)
     objects = TripManager()
 
     class Meta:
@@ -188,6 +191,8 @@ class Point(models.Model):
     date_left = models.DateTimeField(blank=True, null=True)
     visited = models.BooleanField(default=False)
     order_rank = models.IntegerField()
+    date_added = models.DateTimeField(auto_now_add=True)
+    date_modified = models.DateTimeField(auto_now=True)
 
     def __unicode__(self):
         return str(self.coords)
@@ -213,6 +218,8 @@ class Annotation(models.Model):
     content_type = models.IntegerField(choices=ContentType.choices)
     content = models.TextField(null=True)
     visibility = models.IntegerField(choices=Visibility.choices, default=Visibility.PUBLIC)
+    date_added = models.DateTimeField(auto_now_add=True)
+    date_modified = models.DateTimeField(auto_now=True)
 
     class Meta:
         ordering = ['content_type', 'point', 'segment', 'title']
@@ -262,13 +269,15 @@ class Annotation(models.Model):
 class ExtendedAnnotationContent(models.Model):
     annotation = models.OneToOneField(Annotation, primary_key=True, related_name='extended_content')
     content = models.TextField()
+    date_added = models.DateTimeField(auto_now_add=True)
+    date_modified = models.DateTimeField(auto_now=True)
 
 NotificationType = utils.Enum({'FRIEND_REQUEST': (1, "Friend request"),
                                'TRIP_SHARE_REQUEST': (2, "Trip share request")})
 
 class Notification(models.Model):
     user = models.ForeignKey(User)
-    date = models.DateTimeField(default=datetime.now)
+    date = models.DateTimeField(auto_now_add=True)
     type = models.IntegerField(choices=NotificationType.choices)
     content = models.TextField()
 

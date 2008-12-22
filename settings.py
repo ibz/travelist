@@ -18,7 +18,7 @@ FIXTURE_DIRS = ("fixtures",)
 LOGIN_URL = "/account/login/"
 LOGOUT_URL = "/account/logout/"
 
-TIME_ZONE = 'America/Chicago'
+TIME_ZONE = 'UTC'
 
 LANGUAGE_CODE = 'en-us'
 USE_I18N = True
