@@ -35,10 +35,13 @@ class PlaceSuggestionAdmin(admin.ModelAdmin):
             return self.delete_view(request, id)
         else:
             return super(PlaceSuggestionAdmin, self).__call__(request, url)
-
 admin.site.register(models.PlaceSuggestion, PlaceSuggestionAdmin)
 
 class UserProfileAdmin(admin.ModelAdmin):
     ordering = ['user__username']
     search_fields = ['user__username', 'user__email', 'name']
 admin.site.register(models.UserProfile, UserProfileAdmin)
+
+class SuggestionAdmin(admin.ModelAdmin):
+    ordering = ['-date']
+admin.site.register(models.Suggestion, SuggestionAdmin)

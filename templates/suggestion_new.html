@@ -1,0 +1,12 @@
+{% extends "page.html" %}
+{% block content %}
+<div class="column span-10 prepend-7 prepend-top">
+<form method="POST" action="">
+<fieldset>
+<legend>Send a suggestion</legend>
+{{ form.as_p }}
+<p><input type="submit" class="submit button positive" value="Send" /></p>
+</fieldset>
+</form>
+</div>
+{% endblock %}

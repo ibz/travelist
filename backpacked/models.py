@@ -288,3 +288,15 @@ class Notification(models.Model):
     def manager(self):
         from backpacked import notificationtypes
         return notificationtypes.get_manager(self.type)(self)
+
+SuggestionType = utils.Enum([(1, "Report issue"),
+                             (2, "Suggest feature")])
+
+class Suggestion(models.Model):
+    user = models.ForeignKey(User)
+    date = models.DateTimeField(auto_now_add=True)
+    type = models.IntegerField(choices=SuggestionType.choices, default=SuggestionType.REPORT_ISSUE)
+    comments = models.TextField()
+
+    class Meta:
+        ordering = ['-date']
