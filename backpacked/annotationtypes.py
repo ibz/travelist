@@ -314,7 +314,8 @@ AccomodationType = utils.Enum([(0, ""),
                                (4, "**** Hotel"),
                                (5, "***** Hotel"),
                                (6, "Hostel"),
-                               (7, "Bungalow")])
+                               (7, "Bungalow"),
+                               (8, "Guesthouse")])
 
 AccomodationRoomType = utils.Enum([(0, ""),
                                    (1, "Single room"),
