@@ -186,7 +186,7 @@ class TransportationWidget(CompositeContentWidget):
             + "<script type=\"text/javascript\">init_annotation_edit_transportation(%s, %s, %s);</script>" \
             % (simplejson.dumps(dict(Transportation.Class.choices)),
                simplejson.dumps(Transportation.ClassMapping),
-               value['class'])
+               value.get('class') or "null")
 
 class TransportationAnnotationManager(AnnotationManager):
     content_type = models.ContentType.TRANSPORTATION
