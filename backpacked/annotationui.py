@@ -28,7 +28,7 @@ class EditForm(ui.ModelForm):
         super(EditForm, self).__init__(data, files, initial=initial, instance=annotation)
 
         if annotation.manager.edit_content_as_file:
-            self.fields['content'] = forms.fields.FileField(widget=ContentInput(), required=False)
+            self.fields['content'] = forms.fields.FileField(required=False)
 
         self.fields['content'].widget = annotation.manager.widget()
         self.fields['content'].widget.annotation = annotation
