@@ -3,9 +3,10 @@ function autoCompletePlace(name, id, coords)
 {
     $(name).autocomplete("/places/search/",
                          {minChars: 2,
-			  matchSubset: false,
-			  onItemSelect: function(li) {
-			      $(id).attr('value', li.extra[0]);
+                          matchSubset: false,
+                          cacheLength: 0,
+                          onItemSelect: function(li) {
+			                  $(id).attr('value', li.extra[0]);
                               $(name).attr('value', li.extra[1]);
                               if(coords)
                               {

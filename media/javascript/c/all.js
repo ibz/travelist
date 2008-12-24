@@ -793,7 +793,7 @@ if(ms){start();if(!continuing)
 this.$tabs.bind(this.options.event,stop);else
 this.$tabs.bind(this.options.event,function(){stop();t=self.options.selected;start();});}
 else{stop();this.$tabs.unbind(this.options.event,stop);}}});})(jQuery);function autoCompletePlace(name,id,coords)
-{$(name).autocomplete("/places/search/",{minChars:2,matchSubset:false,onItemSelect:function(li){$(id).attr('value',li.extra[0]);$(name).attr('value',li.extra[1]);if(coords)
+{$(name).autocomplete("/places/search/",{minChars:2,matchSubset:false,cacheLength:0,onItemSelect:function(li){$(id).attr('value',li.extra[0]);$(name).attr('value',li.extra[1]);if(coords)
 {$(coords).attr('value',li.extra[2]);}}});}
 function convertDate(from_format,to_format,date)
 {function get_format(f)
