@@ -143,7 +143,7 @@
 }
 
 .ac_loading {
-	background : Window url('./indicator.gif') right center no-repeat;
+	background : Window url('/media/images/ajax.gif') right center no-repeat;
 }
 
 .ac_over {
