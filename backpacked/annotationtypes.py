@@ -164,13 +164,16 @@ class Transportation:
                         (5, "Second class sleeper"),
                         (6, "Third class sleeper"),
                         (7, "Economy"),
-                        (8, "Business class")])
+                        (8, "Business class"),
+                        (9, "No seat")])
 
     ClassMapping = {Means.AIRPLANE: [Class.ECONOMY, Class.BUSINESS_CLASS],
                     Means.BOAT_X_FERRY: [Class.FIRST_CLASS, Class.SECOND_CLASS, Class.THIRD_CLASS,
-                                         Class.FIRST_CLASS_SLEEPER, Class.SECOND_CLASS_SLEEPER, Class.THIRD_CLASS_SLEEPER],
+                                         Class.FIRST_CLASS_SLEEPER, Class.SECOND_CLASS_SLEEPER, Class.THIRD_CLASS_SLEEPER,
+                                         Class.NO_SEAT],
                     Means.TRAIN: [Class.FIRST_CLASS, Class.SECOND_CLASS, Class.THIRD_CLASS,
-                                  Class.FIRST_CLASS_SLEEPER, Class.SECOND_CLASS_SLEEPER, Class.THIRD_CLASS_SLEEPER]}
+                                  Class.FIRST_CLASS_SLEEPER, Class.SECOND_CLASS_SLEEPER, Class.THIRD_CLASS_SLEEPER,
+                                  Class.NO_SEAT]}
 
 class TransportationWidget(CompositeContentWidget):
     subfields = ['means', 'class', 'comments']
