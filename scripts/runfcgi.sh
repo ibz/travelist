@@ -1,7 +1,7 @@
 #!/bin/bash
 
 PROJDIR="/srv/fcgi/backpacked.it/backpackedit"
-PIDFILE="$PROJDIR/mysite.pid"
+PIDFILE="$PROJDIR/tmp/mysite.pid"
 
 cd $PROJDIR
 if [ -f $PIDFILE ]; then
@@ -12,4 +12,3 @@ fi
 exec /usr/bin/env - \
   PYTHONPATH="../python:.." \
   ./manage.py runfcgi pidfile=$PIDFILE host=127.0.0.1 port=3033
-
