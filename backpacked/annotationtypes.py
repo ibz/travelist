@@ -176,12 +176,13 @@ class Transportation:
                                   Class.NO_SEAT]}
 
 class TransportationWidget(CompositeContentWidget):
-    subfields = ['means', 'class', 'comments']
+    subfields = ['means', 'number', 'class', 'comments']
 
     def render(self, name, value, attrs=None):
         value = deserialize(value)
 
         widgets = [('means', "Means", forms.widgets.Select(choices=Transportation.Means.choices)),
+                   ('number', "Number", forms.widgets.TextInput(attrs={'class': 'text'})),
                    ('class', "Class", forms.widgets.Select(), "<span id=\"content_class\">%s</span>"),
                    ('comments', "Comments", forms.widgets.Textarea())]
 
