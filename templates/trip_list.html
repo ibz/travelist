@@ -19,12 +19,20 @@
   {% endfor %}
 </table>
 {% else %}
-{% if is_self %}You have no trips.{% else %}User {{ for_user.username }} has no trips.{% endif %}
+<div class="large">
+{% if is_self %}
+You have no trips. Start by <a href="/trips/new/">adding one</a>.
+{% else %}
+User {{ for_user.username }} has no trips.
 {% endif %}
+{% endif %}
+</div>
 </div>
 {% if is_self %}
 <div class="column span-3 prepend-2 prepend-top last">
+  {% if trips %}
   <a href="/trips/new/" class="large" style="position: relative; top: 100px;">add a trip</a>
+  {% endif %}
 </div>
 {% endif %}
 {% endblock %}
