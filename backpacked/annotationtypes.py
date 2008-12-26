@@ -175,6 +175,8 @@ class Transportation:
                                   Class.FIRST_CLASS_SLEEPER, Class.SECOND_CLASS_SLEEPER, Class.THIRD_CLASS_SLEEPER,
                                   Class.NO_SEAT]}
 
+    NumberMapping = [Means.AIRPLANE, Means.BOAT_X_FERRY, Means.BUS, Means.TRAIN]
+
 class TransportationWidget(CompositeContentWidget):
     subfields = ['means', 'number', 'class', 'comments']
 
@@ -182,14 +184,15 @@ class TransportationWidget(CompositeContentWidget):
         value = deserialize(value)
 
         widgets = [('means', "Means", forms.widgets.Select(choices=Transportation.Means.choices)),
-                   ('number', "Number", forms.widgets.TextInput(attrs={'class': 'text'})),
+                   ('number', "Number", forms.widgets.TextInput(attrs={'class': 'text'}), "<span id=\"content_number\">%s</span>"),
                    ('class', "Class", forms.widgets.Select(), "<span id=\"content_class\">%s</span>"),
                    ('comments', "Comments", forms.widgets.Textarea())]
 
         return self.render_set(widgets, name, value, attrs) \
-            + "<script type=\"text/javascript\">init_annotation_edit_transportation(%s, %s, %s);</script>" \
+            + "<script type=\"text/javascript\">init_annotation_edit_transportation(%s, %s, %s, %s);</script>" \
             % (simplejson.dumps(dict(Transportation.Class.choices)),
                simplejson.dumps(Transportation.ClassMapping),
+               simplejson.dumps(Transportation.NumberMapping),
                value.get('class') or "null")
 
 class TransportationAnnotationManager(AnnotationManager):
