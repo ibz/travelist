@@ -1,11 +1,17 @@
 function update_trip_details(trip_id)
 {
-    $("#trip-details").load("/trips/" + trip_id + "/details/");
+    var activity = $("#trip-activity");
+    activity.show();
+    $("#trip-details").load("/trips/" + trip_id + "/details/", null,
+                            function() { activity.hide(); });
 }
 
 function edit_points(trip_id)
 {
-    $("#trip-details").load("/trips/" + trip_id + "/points/");
+    var activity = $("#trip-activity");
+    activity.show();
+    $("#trip-details").empty().load("/trips/" + trip_id + "/points/", null,
+                                    function() { activity.hide(); });
 }
 
 function suggest_place()
