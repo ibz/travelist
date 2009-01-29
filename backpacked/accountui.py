@@ -53,7 +53,6 @@ class RegistrationForm(ui.ModelForm):
     username = forms.fields.CharField(widget=forms.widgets.TextInput(attrs={'class': 'text'}))
     email = forms.fields.EmailField(widget=forms.widgets.TextInput(attrs={'class': 'text'}))
     password = forms.fields.CharField(widget=forms.widgets.PasswordInput(attrs={'class': 'text'}))
-    alpha_code = forms.fields.CharField(widget=forms.widgets.TextInput(attrs={'class': 'text'}))
 
     class Meta:
         model = models.User
@@ -70,10 +69,6 @@ class RegistrationForm(ui.ModelForm):
         except models.User.DoesNotExist:
             return username
         raise forms.util.ValidationError("That username is not available.")
-
-    def clean_alpha_code(self):
-        if self.cleaned_data['alpha_code'] != "i want the alpha!":
-            raise forms.util.ValidationError("The alpha code is invalid.")
 
     def save(self, commit=True):
         user = super(RegistrationForm, self).save(commit=False)
