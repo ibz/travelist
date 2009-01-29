@@ -2,8 +2,11 @@
 
 {% block htmlbody %}
 <div class="container">
-<div class="column span-24 header last">
-  <div class="column span-12">
+<div class="column span-4">
+  <h3>backpacked.it</h3>
+</div>
+<div class="column span-20 header last">
+  <div class="column span-10">
     <ul class="horizontal-list">
       {% if not user.is_anonymous %}
       <li><a href="/trips/{{ user.username }}/">My trips</a></li>
@@ -11,7 +14,7 @@
       {% endif %}
     </ul>
   </div>
-  <div class="column span-12 last right">
+  <div class="column span-10 last right">
     <ul class="horizontal-list">
       {% if not user.is_anonymous %}
       <li>Logged in as <a href="/people/{{ user.username }}/">{{ user.username }}</a></li>

@@ -62,12 +62,11 @@ $(document).ready(function()
 </div>
 
 <div id="photos">
+  {% ifequal user.id trip.user_id %}
+    <a href="/trips/{{ trip.id }}/annotations/new/?content_type=3">add photos</a>
+  {% endifequal %}
   <ul class="plain-list">
-    {% for annotation in trip.annotation_set.all %}
-    {% if annotation.manager.is_photos %}
-    <li>{% autoescape off %}{{ annotation.manager.render_short }}{% endautoescape %}</li>
-    {% endif %}
-    {% endfor %}
+    {% call "_trip_details_annotations.html" with annotations=trip_photos %}
   </ul>
 </div>
 </div>

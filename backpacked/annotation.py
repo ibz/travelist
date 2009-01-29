@@ -34,15 +34,14 @@ def new_POST(request, annotation):
 def new(request, trip_id):
     content_type = int(request.GET.get('content_type', 0))
     assert content_type
-    point_id = int(request.GET.get('point_id', 0))
-    assert point_id
+    point_id = int(request.GET.get('point_id', 0)) or None
     segment = bool(int(request.GET.get('segment', 0)))
 
     if request.user.userprofile.level not in annotationtypes.get_manager(content_type).user_levels:
         return http.HttpResponseForbidden()
 
-    annotation = models.Annotation(trip_id=trip_id, content_type=content_type,
-                                   point=models.Point.objects.get(id=point_id), segment=segment)
+    point = models.Point.objects.get(id=point_id) if point_id else None
+    annotation = models.Annotation(trip_id=trip_id, content_type=content_type, point=point, segment=segment)
 
     if request.method == 'GET':
         return new_GET(request, annotation)

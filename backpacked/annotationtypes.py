@@ -71,8 +71,6 @@ class AnnotationManager(object):
 
     user_levels = models.UserLevel.values
 
-    is_photos = False
-
     can_attach_cost = False
 
     widget = None
@@ -138,8 +136,6 @@ class UrlAnnotationManager(AnnotationManager):
 
 class ExternalPhotosAnnotationManager(UrlAnnotationManager):
     content_type = models.ContentType.EXTERNAL_PHOTOS
-
-    is_photos = True
 
     def render_short(self):
         return "<a href=\"%s\">Photos: %s</a>" % (html.escape(self.annotation.content),

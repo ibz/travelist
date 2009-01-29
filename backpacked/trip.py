@@ -96,7 +96,7 @@ def details(request, id):
                         'order_rank': p.order_rank,
                         'annotations': []}
     for a in annotations:
-        if not a.segment:
+        if a.point and not a.segment:
             points[a.point_id]['annotations'].append(a)
     points = sorted(points.values(), sort_func)
 
@@ -110,7 +110,7 @@ def details(request, id):
                               'order_rank': i,
                               'annotations': []}
     for a in annotations:
-        if a.segment:
+        if a.point and a.segment:
             segments[a.point_id]['annotations'].append(a)
     segments = sorted(segments.values(), sort_func)
 
@@ -125,7 +125,10 @@ def details(request, id):
                 if manager.segment_allowed:
                     segment_annotation_type_choices.append(content_type)
 
+    trip_photos = [a for a in annotations if not a.point and a.content_type == models.ContentType.EXTERNAL_PHOTOS]
+
     return views.render("trip_details.html", request, {'trip': trip, 'segments': segments, 'points': points,
+                                                       'trip_photos': trip_photos,
                                                        'point_annotation_type_choices': point_annotation_type_choices,
                                                        'segment_annotation_type_choices': segment_annotation_type_choices})
 
