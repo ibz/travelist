@@ -16,6 +16,8 @@ urlpatterns = patterns('',
     (r"^account/confirm-email/$", 'backpacked.account.confirm_email'),
     (r"^account/profile/$", 'backpacked.account.profile'),
 
+    (r"^help/(?P<section>\w+)/$", 'backpacked.help.view'),
+
     (r"^suggestions/new/$", 'backpacked.suggestion.new'),
 
     (r"^notifications/$", 'backpacked.notification.all'),
