@@ -514,11 +514,9 @@ img.user-image {
 #sort-points li.edit-mode {
     border: 1px dashed #5F99CF;
     margin-bottom: 5px;
-}
-
-#sort-points li.edit-mode .point-view,
-#sort-points li.edit-mode .point-edit {
-    margin: 5px;
+    padding: 5px;
+    position: relative;
+    left: -5px;
 }
 
 /* jQuery Tabs & Sortable */

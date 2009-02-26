@@ -161,6 +161,7 @@ function add_new_point()
     var point_id = "newpoint_" + place_id;
     var id = add_point(point_id, name);
     set_point_data(id, {lat: lat, lng: lng, name: name, date_arrived: "", date_left: "", visited: false}, true);
+    edit_point(id);
 
     refresh_map();
 
@@ -172,14 +173,24 @@ function edit_point(id)
     var point = $("#point_" + id);
     var view = point.find(".point-view");
     var edit = point.find(".point-edit");
+    var point_id = point.attr('point_id');
+    var is_new = point_id.indexOf('newpoint') == 0;
     edit.show();
-    view.find(".operations").hide();
     view.effect('transfer', {to: edit}, 500);
     point.addClass("edit-mode");
     var data = points[id];
     edit.find(".date-arrived").val(data.date_arrived);
     edit.find(".date-left").val(data.date_left);
     edit.find(".visited").val(data.visited);
+    if(is_new)
+    {
+        edit.find(".operations").hide();
+        view.find(".operations .point-edit-link").hide();
+    }
+    else
+    {
+        view.find(".operations").hide();
+    }
 }
 
 function edit_point_save(id)
