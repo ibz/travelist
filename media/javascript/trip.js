@@ -173,8 +173,7 @@ function edit_point(id)
     var point = $("#point_" + id);
     var view = point.find(".point-view");
     var edit = point.find(".point-edit");
-    var point_id = point.attr('point_id');
-    var is_new = point_id.indexOf('newpoint') == 0;
+    var is_new = point.attr('point_id').indexOf('newpoint') == 0;
     edit.show();
     view.effect('transfer', {to: edit}, 500);
     point.addClass("edit-mode");
@@ -193,17 +192,25 @@ function edit_point(id)
     }
 }
 
-function edit_point_save(id)
+function edit_point_save_data(id)
 {
-    var point = $("#point_" + id).removeClass("edit-mode");
+    var point = $("#point_" + id);
     var edit = point.find(".point-edit");
     var date_arrived = edit.find(".date-arrived").val();
     var date_left = edit.find(".date-left").val();
     var visited = edit.find(".visited").attr('checked');
-    point.find(".point-view .operations").show();
-    edit.hide();
     set_point_details(id, date_arrived, date_left, visited);
     set_point_data(id, {date_arrived: date_arrived, date_left: date_left, visited: visited}, true);
+}
+
+function edit_point_save(id)
+{
+    edit_point_save_data(id);
+    var point = $("#point_" + id);
+    var edit = point.find(".point-edit");
+    point.removeClass("edit-mode");
+    point.find(".point-view .operations").show();
+    edit.hide();
 }
 
 function edit_point_cancel(id)
@@ -256,8 +263,15 @@ function trip_points_save(trip_id)
     var point_strs = $.map($("#sort-points").sortable('toArray'),
                            function(id)
                            {
-                               var point = points[parseInt(id.substr(id.indexOf("_") + 1))];
-                               var point_str = "id=" + $("#" + id).attr("point_id");
+                               id = parseInt(id.substr(id.indexOf("_") + 1));
+                               var point_id = $("#point_" + id).attr("point_id");
+                               var is_new = point_id.indexOf('newpoint') == 0;
+                               if(is_new)
+                               {
+                                   edit_point_save_data(id);
+                               }
+                               var point = points[id];
+                               var point_str = "id=" + point_id;
                                if(point.modified)
                                {
                                    point_str += ",";
