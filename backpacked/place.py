@@ -1,6 +1,7 @@
 from django import http
 from django.contrib.auth.decorators import login_required
 from django.core import mail
+from django.db.models import Q
 from django.views.decorators.http import require_GET, require_POST, require_http_methods
 
 from backpacked import models
@@ -13,7 +14,13 @@ import settings
 def search(request):
     def render(p):
         return "%s|%s|%s|%s,%s" % (p.display_name, p.id, p.name, p.coords.coords[0], p.coords.coords[1])
-    places = models.Place.objects.filter(name_ascii__istartswith=request.GET['q'])[:15]
+    query_terms = [t.strip() for t in request.GET['q'].split(",", 1)]
+    places = models.Place.objects.filter(name_ascii__istartswith=query_terms[0])
+    if len(query_terms) > 1:
+        administrative_divisions = models.AdministrativeDivision.objects.filter(name__istartswith=query_terms[1])
+        countries = models.Country.objects.filter(name__istartswith=query_terms[1])
+        places = places.filter(Q(administrative_division__in=administrative_divisions) | Q(country__in=countries))
+    places = places[:15]
     return http.HttpResponse("\n".join([render(p) for p in places]))
 
 @login_required
