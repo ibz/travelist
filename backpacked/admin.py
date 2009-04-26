@@ -45,3 +45,7 @@ admin.site.register(models.UserProfile, UserProfileAdmin)
 class SuggestionAdmin(admin.ModelAdmin):
     ordering = ['-date']
 admin.site.register(models.Suggestion, SuggestionAdmin)
+
+class AccommodationAdmin(admin.ModelAdmin):
+    ordering = ['name']
+admin.site.register(models.Accommodation, AccommodationAdmin)
