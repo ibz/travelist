@@ -58,6 +58,30 @@ class PlaceSuggestion(models.Model):
     def __unicode__(self):
         return self.name
 
+class Accommodation(models.Model):
+    name = models.CharField(max_length=100)
+    place = models.ForeignKey(Place)
+    wiki_content = models.TextField()
+    date_added = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        unique_together = ('name', 'place')
+
+    def __unicode__(self):
+        return self.name
+
+class AccommodationHist(models.Model):
+    accommodation = models.ForeignKey(Accommodation)
+    revision = models.IntegerField()
+    wiki_content = models.TextField()
+    date_added = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        unique_together = ('accommodation', 'revision')
+
+    def __unicode__(self):
+        return "%s (%s)" % (self.accommodation.name, self.revision)
+
 UserLevel = utils.Enum([(1, "Basic"),
                         (2, "Pro")])
 
@@ -205,7 +229,7 @@ ContentType = utils.Enum({'ACTIVITY': (1, "Activity"),
                           'EXTERNAL_PHOTOS': (3, "Photos"),
                           'TRANSPORTATION': (4, "Transportation"),
                           'GPS': (5, "GPS"),
-                          'ACCOMODATION': (6, "Accomodation"),
+                          'ACCOMMODATION': (6, "Accommodation"),
                           'COST': (7, "Cost"),
                           'NOTE': (8, "Note")})
 

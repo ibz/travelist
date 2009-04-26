@@ -1,0 +1,23 @@
+{% extends "page.html" %}
+
+{% block content %}
+
+<div class="column span-14 prepend-4 prepend-top">
+<h3>{{ accommodation.name }}, {{ accommodation.place.name }}</h3>
+  <form action="" method="POST">
+    <fieldset>
+      {{ form.as_p }}
+      <p>
+        <input type="submit" class="submit button positive" value="Save" />
+        <input type="button" class="button negative" value="Cancel" onclick="javascript:window.location='/accommodations/{{ accommodation.id }}/';" />
+      </p>
+    </fieldset>
+  </form>
+</div>
+<div class="column span-6 prepend-top last">
+<h4>Please read the following before posting:</h4>
+<p>This description should be written in the third person, factual and unbiased. No personal opinions.</p>
+<p>Submitted content must not violate copyright.</p>
+<p>All submitted content remains copyright of the author, and is licensed under the <a href="http://www.gnu.org/licenses/fdl-1.3.txt">GFDL</a>.</p>
+</div>
+{% endblock %}

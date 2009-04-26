@@ -99,6 +99,11 @@ class AnnotationManager(object):
     def after_save(self):
         pass
 
+    def append_date_to_display_name(self, display_name):
+        if not self.annotation.date:
+            return display_name
+        return "%s (%s)" % (display_name, utils.format_date_human(self.annotation.date))
+
 class ActivityAnnotationManager(AnnotationManager):
     content_type = models.ContentType.ACTIVITY
 
@@ -108,10 +113,7 @@ class ActivityAnnotationManager(AnnotationManager):
 
     @property
     def display_name(self):
-        display = "Activity: %s" % self.annotation.title
-        if self.annotation.date:
-            display += " (%s)" % utils.format_date_human(self.annotation.date)
-        return display
+        return self.append_date_to_display_name("Activity: %s" % self.annotation.title)
 
     def render_short(self):
         t = template.loader.get_template("annotation_view_activity.html")
@@ -310,68 +312,18 @@ class GPSAnnotationManager(AnnotationManager):
         if os.path.exists(cachefilename):
             os.unlink(cachefilename)
 
-AccomodationType = utils.Enum([(0, ""),
-                               (1, "* Hotel"),
-                               (2, "** Hotel"),
-                               (3, "*** Hotel"),
-                               (4, "**** Hotel"),
-                               (5, "***** Hotel"),
-                               (6, "Hostel"),
-                               (7, "Bungalow"),
-                               (8, "Guesthouse")])
-
-AccomodationRoomType = utils.Enum([(0, ""),
-                                   (1, "Single room"),
-                                   (2, "Double room"),
-                                   (3, "Dorm"),
-                                   (4, "Suite")])
-
-AccomodationRating = utils.Enum([(-2, "Very poor"),
-                                 (-1, "Poor"),
-                                 (0, "Average"),
-                                 (1, "Good"),
-                                 (2, "Very good")])
-
-class AccomodationInput(CompositeContentWidget):
-    subfields = ['name', 'type', 'room_type', 'URL', 'email', 'address', 'phone_number', 'rating', 'comments']
-
-    def render_basic(self, name, value, attrs=None):
-        basic = [('name', "Name", forms.widgets.TextInput(attrs={'class': 'text'})),
-                 ('type', "Type", forms.widgets.Select(choices=AccomodationType.choices)),
-                 ('room_type', "Room type", forms.widgets.Select(choices=AccomodationRoomType.choices))]
-        return self.render_set(basic, name, value, attrs) + "<br />" \
-            "<a href=\"javascript:accomodation_toggle_contact();\">toggle contact details</a>" \
-            " | " \
-            "<a href=\"javascript:accomodation_toggle_rating();\">toggle rating</a>"
-
-    def render_contact(self, name, value, attrs=None):
-        contact = [('URL', "URL", forms.widgets.TextInput(attrs={'class': 'text'})),
-                   ('address', "Address", forms.widgets.TextInput(attrs={'class': 'text'})),
-                   ('email', "Email", forms.widgets.TextInput(attrs={'class': 'text'})),
-                   ('phone_number', "Phone number", forms.widgets.TextInput(attrs={'class': 'text'}))]
-        return "<div id=\"accomodation-contact\" style=\"display: none;\">%s</div>" \
-            % self.render_set(contact, name, value, attrs)
-
-    def render_rating_stars(self, value):
-        checked = lambda r: value and r == value and "checked=\"checked\"" or ""
-        return "".join(["<input name=\"content_rating\" type=\"radio\" class=\"star\" value=\"%s\" title=\"%s\" %s />" \
-                            % (r, AccomodationRating.get_description(r), checked(r))
-                        for r in sorted(AccomodationRating.values)])
-
-    def render_rating(self, name, value, attrs=None):
-        rating = [('comments', "Comments", forms.widgets.Textarea())]
-        return "<div id=\"accomodation-rating\" style=\"display: none;\">" \
-            "<label for=\"content_rating\">Rating:</label><br />%s<br />%s" \
-            "</div>" % (self.render_rating_stars(value.get('rating')),
-                        self.render_set(rating, name, value, attrs))
+class AccommodationInput(forms.widgets.Widget):
+    def __init__(self, attrs=None, choices=[]):
+        super(AccommodationInput, self).__init__(attrs)
+        self.choices = choices
 
     def render(self, name, value, attrs=None):
-        value = deserialize(value)
-        render_funcs = [self.render_basic, self.render_contact, self.render_rating]
-        return "".join([render_func(name, value, attrs) for render_func in render_funcs])
+        final_attrs = self.build_attrs(attrs)
+        return forms.widgets.Select(final_attrs, self.choices).render(name, value) + \
+            "<br />Can't find what you're looking for? <a href=\"javascript:accommodation_add();\">Add it!</a>"
 
-class AccomodationAnnotationManager(AnnotationManager):
-    content_type = models.ContentType.ACCOMODATION
+class AccommodationAnnotationManager(AnnotationManager):
+    content_type = models.ContentType.ACCOMMODATION
 
     exclude_fields = ['title']
 
@@ -381,43 +333,34 @@ class AccomodationAnnotationManager(AnnotationManager):
     point_allowed = True
     segment_allowed = False
 
-    show_content_label = False
-
-    widget = AccomodationInput
-
     can_attach_cost = True
+
+    def widget(self):
+        choices = [(a.id, a.name) for a in self.annotation.point.place.accommodation_set.all()]
+        return AccommodationInput(choices=choices)
+
+    @property
+    def accommodation(self):
+        return models.Accommodation.objects.get(id=int(self.annotation.content))
 
     @property
     def display_name(self):
-        display = "Accomodation"
-        if self.annotation.date:
-            display += " (%s)" % utils.format_date_human(self.annotation.date)
-        return display
+        return self.append_date_to_display_name("Accommodation: %s" % self.accommodation.name)
 
     def render_short(self):
-        content = deserialize(self.annotation.content)
-        for k, t in [('type', AccomodationType), ('room_type', AccomodationRoomType), ('rating', AccomodationRating)]:
-            if content.has_key(k):
-                content["%s_h" % k] = t.get_description(content[k])
-
-        t = template.loader.get_template("annotation_view_accomodation.html")
-        c = template.Context({'annotation': self.annotation, 'content': content})
-
-        return t.render(c)
+        return "Accommodation: <a href=\"/accommodations/%s/\" title=\"%s\">%s</a>" % \
+            (self.accommodation.id,
+             utils.format_date_human(self.annotation.date),
+             html.escape(self.accommodation.name))
 
     def clean_content(self, content):
-        if not content.get('name'):
-            raise forms.util.ValidationError("The name is mandatory.")
-        if content.get('URL'):
-            content['URL'] = forms.fields.URLField().clean(content['URL'])
-        for k in ['type', 'room_type', 'rating']:
-            if content.has_key(k):
-                try:
-                    content[k] = int(content[k])
-                except ValueError:
-                    del content[k]
-        content['comments'] = re.sub("\r", "", content['comments'])
-        return serialize(content)
+        try:
+            return int(content)
+        except ValueError:
+            accommodation = models.Accommodation(name=content,
+                                                 place=self.annotation.point.place)
+            accommodation.save()
+            return accommodation.id
 
 class CostWidget(CompositeContentWidget):
     subfields = ['value', 'currency', 'parent', 'comments']
@@ -475,10 +418,7 @@ class NoteAnnotationManager(AnnotationManager):
 
     @property
     def display_name(self):
-        display = "Note: %s" % self.annotation.title
-        if self.annotation.date:
-            display += " (%s)" % utils.format_date_human(self.annotation.date)
-        return display
+        return self.append_date_to_display_name("Note: %s" % self.annotation.title)
 
     def render_short(self):
         t = template.loader.get_template("annotation_view_note.html")

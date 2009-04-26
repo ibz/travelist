@@ -41,12 +41,8 @@ function init_annotation_edit_transportation(classes, class_mapping, number_mapp
         }).change();
 }
 
-function accomodation_toggle_contact()
+function accommodation_add()
 {
-    $("#accomodation-contact").toggle();
-}
-
-function accomodation_toggle_rating()
-{
-    $("#accomodation-rating").toggle();
+    var name = prompt("Name", "");
+    $("#id_content").addOption(name, name).selectOptions(name);
 }
