@@ -60,7 +60,7 @@ class PlaceSuggestion(models.Model):
 
 class Accommodation(models.Model):
     name = models.CharField(max_length=100)
-    place = models.ForeignKey(Place)
+    place = models.ForeignKey(Place, editable=False)
     wiki_content = models.TextField()
     date_added = models.DateTimeField(auto_now_add=True)
 
