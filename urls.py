@@ -32,6 +32,8 @@ urlpatterns = patterns('',
 
     (r"^accommodations/(?P<id>\d+)/$", 'backpacked.accommodation.view'),
     (r"^accommodations/(?P<id>\d+)/edit/$", 'backpacked.accommodation.edit'),
+    (r"^accommodations/(?P<id>\d+)/rate/$", 'backpacked.accommodation.rate'),
+    (r"^accommodations/(?P<id>\d+)/comment/$", 'backpacked.accommodation.comment'),
 
     (r"^trips/new/$", 'backpacked.trip.new'),
     (r"^trips/(?P<id>\d+)/$", 'backpacked.trip.view'),

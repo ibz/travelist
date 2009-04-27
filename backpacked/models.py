@@ -6,6 +6,7 @@ from django.contrib.auth.models import User
 from django.contrib.gis.db import models
 
 from backpacked import utils
+from backpacked.utils import cached_property
 
 class Country(models.Model):
     code = models.CharField(max_length=2)
@@ -70,6 +71,13 @@ class Accommodation(models.Model):
     def __unicode__(self):
         return "%s, %s" (self.name, self.place.name)
 
+    @cached_property
+    def ratings(self):
+        counts = AccommodationRating.objects.filter(accommodation=self).values('value').annotate(models.Count('value'))
+        ratings = {1: 0, 2: 0, 3: 0}
+        ratings.update(dict([(c['value'], c['value__count']) for c in counts]))
+        return ratings
+
 class AccommodationHist(models.Model):
     accommodation = models.ForeignKey(Accommodation)
     wiki_content = models.TextField()
@@ -78,6 +86,21 @@ class AccommodationHist(models.Model):
 
     def __unicode__(self):
         return self.accommodation.name
+
+class AccommodationRating(models.Model):
+    accommodation = models.ForeignKey(Accommodation)
+    user = models.ForeignKey(User)
+    value = models.IntegerField()
+    date_added = models.DateTimeField(auto_now_add=True)
+
+class AccommodationComment(models.Model):
+    accommodation = models.ForeignKey(Accommodation)
+    user = models.ForeignKey(User)
+    content = models.TextField()
+    date_added = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        ordering = ['-date_added']
 
 UserLevel = utils.Enum([(1, "Basic"),
                         (2, "Pro")])

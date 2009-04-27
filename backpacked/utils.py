@@ -1,5 +1,6 @@
 import re
 from datetime import datetime
+from functools import update_wrapper
 
 from django import template
 
@@ -69,3 +70,17 @@ class Enum:
         for i in self.all.values():
             if i[0] == value:
                 return i[2:]
+
+
+def cached_property(func):
+    def _get(self):
+        try:
+            return self.__dict__[func.__name__]
+        except KeyError:
+            value = func(self)
+            self.__dict__[func.__name__] = value
+            return value
+    update_wrapper(_get, func)
+    def _del(self):
+        del self.__dict__[func.__name__]
+    return property(_get, None, _del)

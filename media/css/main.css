@@ -211,6 +211,17 @@ img.user-image {
     left: -5px;
 }
 
+/* Accommodation */
+
+#accommodation-rating {
+    padding-bottom: 20px;
+}
+
+#accommodation-rating img,
+#accommodation-rating span {
+    vertical-align: middle;
+}
+
 /* jQuery Tabs & Sortable */
 
 .ui-tabs-panel {

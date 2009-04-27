@@ -3,18 +3,61 @@
 
 {% block content %}
 <div class="column span-14 prepend-5 prepend-top">
-<h3>{{ accommodation.name }}, {{ accommodation.place.name }}</h3>
-{% if accommodation.wiki_content %}
-{{ accommodation.wiki_content|markdown:"safe" }}
-{% else %}
-  {% if not user.is_anonymous %}
-    We don't have a description for this accommodation yet, <a href="/accommodations/{{ accommodation.id }}/edit/">care to help</a>?
-  {% endif %}
-{% endif %}
+  <h3>{{ accommodation.name }}, {{ accommodation.place.name }}</h3>
+  <div>
+    {% if accommodation.wiki_content %}
+      {{ accommodation.wiki_content|markdown:"safe" }}
+    {% else %}
+      {% if not user.is_anonymous %}
+        We don't have a description for this accommodation yet, <a href="/accommodations/{{ accommodation.id }}/edit/">care to help</a>?
+      {% endif %}
+    {% endif %}
+  </div>
+  <hr />
+  <div id="accommodation-rating">
+    <h4>User ratings</h4>
+    <a href="/accommodations/{{ accommodation.id }}/rate/?value=3" title="Good"><img src="/media/images/star_green.png" /></a> <span>{{ accommodation.ratings.3 }}</span>
+    <a href="/accommodations/{{ accommodation.id }}/rate/?value=2" title="Average"><img src="/media/images/star_grey.png" /></a> <span>{{ accommodation.ratings.2 }}</span>
+    <a href="/accommodations/{{ accommodation.id }}/rate/?value=1" title="Bad"><img src="/media/images/star_red.png" /></a> <span>{{ accommodation.ratings.1 }}</span>
+    {% if not user.is_anonymous %}
+    |
+    <span>
+        {% if user_rating %}
+            Your rating:
+            {% ifequal user_rating.value 1 %}Bad{% endifequal %}
+            {% ifequal user_rating.value 2 %}Average{% endifequal %}
+            {% ifequal user_rating.value 3 %}Good{% endifequal %}
+        {% else %}
+            Click a star to rate.
+        {% endif %}
+    </span>
+    {% endif %}
+  </div>
+  <div>
+    <h4>Comments</h4>
+    <div>
+      <form action="/accommodations/{{ accommodation.id }}/comment/" method="POST">
+        <textarea name="comment_content" style="height: 60px;"></textarea><br />
+        <input type="submit" class="submit button positive" value="Say it!" />
+      </form>
+    </div>
+    <br />
+    {% for comment in accommodation.accommodationcomment_set.all %}
+      <div>
+        <a href="/people/{{ comment.user.username }}">{{ comment.user.username }}</a> said on {{ comment.date_added|date }}:
+        {{ comment.content|markdown:"safe" }}
+      </div>
+    {% endfor %}
+  </div>
 </div>
 <div class="column span-3 prepend-2 prepend-top last">
+<p>
 {% if accommodation.wiki_content and not user.is_anonymous %}
 <a href="/accommodations/{{ accommodation.id }}/edit/">Edit</a>
 {% endif %}
+</p>
+<p>
+
+</p>
 </div>
 {% endblock %}
