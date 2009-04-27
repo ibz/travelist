@@ -61,26 +61,23 @@ class PlaceSuggestion(models.Model):
 class Accommodation(models.Model):
     name = models.CharField(max_length=100)
     place = models.ForeignKey(Place, editable=False)
-    wiki_content = models.TextField()
+    wiki_content = models.TextField(blank=True)
     date_added = models.DateTimeField(auto_now_add=True)
 
     class Meta:
         unique_together = ('name', 'place')
 
     def __unicode__(self):
-        return self.name
+        return "%s, %s" (self.name, self.place.name)
 
 class AccommodationHist(models.Model):
     accommodation = models.ForeignKey(Accommodation)
-    revision = models.IntegerField()
     wiki_content = models.TextField()
+    user = models.ForeignKey(User)
     date_added = models.DateTimeField(auto_now_add=True)
 
-    class Meta:
-        unique_together = ('accommodation', 'revision')
-
     def __unicode__(self):
-        return "%s (%s)" % (self.accommodation.name, self.revision)
+        return self.accommodation.name
 
 UserLevel = utils.Enum([(1, "Basic"),
                         (2, "Pro")])

@@ -19,12 +19,11 @@ def edit_GET(request, accommodation):
 def edit_POST(request, accommodation):
     form = accommodationui.EditForm(request.POST, instance=accommodation)
     if form.is_valid():
-        old_rev = accommodation.accommodationhist_set.count()
-        hist = models.AccommodationHist(accommodation=accommodation,
-                                        revision=old_rev,
-                                        wiki_content=accommodation.wiki_content)
-        hist.save()
         form.save()
+        hist = models.AccommodationHist(accommodation=accommodation,
+                                        wiki_content=accommodation.wiki_content,
+                                        user=request.user)
+        hist.save()
         return http.HttpResponseRedirect("/accommodations/%s/" % accommodation.id)
     else:
         return views.render("accommodation_edit.html", request, {'accommodation': accommodation, 'form': form})
