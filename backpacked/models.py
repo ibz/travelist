@@ -69,7 +69,7 @@ class Accommodation(models.Model):
         unique_together = ('name', 'place')
 
     def __unicode__(self):
-        return "%s, %s" (self.name, self.place.name)
+        return "%s, %s" % (self.name, self.place.name)
 
     @cached_property
     def ratings(self):
