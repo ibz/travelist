@@ -3,8 +3,10 @@ from django.views.decorators.http import require_GET, require_POST, require_http
 
 from backpacked import views
 
+available_sections = []
+
 @require_GET
 def view(request, section):
-    if section not in ['faq']:
+    if section not in available_sections:
         return http.HttpResponseNotFound()
     return views.render("help_%s.html" % section, request)
