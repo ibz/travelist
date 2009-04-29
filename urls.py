@@ -29,6 +29,10 @@ urlpatterns = patterns('',
 
     (r"^places/search/$", 'backpacked.place.search'),
     (r"^places/suggest/$", 'backpacked.place.suggest'),
+    (r"^places/(?P<id>\d+)/$", 'backpacked.place.view'),
+    (r"^places/(?P<id>\d+)/edit/$", 'backpacked.place.edit'),
+    (r"^places/(?P<id>\d+)/rate/$", 'backpacked.place.rate'),
+    (r"^places/(?P<id>\d+)/comment/$", 'backpacked.place.comment'),
 
     (r"^accommodations/(?P<id>\d+)/$", 'backpacked.accommodation.view'),
     (r"^accommodations/(?P<id>\d+)/edit/$", 'backpacked.accommodation.edit'),

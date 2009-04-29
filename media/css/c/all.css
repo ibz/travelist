@@ -521,12 +521,12 @@ img.user-image {
 
 /* Accommodation */
 
-#accommodation-rating {
+#star-rating {
     padding-bottom: 20px;
 }
 
-#accommodation-rating img,
-#accommodation-rating span {
+#star-rating img,
+#star-rating span {
     vertical-align: middle;
 }
 

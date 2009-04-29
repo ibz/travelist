@@ -4,28 +4,28 @@
 
 {% block content %}
 <div class="column span-14 prepend-5 prepend-top">
-  <h3>{{ accommodation.name }}, {{ accommodation.place.name }}</h3>
+  <h3>{{ place.display_name }}</h3>
   <div>
-    {% if accommodation.wiki_content %}
-      {{ accommodation.wiki_content|markdown:"safe" }}
+    {% if place.wiki_content %}
+      {{ place.wiki_content|markdown:"safe" }}
     {% else %}
       {% if not user.is_anonymous %}
-        We don't have a description for this accommodation yet, <a href="/accommodations/{{ accommodation.id }}/edit/">care to help</a>?
+        We don't have a description for this place yet, <a href="/places/{{ place.id }}/edit/">care to help</a>?
       {% endif %}
     {% endif %}
   </div>
   <hr />
-  {% call "_star_rating.html" with entity=accommodation %}
+  {% call "_star_rating.html" with entity=place %}
   <div>
     <h4>Comments</h4>
     <div>
-      <form action="/accommodations/{{ accommodation.id }}/comment/" method="POST">
+      <form action="/places/{{ place.id }}/comment/" method="POST">
         <textarea name="comment_content" style="height: 60px;"></textarea><br />
         <input type="submit" class="submit button positive" value="Say it!" />
       </form>
     </div>
     <br />
-    {% for comment in accommodation.accommodationcomment_set.all %}
+    {% for comment in place.placecomment_set.all %}
       <div>
         <a href="/people/{{ comment.user.username }}">{{ comment.user.username }}</a> said on {{ comment.date_added|date }}:
         {{ comment.content|markdown:"safe" }}
@@ -35,8 +35,8 @@
 </div>
 <div class="column span-3 prepend-2 prepend-top last">
 <p>
-{% if accommodation.wiki_content and not user.is_anonymous %}
-<a href="/accommodations/{{ accommodation.id }}/edit/">Edit</a>
+{% if place.wiki_content and not user.is_anonymous %}
+<a href="/places/{{ place.id }}/edit/">Edit</a>
 {% endif %}
 </p>
 <p>

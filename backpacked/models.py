@@ -30,6 +30,8 @@ class AdministrativeDivision(models.Model):
         return "%s (%s)" % (self.name, self.code)
 
 class Place(models.Model):
+    url_prefix = 'places'
+
     source = models.IntegerField() # 1 = manual, 2 = geonames
     code = models.IntegerField()
     name = models.CharField(max_length=100)
@@ -37,9 +39,10 @@ class Place(models.Model):
     country = models.ForeignKey(Country)
     administrative_division = models.ForeignKey(AdministrativeDivision, null=True)
     coords = models.PointField()
+    wiki_content = models.TextField(blank=True)
 
     def __unicode__(self):
-        return self.name
+        return self.display_name
 
     @property
     def display_name(self):
@@ -50,6 +53,13 @@ class Place(models.Model):
         name += ", %s" % self.country.name
         return name
 
+    @cached_property
+    def ratings(self):
+        counts = PlaceRating.objects.filter(place=self).values('value').annotate(models.Count('value'))
+        ratings = {1: 0, 2: 0, 3: 0}
+        ratings.update(dict([(c['value'], c['value__count']) for c in counts]))
+        return ratings
+
 class PlaceSuggestion(models.Model):
     user = models.ForeignKey(User)
     date = models.DateTimeField(auto_now_add=True)
@@ -59,7 +69,33 @@ class PlaceSuggestion(models.Model):
     def __unicode__(self):
         return self.name
 
+class PlaceHist(models.Model):
+    place = models.ForeignKey(Place)
+    wiki_content = models.TextField()
+    user = models.ForeignKey(User)
+    date_added = models.DateTimeField(auto_now_add=True)
+
+    def __unicode__(self):
+        return self.place.display_name
+
+class PlaceRating(models.Model):
+    place = models.ForeignKey(Place)
+    user = models.ForeignKey(User)
+    value = models.IntegerField()
+    date_added = models.DateTimeField(auto_now_add=True)
+
+class PlaceComment(models.Model):
+    place = models.ForeignKey(Place)
+    user = models.ForeignKey(User)
+    content = models.TextField()
+    date_added = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        ordering = ['-date_added']
+
 class Accommodation(models.Model):
+    url_prefix = 'accommodations'
+
     name = models.CharField(max_length=100)
     place = models.ForeignKey(Place, editable=False)
     wiki_content = models.TextField(blank=True)

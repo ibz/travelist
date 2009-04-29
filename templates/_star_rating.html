@@ -1,0 +1,19 @@
+<div id="star-rating">
+<h4>User ratings</h4>
+<a href="/{{ entity.url_prefix }}/{{ entity.id }}/rate/?value=3" title="Good"><img src="/media/images/star_green.png" /></a> <span>{{ entity.ratings.3 }}</span>
+<a href="/{{ entity.url_prefix }}/{{ entity.id }}/rate/?value=2" title="Average"><img src="/media/images/star_grey.png" /></a> <span>{{ entity.ratings.2 }}</span>
+<a href="/{{ entity.url_prefix }}/{{ entity.id }}/rate/?value=1" title="Bad"><img src="/media/images/star_red.png" /></a> <span>{{ entity.ratings.1 }}</span>
+{% if not user.is_anonymous %}
+  |
+  <span>
+    {% if user_rating %}
+      Your rating:
+      {% ifequal user_rating.value 1 %}Bad{% endifequal %}
+      {% ifequal user_rating.value 2 %}Average{% endifequal %}
+      {% ifequal user_rating.value 3 %}Good{% endifequal %}
+    {% else %}
+      Click a star to rate.
+    {% endif %}
+  </span>
+{% endif %}
+</div>
