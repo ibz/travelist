@@ -110,13 +110,14 @@ function initTripMap(id, point_data, bind_events)
             var p1 = point_data[i];
             var p2 = point_data[i + 1];
             var segment = [Math.min(p1.place_id, p2.place_id), Math.max(p1.place_id, p2.place_id)];
-            if($.inArray(segment, addedOverlays) == -1) {
+            var place_id_pair = segment[0] + "-" + segment[1];
+            if($.inArray(place_id_pair, addedOverlays) == -1) {
                 var line = new GPolyline([new GLatLng(p1.lat, p1.lng), new GLatLng(p2.lat, p2.lng)], "#ff0000", 3);
                 if(bind_events) {
-                    addListener(line, "#segment-data #place-pair-" + segment[0] + "-" + segment[1], i);
+                    addListener(line, "#segment-data #place-pair-" + place_id_pair, i);
                 }
                 map.addOverlay(line);
-                addedOverlays.push(segment);
+                addedOverlays.push(place_id_pair);
             }
         }
 
