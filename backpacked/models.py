@@ -269,7 +269,7 @@ class Trip(models.Model):
         if is_friend:
             return self.annotation_set.filter(visibility__in=[Visibility.PUBLIC, Visibility.PROTECTED])
         else:
-            return self.annotation_set.filter(visibility=models.Visibility.PUBLIC)
+            return self.annotation_set.filter(visibility=Visibility.PUBLIC)
 
 class Point(models.Model):
     trip = models.ForeignKey(Trip)
