@@ -517,10 +517,6 @@ input {
     height: 100%;
 }
 
-.short-content .footer-space {
-    height: 20px;
-}
-
 .short-content .footer {
     height: 20px;
     position: relative;
@@ -533,7 +529,7 @@ input {
 
 .annotation {
     position: relative;
-    width: 250px;
+    width: 190px;
 }
 
 .annotation .operations {
@@ -544,7 +540,7 @@ input {
     display: inline;
     position: absolute;
     top: 0px;
-    left: 150px;
+    left: 90px;
     width: 100px;
     text-align: right;
 }

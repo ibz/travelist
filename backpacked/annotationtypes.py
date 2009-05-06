@@ -208,12 +208,11 @@ class TransportationAnnotationManager(AnnotationManager):
     def render_short(self):
         content = deserialize(self.annotation.content)
         str = Transportation.Means.get_description(content['means'])
-        if content['number']:
-            str += ", %s" % content['number']
-        if content['class']:
-            str += ", %s" % Transportation.Class.get_description(content['class'])
-        if content['comments']:
-            str += "<p>%s</p>" % content['comments'].replace("\n", "<br />")
+        if content.get('number') or content.get('class'):
+            str += "<br /><span>%s %s</span>" % (content.get('number', ""),
+                                                 Transportation.Class.get_description(content['class']) if content.get('class') else "")
+        if content.get('comments'):
+            str += "<br /><span>%s</span>" % content['comments'].replace("\n", "<br />")
         return str
 
     def clean_content(self, content):
@@ -332,12 +331,11 @@ class AccommodationAnnotationManager(AnnotationManager):
 
     @property
     def display_name(self):
-        return "Accommodation: %s" % self.accommodation.name
+        return self.accommodation.name
 
     def render_short(self):
-        return "Accommodation: <a href=\"/accommodations/%s/\">%s</a>" % \
-            (self.accommodation.id,
-             html.escape(self.accommodation.name))
+        return "<a href=\"/accommodations/%s/\">%s</a>" % (self.accommodation.id,
+                                                           html.escape(self.accommodation.name))
 
     def clean_content(self, content):
         try:
@@ -383,9 +381,9 @@ class CostAnnotationManager(AnnotationManager):
 
         str = "%s %s" % (content['value'], content['currency'])
         if parent:
-            str += " for %s" % parent.manager.display_name
+            str += "<br /><span>%s</span>" % parent.manager.display_name
         if content.get('comments'):
-            str += "<p>%s</p>" % content['comments']
+            str += "<br /><span>%s</span>" % content['comments']
 
         return str
 
@@ -409,7 +407,7 @@ class NoteAnnotationManager(AnnotationManager):
         return self.annotation.title
 
     def render_short(self):
-        return "<h4>%s</h4><p>%s</p>" % (self.display_name,
+        return "<h5>%s</h5><p>%s</p>" % (self.display_name,
                                          self.annotation.content.replace("\n", "<br />"))
 
     def clean_content(self, content):

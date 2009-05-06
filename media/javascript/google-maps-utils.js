@@ -108,7 +108,14 @@ function initTripMap(id, point_data, bind_events)
         // draw point
         var p = point_data[i];
         if($.inArray(p.place_id, addedOverlays) == -1) {
-            var marker = new GMarker(new GLatLng(p.lat, p.lng), {title: p.name, icon: p.visited ? G_DEFAULT_ICON : new GIcon(G_DEFAULT_ICON, "/media/images/marker_grey.png")});
+            var icon = G_DEFAULT_ICON;
+            if (!p.visited) {
+                icon = new GIcon(G_DEFAULT_ICON, "/media/images/marker_grey.png");
+            }
+            if (i == 0 || i == point_data.length - 1) {
+                icon = new GIcon(G_DEFAULT_ICON, "/media/images/marker_green.png");
+            }
+            var marker = new GMarker(new GLatLng(p.lat, p.lng), {title: p.name, icon: icon});
             if(bind_events) {
                 addListener(marker, "#point-data #place-" + p.place_id);
             }

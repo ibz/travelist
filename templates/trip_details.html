@@ -25,15 +25,16 @@ $(function()
 <div class="short-content">
   <div class="body">
     <h4><a href="/places/{{ point.place_id }}/">{{ point.name }}</a></h4>
-    {% if point.date_arrived or point.date_left %}
-      {% if point.date_arrived %}{{ point.date_arrived|date }}{% else %}?{% endif %} - {% if point.date_left %}{{ point.date_left|date }}{% else %}?{% endif %}
-    {% endif %}
     <ul class="plain-list">
+      <li>
+        {% if point.date_arrived or point.date_left %}
+          {% if point.date_arrived %}{{ point.date_arrived|date }}{% else %}?{% endif %} - {% if point.date_left %}{{ point.date_left|date }}{% else %}?{% endif %}
+        {% endif %}
+      </li>
       {% call "_trip_details_annotations.html" with annotations=point.annotations.POINT.ACCOMMODATION empty='' %}
       {% call "_trip_details_annotations.html" with annotations=point.annotations.POINT.EXTERNAL_PHOTOS empty='' %}
       {% call "_trip_details_annotations.html" with annotations=point.annotations.POINT.URL empty='' %}
     </ul>
-    <div class="footer-space"></div>
   </div>
   <div class="footer">
     <hr />
@@ -77,16 +78,17 @@ $(function()
 <div class="short-content">
   <div class="body">
     <h4><a href="/places/{{ segment.p1.place_id }}/">{{ segment.p1.name }}</a> - <a href="/places/{{ segment.p2.place_id }}/">{{ segment.p2.name }}</a></h4>
-    {% if segment.p1.date_left or segment.p2.date_arrived %}
-      {% if segment.p1.date_left %}{{ segment.p1.date_left|date }}{% else %}?{% endif %} - {% if segment.p2.date_arrived %}{{ segment.p2.date_arrived|date }}{% else %}?{% endif %}
-    {% endif %}
     <ul class="plain-list">
+      <li>
+        {% if segment.p1.date_left or segment.p2.date_arrived %}
+        {% if segment.p1.date_left %}{{ segment.p1.date_left|date }}{% else %}?{% endif %} - {% if segment.p2.date_arrived %}{{ segment.p2.date_arrived|date }}{% else %}?{% endif %}
+        {% endif %}
+      </li>
       <li>Distance: {{ segment.length|floatformat:2 }} km</li>
       {% call "_trip_details_annotations.html" with annotations=segment.p1.annotations.SEGMENT.TRANSPORTATION empty='' %}
       {% call "_trip_details_annotations.html" with annotations=segment.p1.annotations.SEGMENT.EXTERNAL_PHOTOS empty='' %}
       {% call "_trip_details_annotations.html" with annotations=segment.p1.annotations.SEGMENT.URL empty='' %}
     </ul>
-    <div class="footer-space"></div>
   </div>
   <div class="footer">
     <hr />

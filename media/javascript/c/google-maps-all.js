@@ -65,7 +65,9 @@ var initialZoom=16;var map=new GMap2(document.getElementById(id));map.addControl
 var markers=[];for(var i=0,addedOverlays=[];i<point_data.length;i++)
 {if(i+1<point_data.length){var p1=point_data[i];var p2=point_data[i+1];var segment=[Math.min(p1.place_id,p2.place_id),Math.max(p1.place_id,p2.place_id)];if($.inArray(segment,addedOverlays)==-1){var line=new GPolyline([new GLatLng(p1.lat,p1.lng),new GLatLng(p2.lat,p2.lng)],"#ff0000",3);if(bind_events){addListener(line,"#segment-data #place-pair-"+segment[0]+"-"+segment[1]);}
 map.addOverlay(line);addedOverlays.push(segment);}}
-var p=point_data[i];if($.inArray(p.place_id,addedOverlays)==-1){var marker=new GMarker(new GLatLng(p.lat,p.lng),{title:p.name,icon:p.visited?G_DEFAULT_ICON:new GIcon(G_DEFAULT_ICON,"/media/images/marker_grey.png")});if(bind_events){addListener(marker,"#point-data #place-"+p.place_id);}
+var p=point_data[i];if($.inArray(p.place_id,addedOverlays)==-1){var icon=G_DEFAULT_ICON;if(!p.visited){icon=new GIcon(G_DEFAULT_ICON,"/media/images/marker_grey.png");}
+if(i==0||i==point_data.length-1){icon=new GIcon(G_DEFAULT_ICON,"/media/images/marker_green.png");}
+var marker=new GMarker(new GLatLng(p.lat,p.lng),{title:p.name,icon:icon});if(bind_events){addListener(marker,"#point-data #place-"+p.place_id);}
 markers.push(marker);addedOverlays.push(p.place_id);}}
 setTimeout(function(){var mgr=new MarkerManager(map);mgr.addMarkers(markers,1);mgr.refresh();},0);}
 function cleanupMap()
