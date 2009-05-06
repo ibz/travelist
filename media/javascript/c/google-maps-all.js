@@ -61,13 +61,16 @@ return{latlng:new GLatLng((minLat+maxLat)/2,(minLng+maxLng)/2),zoom:Math.min(wZo
 function initTripMap(id,point_data,bind_events)
 {if(!GBrowserIsCompatible())
 {return;}
-var initialZoom=16;var map=new GMap2(document.getElementById(id));map.addControl(new GLargeMapControl());map.setCenter(new GLatLng(0,0),initialZoom);var mapCenter=getMapCenter(map,point_data,initialZoom);map.setCenter(mapCenter.latlng,mapCenter.zoom);function addListener(overlay,id){GEvent.addListener(overlay,'click',function(latlng){var children=$(id).children().clone(true);if(children.length==1){var child=$(children[0]);map.openInfoWindow(latlng,child.find('.short-content')[0],{maxContent:child.find('.full-content')[0]});}else{var tabname=function(i){return i==0?"Start":i==children.length-1?"End":ordinal(i+1);};var tabs=$.map(children,function(c,i){return new GInfoWindowTab(tabname(i),$(c).find('.short-content')[0]);});if($.grep(children,function(c){return $(c).find('.full-content').length!=0;}).length==0){map.openInfoWindowTabs(latlng,tabs);}else{var maxTabs=$.map(children,function(c,i){return new MaxContentTab(tabname(i),$(c).find('.full-content')[0]);});map.openInfoWindowTabsMaxTabs(latlng,tabs,maxTabs);}}});}
+var initialZoom=16;var map=new GMap2(document.getElementById(id));map.addControl(new GLargeMapControl());map.setCenter(new GLatLng(0,0),initialZoom);var mapCenter=getMapCenter(map,point_data,initialZoom);map.setCenter(mapCenter.latlng,mapCenter.zoom);function addListener(overlay,id,i){GEvent.addListener(overlay,'click',function(latlng){var children=$(id).children().clone(true);if(children.length==1){var child=$(children[0]);map.openInfoWindow(latlng,child.find('.short-content')[0],{maxContent:child.find('.full-content')[0]});}else{function tabname(i,j){if(i==0&&point_data[0].place_id==point_data[point_data.length-1].place_id){if(j==0){return"Start";}
+if(j==children.length-1){return"End";}}
+return ordinal(j+1);}
+var tabs=$.map(children,function(c,j){return new GInfoWindowTab(tabname(i,j),$(c).find('.short-content')[0]);});if($.grep(children,function(c){return $(c).find('.full-content').length!=0;}).length==0){map.openInfoWindowTabs(latlng,tabs);}else{var maxTabs=$.map(children,function(c,j){return new MaxContentTab(tabname(i,j),$(c).find('.full-content')[0]);});map.openInfoWindowTabsMaxTabs(latlng,tabs,maxTabs);}}});}
 var markers=[];for(var i=0,addedOverlays=[];i<point_data.length;i++)
-{if(i+1<point_data.length){var p1=point_data[i];var p2=point_data[i+1];var segment=[Math.min(p1.place_id,p2.place_id),Math.max(p1.place_id,p2.place_id)];if($.inArray(segment,addedOverlays)==-1){var line=new GPolyline([new GLatLng(p1.lat,p1.lng),new GLatLng(p2.lat,p2.lng)],"#ff0000",3);if(bind_events){addListener(line,"#segment-data #place-pair-"+segment[0]+"-"+segment[1]);}
+{if(i+1<point_data.length){var p1=point_data[i];var p2=point_data[i+1];var segment=[Math.min(p1.place_id,p2.place_id),Math.max(p1.place_id,p2.place_id)];if($.inArray(segment,addedOverlays)==-1){var line=new GPolyline([new GLatLng(p1.lat,p1.lng),new GLatLng(p2.lat,p2.lng)],"#ff0000",3);if(bind_events){addListener(line,"#segment-data #place-pair-"+segment[0]+"-"+segment[1],i);}
 map.addOverlay(line);addedOverlays.push(segment);}}
 var p=point_data[i];if($.inArray(p.place_id,addedOverlays)==-1){var icon=G_DEFAULT_ICON;if(!p.visited){icon=new GIcon(G_DEFAULT_ICON,"/media/images/marker_grey.png");}
 if(i==0||i==point_data.length-1){icon=new GIcon(G_DEFAULT_ICON,"/media/images/marker_green.png");}
-var marker=new GMarker(new GLatLng(p.lat,p.lng),{title:p.name,icon:icon});if(bind_events){addListener(marker,"#point-data #place-"+p.place_id);}
+var marker=new GMarker(new GLatLng(p.lat,p.lng),{title:p.name,icon:icon});if(bind_events){addListener(marker,"#point-data #place-"+p.place_id,i);}
 markers.push(marker);addedOverlays.push(p.place_id);}}
 setTimeout(function(){var mgr=new MarkerManager(map);mgr.addMarkers(markers,1);mgr.refresh();},0);}
 function cleanupMap()

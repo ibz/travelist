@@ -106,7 +106,7 @@ def details(request, id):
     return views.render("trip_details.html", request, {'trip': trip, 'points': points, 'segments': segments,
                                                        'points_sorted': sorted(points, key=lambda p: p['place_id']), # XXX: needed until #11008 is fixed in Django
                                                        'segments_sorted': sorted(segments, key=lambda s: s['place_ids']), # XXX: needed until #11008 is fixed in Django
-                                                       'trip_photos': trip_photos})
+                                                       'trip_photos': trip_photos, 'show_trip_photos': trip.user == request.user or trip_photos})
 
 def points_GET(request, id):
     trip = shortcuts.get_object_or_404(models.Trip, id=id, user=request.user)

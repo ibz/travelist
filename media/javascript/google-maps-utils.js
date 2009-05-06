@@ -72,7 +72,7 @@ function initTripMap(id, point_data, bind_events)
     var mapCenter = getMapCenter(map, point_data, initialZoom);
     map.setCenter(mapCenter.latlng, mapCenter.zoom);
 
-    function addListener(overlay, id) {
+    function addListener(overlay, id, i) {
         GEvent.addListener(overlay, 'click',
             function(latlng) {
                 var children = $(id).children().clone(true);
@@ -80,12 +80,22 @@ function initTripMap(id, point_data, bind_events)
                     var child = $(children[0]);
                     map.openInfoWindow(latlng, child.find('.short-content')[0], {maxContent: child.find('.full-content')[0]});
                 } else {
-                    var tabname = function(i) { return i == 0 ? "Start" : i == children.length - 1 ? "End" : ordinal(i + 1); };
-                    var tabs = $.map(children, function(c, i) { return new GInfoWindowTab(tabname(i), $(c).find('.short-content')[0]); });
+                    function tabname(i, j) { // give friendly name to tabs for Start/End
+                        if (i == 0 && point_data[0].place_id == point_data[point_data.length - 1].place_id) {
+                            if(j == 0) {
+                                return "Start";
+                            }
+                            if (j == children.length - 1) {
+                                return "End";
+                            }
+                        }
+                        return ordinal(j + 1);
+                    }
+                    var tabs = $.map(children, function(c, j) { return new GInfoWindowTab(tabname(i, j), $(c).find('.short-content')[0]); });
                     if($.grep(children, function(c) { return $(c).find('.full-content').length != 0; }).length == 0) { // all the tabs only have short content
                         map.openInfoWindowTabs(latlng, tabs);
                     } else {
-                        var maxTabs = $.map(children, function(c, i) { return new MaxContentTab(tabname(i), $(c).find('.full-content')[0]); });
+                        var maxTabs = $.map(children, function(c, j) { return new MaxContentTab(tabname(i, j), $(c).find('.full-content')[0]); });
                         map.openInfoWindowTabsMaxTabs(latlng, tabs, maxTabs);
                     }
                 }
@@ -103,7 +113,7 @@ function initTripMap(id, point_data, bind_events)
             if($.inArray(segment, addedOverlays) == -1) {
                 var line = new GPolyline([new GLatLng(p1.lat, p1.lng), new GLatLng(p2.lat, p2.lng)], "#ff0000", 3);
                 if(bind_events) {
-                    addListener(line, "#segment-data #place-pair-" + segment[0] + "-" + segment[1]);
+                    addListener(line, "#segment-data #place-pair-" + segment[0] + "-" + segment[1], i);
                 }
                 map.addOverlay(line);
                 addedOverlays.push(segment);
@@ -122,7 +132,7 @@ function initTripMap(id, point_data, bind_events)
             }
             var marker = new GMarker(new GLatLng(p.lat, p.lng), {title: p.name, icon: icon});
             if(bind_events) {
-                addListener(marker, "#point-data #place-" + p.place_id);
+                addListener(marker, "#point-data #place-" + p.place_id, i);
             }
             markers.push(marker);
             addedOverlays.push(p.place_id);

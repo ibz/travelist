@@ -104,7 +104,9 @@ $(function()
 <div id="trip-details-tabs" style="display: none;">
 <ul>
   <li><a href="#points"><span>Places</span></a></li>
+  {% if show_trip_photos %}
   <li><a href="#photos"><span>Photos</span></a></li>
+  {% endif %}
 </ul>
 
 <div id="points">
@@ -118,6 +120,7 @@ $(function()
   </ul>
 </div>
 
+{% if show_trip_photos %}
 <div id="photos">
   {% ifequal user.id trip.user_id %}
     <a href="/trips/{{ trip.id }}/annotations/new/?content_type=3">add photos</a>
@@ -126,6 +129,7 @@ $(function()
     {% call "_trip_details_annotations.html" with annotations=trip_photos %}
   </ul>
 </div>
+{% endif %}
 </div>
 </body>
 </html>
