@@ -15,14 +15,13 @@ class NoWidget(forms.widgets.Widget):
 
 class EditForm(ui.ModelForm):
     title = forms.fields.CharField(max_length=30, widget=forms.widgets.TextInput(attrs={'class': 'title'}))
-    date = forms.fields.DateField(widget=forms.widgets.DateTimeInput(format=settings.DATE_FORMAT_SHORT_PY, attrs={'class': 'text'}), required=False)
     visibility = forms.fields.ChoiceField(choices=models.Visibility.choices)
     point = forms.models.ModelChoiceField(models.Point.objects, required=False, widget=forms.widgets.HiddenInput(), label="")
     segment = forms.fields.BooleanField(required=False, widget=forms.widgets.HiddenInput(), label="")
     content = forms.fields.Field()
 
     class Meta:
-        fields = ('title', 'date', 'visibility', 'point', 'segment', 'content')
+        fields = ('title', 'visibility', 'point', 'segment', 'content')
 
     def __init__(self, data=None, files=None, annotation=None, initial=None):
         super(EditForm, self).__init__(data, files, initial=initial, instance=annotation)

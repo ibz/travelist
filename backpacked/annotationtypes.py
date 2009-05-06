@@ -95,11 +95,6 @@ class AnnotationManager(object):
     def after_save(self):
         pass
 
-    def append_date_to_display_name(self, display_name):
-        if not self.annotation.date:
-            return display_name
-        return "%s (%s)" % (display_name, utils.format_date_human(self.annotation.date))
-
 class ActivityAnnotationManager(AnnotationManager):
     content_type = models.ContentType.ACTIVITY
 
@@ -109,7 +104,7 @@ class ActivityAnnotationManager(AnnotationManager):
 
     @property
     def display_name(self):
-        return self.append_date_to_display_name(self.annotation.title)
+        return self.annotation.title
 
     def render_short(self):
         return "<h5>%s</h5><p>%s</p>" % (self.display_name,
@@ -135,7 +130,7 @@ class ExternalPhotosAnnotationManager(UrlAnnotationManager):
 
     @property
     def display_name(self):
-        return self.append_date_to_display_name("Photos: %s" % self.annotation.name)
+        return "Photos: %s" % self.annotation.name
 
     def render_short(self):
         return "Photos: <a href=\"%s\">%s</a>" % \
@@ -195,7 +190,7 @@ class TransportationWidget(CompositeContentWidget):
 class TransportationAnnotationManager(AnnotationManager):
     content_type = models.ContentType.TRANSPORTATION
 
-    exclude_fields = ['title', 'date']
+    exclude_fields = ['title']
 
     title_required = False
 
@@ -337,12 +332,11 @@ class AccommodationAnnotationManager(AnnotationManager):
 
     @property
     def display_name(self):
-        return self.append_date_to_display_name("Accommodation: %s" % self.accommodation.name)
+        return "Accommodation: %s" % self.accommodation.name
 
     def render_short(self):
-        return "Accommodation: <a href=\"/accommodations/%s/\" title=\"%s\">%s</a>" % \
+        return "Accommodation: <a href=\"/accommodations/%s/\">%s</a>" % \
             (self.accommodation.id,
-             utils.format_date_human(self.annotation.date),
              html.escape(self.accommodation.name))
 
     def clean_content(self, content):
@@ -412,7 +406,7 @@ class NoteAnnotationManager(AnnotationManager):
 
     @property
     def display_name(self):
-        return self.append_date_to_display_name(self.annotation.title)
+        return self.annotation.title
 
     def render_short(self):
         return "<h4>%s</h4><p>%s</p>" % (self.display_name,

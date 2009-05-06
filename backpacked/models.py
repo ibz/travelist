@@ -305,7 +305,6 @@ class Annotation(models.Model):
     trip = models.ForeignKey(Trip)
     point = models.ForeignKey(Point, blank=True, null=True)
     segment = models.BooleanField()
-    date = models.DateTimeField(blank=True, null=True)
     title = models.CharField(max_length=30)
     content_type = models.IntegerField(choices=ContentType.choices)
     content = models.TextField(null=True)
@@ -338,21 +337,6 @@ class Annotation(models.Model):
     @property
     def url(self):
         return "/trips/%s/annotations/%s/" % (self.trip.id, self.id)
-
-    @property
-    def parent_name(self):
-        if not self.point:
-            return ""
-        name = self.point.name
-        if self.segment:
-            name += " - "
-            try:
-                p2 = self.trip.point_set.filter(order_rank__gt=self.point.order_rank).\
-                                         order_by('order_rank')[0:1].get()
-                name += p2.name
-            except Point.DoesNotExist:
-                name += "?"
-        return name
 
     def save(self):
         super(Annotation, self).save()
