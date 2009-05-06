@@ -4,59 +4,137 @@
 <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
 <script src="{{ MEDIA_URL }}javascript/trip.js" type="text/javascript"></script>
 <script type="text/javascript">
-$(document).ready(function()
-                  {
-                      init_trip_details([{% for p in points %}[{{ p.coords.0 }}, {{ p.coords.1 }}, "{{ p.name }}"]{% if not forloop.last %},{% endif %}{% endfor %}]);
-                      $("#trip-details-tabs").show();
-                  });
+$(function()
+{
+  init_trip_details(
+[{% for p in points %}{lat:{{ p.coords.0 }}, lng:{{ p.coords.1 }}, id:{{ p.id }}, name:"{{ p.name }}", place_id:{{ p.place_id }}, visited:{{ p.visited|lower }} }{% if not forloop.last %},{% endif %}{% endfor %}]);
+  $("#trip-details-tabs").show();
+});
 </script>
 </head>
 <body>
+
 {% load call %}
+
+<div id="point-data" style="display: none">
+{% regroup points_sorted by place_id as places %}
+{% for place in places %}
+<div id="place-{{ place.grouper }}">
+{% for point in place.list %}
+<div id="point-{{ point.id }}">
+<div class="short-content">
+  <div class="body">
+    <h4><a href="/places/{{ point.place_id }}/">{{ point.name }}</a></h4>
+    {% if point.date_arrived or point.date_left %}
+      {% if point.date_arrived %}{{ point.date_arrived|date }}{% else %}?{% endif %} - {% if point.date_left %}{{ point.date_left|date }}{% else %}?{% endif %}
+    {% endif %}
+    <ul class="plain-list">
+      {% call "_trip_details_annotations.html" with annotations=point.annotations.POINT.ACCOMMODATION empty='' %}
+      {% call "_trip_details_annotations.html" with annotations=point.annotations.POINT.EXTERNAL_PHOTOS empty='' %}
+      {% call "_trip_details_annotations.html" with annotations=point.annotations.POINT.URL empty='' %}
+    </ul>
+    <div class="footer-space"></div>
+  </div>
+  <div class="footer">
+    <hr />
+    <a href="/trips/{{ trip.id }}/annotations/new/?content_type=6&point_id={{ point.id }}&segment=0">add accommodation</a>,
+    <a href="/trips/{{ trip.id }}/annotations/new/?content_type=3&point_id={{ point.id }}&segment=0">add photos</a>,
+    <a href="/trips/{{ trip.id }}/annotations/new/?content_type=2&point_id={{ point.id }}&segment=0">add link</a>
+  </div>
+</div>
+<div class="full-content">
+  <div>
+    <h5>Activities (<a href="/trips/{{ trip.id }}/annotations/new/?content_type=1&point_id={{ point.id }}&segment=0">add</a>)</h5>
+    <ul class="plain-list">
+      {% call "_trip_details_annotations.html" with annotations=point.annotations.POINT.ACTIVITY %}
+    </ul>
+  </div>
+  <div>
+    <h5>Notes (<a href="/trips/{{ trip.id }}/annotations/new/?content_type=8&point_id={{ point.id }}&segment=0">add</a>)</h5>
+    <ul class="plain-list">
+      {% call "_trip_details_annotations.html" with annotations=point.annotations.POINT.NOTE %}
+    </ul>
+  </div>
+  <div>
+    <h5>Costs (<a href="/trips/{{ trip.id }}/annotations/new/?content_type=7&point_id={{ point.id }}&segment=0">add</a>)</h5>
+    <ul class="plain-list">
+      {% call "_trip_details_annotations.html" with annotations=point.annotations.POINT.COST %}
+    </ul>
+  </div>
+</div>
+</div>
+{% endfor %}
+</div>
+{% endfor %}
+</div>
+
+<div id="segment-data" style="display: none">
+{% regroup segments_sorted by place_ids as place_pairs %}
+{% for place_pair in place_pairs %}
+<div id="place-pair-{{ place_pair.grouper }}">
+{% for segment in place_pair.list %}
+<div id="segment-{{ segment.p1.id }}">
+<div class="short-content">
+  <div class="body">
+    <h4><a href="/places/{{ segment.p1.place_id }}/">{{ segment.p1.name }}</a> - <a href="/places/{{ segment.p2.place_id }}/">{{ segment.p2.name }}</a></h4>
+    {% if segment.p1.date_left or segment.p2.date_arrived %}
+      {% if segment.p1.date_left %}{{ segment.p1.date_left|date }}{% else %}?{% endif %} - {% if segment.p2.date_arrived %}{{ segment.p2.date_arrived|date }}{% else %}?{% endif %}
+    {% endif %}
+    <ul class="plain-list">
+      <li>Distance: {{ segment.length|floatformat:2 }} km</li>
+      {% call "_trip_details_annotations.html" with annotations=segment.p1.annotations.SEGMENT.TRANSPORTATION empty='' %}
+      {% call "_trip_details_annotations.html" with annotations=segment.p1.annotations.SEGMENT.EXTERNAL_PHOTOS empty='' %}
+      {% call "_trip_details_annotations.html" with annotations=segment.p1.annotations.SEGMENT.URL empty='' %}
+    </ul>
+    <div class="footer-space"></div>
+  </div>
+  <div class="footer">
+    <hr />
+    <a href="/trips/{{ trip.id }}/annotations/new/?content_type=4&point_id={{ segment.p1.id }}&segment=1">add transportation</a>,
+    <a href="/trips/{{ trip.id }}/annotations/new/?content_type=3&point_id={{ segment.p1.id }}&segment=1">add photos</a>,
+    <a href="/trips/{{ trip.id }}/annotations/new/?content_type=2&point_id={{ segment.p1.id }}&segment=1">add link</a>
+  </div>
+</div>
+
+<div class="full-content">
+  <div>
+    <h5>Activities (<a href="/trips/{{ trip.id }}/annotations/new/?content_type=1&point_id={{ segment.p1.id }}&segment=1">add</a>)</h5>
+    <ul class="plain-list">
+      {% call "_trip_details_annotations.html" with annotations=segment.p1.annotations.SEGMENT.ACTIVITY %}
+    </ul>
+  </div>
+  <div>
+    <h5>Notes (<a href="/trips/{{ trip.id }}/annotations/new/?content_type=8&point_id={{ segment.p1.id }}&segment=1">add</a>)</h5>
+    <ul class="plain-list">
+      {% call "_trip_details_annotations.html" with annotations=segment.p1.annotations.SEGMENT.NOTE %}
+    </ul>
+  </div>
+  <div>
+    <h5>Costs (<a href="/trips/{{ trip.id }}/annotations/new/?content_type=7&point_id={{ segment.p1.id }}&segment=1">add</a>)</h5>
+    <ul class="plain-list">
+      {% call "_trip_details_annotations.html" with annotations=segment.p1.annotations.SEGMENT.COST %}
+    </ul>
+  </div>
+</div>
+</div>
+{% endfor %}
+</div>
+{% endfor %}
+</div>
+
 <div id="trip-details-tabs" style="display: none;">
 <ul>
-  <li><a href="#points"><span>Points</span></a></li>
-  <li><a href="#segments"><span>Segments</span></a></li>
+  <li><a href="#points"><span>Places</span></a></li>
   <li><a href="#photos"><span>Photos</span></a></li>
 </ul>
 
 <div id="points">
   {% ifequal user.id trip.user_id %}
-  <a href="javascript:edit_points({{ trip.id }});">edit points</a>
+  <a href="javascript:edit_points({{ trip.id }});">edit places</a>
   {% endifequal %}
   <ul class="plain-list">
     {% for point in points %}
-    <li>
-      <span class="expand-item" onclick="javascript:toggle_details('point_{{ forloop.counter }}')">
-        <span id="link_point_{{ forloop.counter }}">+</span>
-        {{ point.name }} {% if point.visited %}(visited){% endif %}
-      </span>
-      <ul id="point_{{ forloop.counter }}" class="plain-list" style="display: none;">
-        {% call "_trip_details_annotation_types.html" with choices=point_annotation_type_choices point_id=point.id segment=0 %}
-        {% if point.date_arrived or point.date_left %}
-        <li>{% if point.date_arrived %}{{ point.date_arrived|date }}{% else %}?{% endif %} - {% if point.date_left %}{{ point.date_left|date }}{% else %}?{% endif %}</li>
-        {% endif %}
-        {% call "_trip_details_annotations.html" with annotations=point.annotations %}
-      </ul>
-    </li>
-    {% endfor %}
-  </ul>
-</div>
-
-<div id="segments">
-  <ul class="plain-list">
-    {% for segment in segments %}
-    <li>
-      <span class="expand-item" onclick="javascript:toggle_details('segment_{{ forloop.counter }}')">
-        <span id="link_segment_{{ forloop.counter }}">+</span>
-          {{ segment.p1_name }} - {{ segment.p2_name }}
-      </span>
-      <ul id="segment_{{ forloop.counter }}" class="plain-list" style="display: none;">
-        {% call "_trip_details_annotation_types.html" with choices=segment_annotation_type_choices point_id=segment.id segment=1 %}
-        <li>Length: {{ segment.length|floatformat:2 }} km</li>
-        {% call "_trip_details_annotations.html" with annotations=segment.annotations %}
-      </ul>
-    </li>
+    <li>{{ point.name }} {% if point.visited %}(visited){% endif %}</li>
     {% endfor %}
   </ul>
 </div>

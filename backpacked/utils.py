@@ -34,11 +34,20 @@ def format_date_human(value):
 
 class Enum:
     def __init__(self, all):
+        """
+            'all' is either a dict that looks like this:
+            {'MEMBER_NAME_1': (1, "Member description 1", ...),
+             'MEMBER_NAME_2': (2, "Member description 2", ...), ...}
+            or a list that looks like this:
+            [(1, "Member 1", ...),
+             (2, "Member 2", ...), ...]
+        """
         if isinstance(all, dict):
             self.all = all
         else:
             name = lambda desc: re.sub("[^A-Z0-9_]", "X", re.sub(" ", "_", desc.upper()))
             self.all = dict((name(e[1]), e) for e in all)
+        self.all_by_value = dict((i[1][0], (i[0],) + i[1][1:]) for i in self.all.items())
 
     def __getattr__(self, name):
         return self.all[name][0]
@@ -59,18 +68,16 @@ class Enum:
 
     @property
     def values(self):
-        return [v[0] for v in self.all.values()]
+        return self.all_by_value.keys()
 
     def get_description(self, value):
-        for i in self.all.values():
-            if i[0] == value:
-                return i[1]
+        return self.all_by_value[value][1]
 
     def get_extra(self, value):
-        for i in self.all.values():
-            if i[0] == value:
-                return i[2:]
+        return self.all_by_value[value][2:]
 
+    def get_name(self, value):
+        return self.all_by_value[value][0]
 
 def cached_property(func):
     def _get(self):

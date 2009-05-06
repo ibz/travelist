@@ -1,9 +1,0 @@
-<span class="expand-item" onclick="javascript:toggle_details('annotation_details_{{ annotation.id }}');">
-  <span id="link_annotation_details_{{ annotation.id }}">+</span>
-  {{ annotation.manager.display_name }}
-</span>
-<ul id="annotation_details_{{ annotation.id }}" class="plain-list" style="display: none;">
-{% if content.number %}<li>{{ content.number }}</li>{% endif %}
-{% if content.class %}<li>{{ content.class_h }}</li>{% endif %}
-{% if content.comments %}<li>{{ content.comments|linebreaksbr }}</li>{% endif %}
-</ul>

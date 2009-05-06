@@ -6,16 +6,11 @@
 <script type="text/javascript">
 var last_id = 0;
 var points = {};
-$(document).ready(function()
-                  {
-                      init_trip_points([
-                                       {% for p in points %}
-                                       {id: {{ p.id }}, name: "{{ p.name }}", lat: {{ p.coords.coords.0 }}, lng: {{ p.coords.coords.1 }},
-                                        date_arrived: "{{ p.date_arrived|default:"" }}", date_left: "{{ p.date_left|default:"" }}",
-                                        visited: {% if p.visited %}true{% else %}false{% endif %} }{% if not forloop.last %},{% endif %}
-                                       {% endfor %}
-                                       ]);
-                  });
+$(function()
+{
+  init_trip_points(
+[{% for p in points %}{id:{{ p.id }}, place_id:{{ p.place_id }}, name:"{{ p.name }}", lat:{{ p.coords.coords.0 }}, lng:{{ p.coords.coords.1 }}, date_arrived:"{{ p.date_arrived|default:"" }}", date_left:"{{ p.date_left|default:"" }}", visited:{{ p.visited|lower }} }{% if not forloop.last %},{% endif %}{% endfor %}]);
+});
 </script>
 </head>
 <body>
@@ -25,6 +20,12 @@ $(document).ready(function()
 {% else %}
 <h4>Add all the places you've been through. Include the starting and ending point.</h4>
 {% endif %}
+
+<p>
+<input type="button" class="button positive" value="Save" onclick="javascript:trip_points_save({{ trip.id }});" />
+<input type="button" class="button negative" value="Cancel" onclick="javascript:trip_points_cancel({{ trip.id }});" />
+</p>
+
 <ul id="sort-points" class="sortable-list">
 </ul>
 
@@ -44,13 +45,16 @@ $(document).ready(function()
       <div class="values">
         <div>
           <label>Arrived:</label> <input type="text" class="date-arrived" size="10" />
+        </div>
+        <div>
           <label>Left:</label> <input type="text" class="date-left" size="10" />
         </div>
         <div>
-          <input type="checkbox" class="visited" value="visited" /> <label class="visited-label">visited</label>
+          <label class="visited-label">Visited:</label> <input type="checkbox" class="visited" value="visited" />
         </div>
       </div>
       <div class="operations">
+        <br />
         <input type="button" class="point-edit-save button positive" value="save" /><br />
         <input type="button" class="point-edit-cancel button negative" value="cancel" />
       </div>
@@ -74,15 +78,11 @@ $(document).ready(function()
 
 <div id="add-place">
 <p>
-<div id="suggest-place-message">Can't find the place you're looking for? Suggest it <a href="javascript:suggest_place();">here</a>.</div>
 <input type="text" id="new-place-name" />
 <input type="hidden" id="new-place-id" />
 <input type="hidden" id="new-place-coords" />
 <input type="button" class="button positive" value="Add" onclick="javascript:add_new_point();" /><br />
-</p>
-<p>
-<input type="button" class="button positive" value="Save" onclick="javascript:trip_points_save({{ trip.id }});" />
-<input type="button" class="button negative" value="Cancel" onclick="javascript:trip_points_cancel({{ trip.id }});" />
+<div id="suggest-place-message">Can't find the place you're looking for? Suggest it <a href="javascript:suggest_place();">here</a>.</div>
 </p>
 </div>
 </div>

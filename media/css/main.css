@@ -1,3 +1,7 @@
+html {
+    overflow-y: scroll;
+}
+
 a {
     color: #0187C5;
     text-decoration: none;
@@ -124,7 +128,7 @@ img.user-image {
 /* Trip */
 #map {
     border: 2px solid #5F99CF;
-    width: 550px;
+    width: 700px;
     height: 450px;
 }
 
@@ -133,43 +137,18 @@ img.user-image {
     overflow: auto;
 }
 
-#trip-details-tabs .annotation {
-    position: relative;
-}
-
-#trip-details-tabs .annotation .operations {
-    display: none;
-}
-
-#trip-details-tabs .annotation.hover .operations {
-    display: inline;
-    position: absolute;
-    top: 0px;
-    left: 200px;
-    width: 100px;
-    text-align: right;
-}
-
-#trip-details-tabs .annotation-types {
-    padding-bottom: 2em;
-    position: relative;
-}
-
-#trip-details-tabs .annotation-types .type-list {
-    font-weight: bold;
-    position: absolute;
-    left: 2em;
-}
-
 #sort-points li {
-    width: 380px;
+    width: 220px;
+}
+
+#sort-points li .point-view {
+    background-color: #CEE3F8;
+    height: 4.5em;
 }
 
 #sort-points li .point-view,
 #sort-points li .point-edit {
     margin-bottom: 5px;
-    height: 4.5em;
-    background-color: #CEE3F8;
     border: 1px solid #5F99CF;
     cursor: pointer;
     position: relative;
@@ -180,10 +159,11 @@ img.user-image {
 #sort-points li .point-edit .operations {
     position: absolute;
     top: 0px;
-    left: 270px;
+    left: 110px;
     width: 100px;
     text-align: right;
     line-height: 2.25em;
+    height: 100%;
 }
 
 #sort-points li .point-view .point-name {
@@ -193,10 +173,18 @@ img.user-image {
 
 #sort-points li .point-edit {
     background-color: #E6F7D4;
+    height: 7.5em;
+    padding-top: 5px;
 }
 
 #sort-points li .point-edit .values {
     line-height: 2.5em;
+}
+
+#sort-points li .point-edit .values 
+input {
+    position: absolute;
+    left: 60px;
 }
 
 #sort-points li .point-edit .operations input {
@@ -211,7 +199,49 @@ img.user-image {
     left: -5px;
 }
 
-/* Accommodation */
+/* Point / segment details */
+
+.short-content {
+    height: 100%;
+}
+
+.short-content .body {
+    height: 100%;
+}
+
+.short-content .footer-space {
+    height: 20px;
+}
+
+.short-content .footer {
+    height: 20px;
+    position: relative;
+    top: -20px;
+}
+
+.short-content hr {
+    margin: 5px;
+}
+
+.annotation {
+    position: relative;
+    width: 250px;
+}
+
+.annotation .operations {
+    display: none;
+}
+
+.annotation.hover .operations {
+    display: inline;
+    position: absolute;
+    top: 0px;
+    left: 150px;
+    width: 100px;
+    text-align: right;
+}
+
+/* Star rating */
 
 #star-rating {
     padding-bottom: 20px;

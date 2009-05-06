@@ -26,7 +26,7 @@ function suggest_place_ok()
     var comments = $("#suggest-comments").val();
     if (!name || !comments)
     {
-        alert("Please fil in the place name and comments!");
+        alert("Please fill in the place name and comments!");
         return;
     }
     $("#suggest-buttons").hide();
@@ -54,14 +54,6 @@ function suggest_place_cancel()
 {
     $("#suggest-place").hide();
     $("#add-place,#suggest-place-message").show();
-}
-
-function toggle_details(id)
-{
-    var ul = document.getElementById(id);
-    ul.style.display = ul.style.display == 'none' ? 'block' : 'none';
-    var a = document.getElementById("link_" + id);
-    a.textContent = ul.style.display == 'none' ? "+" : "-";
 }
 
 function delete_annotation(trip_id, id)
@@ -115,8 +107,8 @@ function init_trip(trip_id, has_points, allow_edit)
 function init_trip_details(point_data)
 {
     $("#trip-details-tabs > ul").tabs();
-    $("#trip-details-tabs .annotation").hover(function() { $(this).addClass('hover'); }, function() { $(this).removeClass('hover'); });
-    initTripMap("map", point_data);
+    $(".annotation").hover(function() { $(this).addClass('hover'); }, function() { $(this).removeClass('hover'); });
+    initTripMap("map", point_data, true);
 }
 
 function init_trip_new()
@@ -160,7 +152,7 @@ function add_new_point()
 
     var point_id = "newpoint_" + place_id;
     var id = add_point(point_id, name);
-    set_point_data(id, {lat: lat, lng: lng, name: name, date_arrived: "", date_left: "", visited: false}, true);
+    set_point_data(id, {lat: lat, lng: lng, name: name, date_arrived: "", date_left: "", visited: false, place_id: place_id}, true);
     edit_point(id);
 
     refresh_map();
@@ -180,7 +172,7 @@ function edit_point(id)
     var data = points[id];
     edit.find(".date-arrived").val(data.date_arrived);
     edit.find(".date-left").val(data.date_left);
-    edit.find(".visited").val(data.visited);
+    edit.find(".visited").attr('checked', data.visited);
     if(is_new)
     {
         edit.find(".operations").hide();
@@ -211,6 +203,8 @@ function edit_point_save(id)
     point.removeClass("edit-mode");
     point.find(".point-view .operations").show();
     edit.hide();
+
+    refresh_map();
 }
 
 function edit_point_cancel(id)
@@ -229,14 +223,6 @@ function set_point_details(id, date_arrived, date_left, visited)
     if(date_arrived_h != "" || date_left_h != "")
     {
         details = (date_arrived != "" ? date_arrived_h : "?") + " - " + (date_left != "" ? date_left_h : "?");
-    }
-    if(visited)
-    {
-        if(details != "")
-        {
-            details += ", ";
-        }
-        details += "visited";
     }
 
     $("#point_" + id).find(".point-details").text(details);
@@ -310,8 +296,8 @@ function refresh_map()
     var point_data = $.map($("#sort-points").sortable('toArray'),
                            function(id)
                            {
-                               var point = points[parseInt(id.substr(id.indexOf("_") + 1))];
-                               return [[point.lat, point.lng, point.name]];
+                               var p = points[parseInt(id.substr(id.indexOf("_") + 1))];
+                               return [{lat:p.lat, lng:p.lng, name:p.name, id:p.id, date_arrived:p.date_arrived, date_left:p.date_left, visited:p.visited, place_id:p.place_id}];
                            });
-    initTripMap("map", point_data);
+    initTripMap("map", point_data, false);
 }

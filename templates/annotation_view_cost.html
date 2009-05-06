@@ -1,8 +1,0 @@
-<span class="expand-item" onclick="javascript:toggle_details('annotation_details_{{ annotation.id }}');">
-  <span id="link_annotation_details_{{ annotation.id }}">+</span>
-  Cost{% if parent %}: {{ parent.manager.display_name }}{% endif %}
-</span>
-<ul id="annotation_details_{{ annotation.id }}" class="plain-list" style="display: none;">
-<li>{{ content.value }} {{ content.currency }}</li>
-<li>{{ content.comments|linebreaksbr }}</li>
-</ul>

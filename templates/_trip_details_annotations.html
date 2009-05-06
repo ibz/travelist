@@ -1,11 +1,13 @@
 {% for annotation in annotations %}
-<li id="annotation_{{ annotation.id }}" class="annotation">
-  {% autoescape off %}{{ annotation.manager.render_short }}{% endautoescape %}
-  {% ifequal user.id trip.user_id %}
-  <span class="operations">
-    <a href="/trips/{{ trip.id }}/annotations/{{ annotation.id }}/edit/">edit</a> |
-    <a href="javascript:delete_annotation({{ trip.id }}, {{ annotation.id }});">delete</a>
-  </span>
-  {% endifequal %}
-</li>
+  <li class="annotation">
+    {% autoescape off %}{{ annotation.manager.render_short }}{% endautoescape %}
+    {% ifequal user.id trip.user_id %}
+    <span class="operations">
+      <a href="/trips/{{ trip.id }}/annotations/{{ annotation.id }}/edit/">edit</a> |
+      <a href="javascript:delete_annotation({{ trip.id }}, {{ annotation.id }});">delete</a>
+    </span>
+    {% endifequal %}
+  </li>
+{% empty %}
+  <li>{{ empty|default_if_none:"Nothing yet" }}</li>
 {% endfor %}

@@ -61,10 +61,6 @@ class AnnotationManager(object):
 
     title_required = True
 
-    trip_allowed = True
-    point_allowed = True
-    segment_allowed = True
-
     has_extended_content = False
     edit_content_as_file = False
     show_content_label = True
@@ -113,13 +109,11 @@ class ActivityAnnotationManager(AnnotationManager):
 
     @property
     def display_name(self):
-        return self.append_date_to_display_name("Activity: %s" % self.annotation.title)
+        return self.append_date_to_display_name(self.annotation.title)
 
     def render_short(self):
-        t = template.loader.get_template("annotation_view_activity.html")
-        c = template.Context({'annotation': self.annotation})
-
-        return t.render(c)
+        return "<h5>%s</h5><p>%s</p>" % (self.display_name,
+                                         self.annotation.content.replace("\n", "<br />"))
 
     def clean_content(self, content):
         return re.sub("\r", "", content)
@@ -130,8 +124,8 @@ class UrlAnnotationManager(AnnotationManager):
     widget = lambda _: forms.widgets.TextInput(attrs={'class': 'text'})
 
     def render_short(self):
-        return "<a href=\"%s\">URL: %s</a>" % (html.escape(self.annotation.content),
-                                               html.escape(self.annotation.title))
+        return "<a href=\"%s\">%s</a>" % (html.escape(self.annotation.content),
+                                          html.escape(self.annotation.title))
 
     def clean_content(self, content):
         return forms.fields.URLField().clean(content)
@@ -139,9 +133,14 @@ class UrlAnnotationManager(AnnotationManager):
 class ExternalPhotosAnnotationManager(UrlAnnotationManager):
     content_type = models.ContentType.EXTERNAL_PHOTOS
 
+    @property
+    def display_name(self):
+        return self.append_date_to_display_name("Photos: %s" % self.annotation.name)
+
     def render_short(self):
-        return "<a href=\"%s\">Photos: %s</a>" % (html.escape(self.annotation.content),
-                                                  html.escape(self.annotation.title))
+        return "Photos: <a href=\"%s\">%s</a>" % \
+            (html.escape(self.annotation.content),
+             html.escape(self.annotation.title))
 
 class Transportation:
     Means = utils.Enum([(0, "Unspecified"),
@@ -200,9 +199,6 @@ class TransportationAnnotationManager(AnnotationManager):
 
     title_required = False
 
-    trip_allowed = False
-    point_allowed = False
-
     show_content_label = False
 
     widget = TransportationWidget
@@ -212,18 +208,18 @@ class TransportationAnnotationManager(AnnotationManager):
     @property
     def display_name(self):
         content = deserialize(self.annotation.content)
-        return "Transportation: %s" % Transportation.Means.get_description(content['means'])
+        return Transportation.Means.get_description(content['means'])
 
     def render_short(self):
         content = deserialize(self.annotation.content)
-        for k, t in [('means', Transportation.Means), ('class', Transportation.Class)]:
-            if content.has_key(k):
-                content["%s_h" % k] = t.get_description(content[k])
-
-        t = template.loader.get_template("annotation_view_transportation.html")
-        c = template.Context({'annotation': self.annotation, 'content': content})
-
-        return t.render(c)
+        str = Transportation.Means.get_description(content['means'])
+        if content['number']:
+            str += ", %s" % content['number']
+        if content['class']:
+            str += ", %s" % Transportation.Class.get_description(content['class'])
+        if content['comments']:
+            str += "<p>%s</p>" % content['comments'].replace("\n", "<br />")
+        return str
 
     def clean_content(self, content):
         for k in ['means', 'class']:
@@ -329,10 +325,6 @@ class AccommodationAnnotationManager(AnnotationManager):
 
     title_required = False
 
-    trip_allowed = False
-    point_allowed = True
-    segment_allowed = False
-
     can_attach_cost = True
 
     def widget(self):
@@ -393,13 +385,15 @@ class CostAnnotationManager(AnnotationManager):
 
     def render_short(self):
         content = deserialize(self.annotation.content)
-        parent = content.get('parent') and models.Annotation.objects.get(id=content['parent']) or None
+        parent = models.Annotation.objects.get(id=content['parent']) if content.get('parent') else None
 
-        t = template.loader.get_template("annotation_view_cost.html")
-        c = template.Context({'annotation': self.annotation, 'content': content,
-                              'parent': parent})
+        str = "%s %s" % (content['value'], content['currency'])
+        if parent:
+            str += " for %s" % parent.manager.display_name
+        if content.get('comments'):
+            str += "<p>%s</p>" % content['comments']
 
-        return t.render(c)
+        return str
 
     def clean_content(self, content):
         if not content.get('value') or not content.get('currency'):
@@ -418,13 +412,11 @@ class NoteAnnotationManager(AnnotationManager):
 
     @property
     def display_name(self):
-        return self.append_date_to_display_name("Note: %s" % self.annotation.title)
+        return self.append_date_to_display_name(self.annotation.title)
 
     def render_short(self):
-        t = template.loader.get_template("annotation_view_note.html")
-        c = template.Context({'annotation': self.annotation})
-
-        return t.render(c)
+        return "<h4>%s</h4><p>%s</p>" % (self.display_name,
+                                         self.annotation.content.replace("\n", "<br />"))
 
     def clean_content(self, content):
         return re.sub("\r", "", content)

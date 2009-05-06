@@ -262,6 +262,15 @@ class Trip(models.Model):
     def is_visible_to(self, user):
         return is_visible(self.visibility, self.user, user)
 
+    def get_annotations_visible_to(self, user):
+        if self.user == user:
+            return self.annotation_set
+        _, is_friend, _ = self.user.get_relationship_status(user)
+        if is_friend:
+            return self.annotation_set.filter(visibility__in=[Visibility.PUBLIC, Visibility.PROTECTED])
+        else:
+            return self.annotation_set.filter(visibility=models.Visibility.PUBLIC)
+
 class Point(models.Model):
     trip = models.ForeignKey(Trip)
     place = models.ForeignKey(Place, null=True)
@@ -273,6 +282,9 @@ class Point(models.Model):
     order_rank = models.IntegerField()
     date_added = models.DateTimeField(auto_now_add=True)
     date_modified = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        ordering = ['order_rank']
 
     def __unicode__(self):
         return str(self.coords)

@@ -77,64 +77,38 @@ def details(request, id):
     if not trip.is_visible_to(request.user):
         raise http.Http404()
 
-    sort_func = lambda lhs, rhs: cmp(lhs['order_rank'], rhs['order_rank'])
+    points = dict([(p.id, {'id': p.id, 'place_id': p.place_id, 'name': p.name, 'coords': p.coords.coords,
+                           'date_arrived': p.date_arrived, 'date_left': p.date_left, 'visited': p.visited,
+                           'order_rank': p.order_rank,
+                           'annotations': {'POINT': {}, 'SEGMENT': {}}})
+                   for p in trip.point_set.all()])
 
-    annotations = trip.annotation_set.all()
-    if trip.user != request.user:
-        _, is_friend, _ = trip.user.get_relationship_status(request.user)
-        if is_friend:
-            annotations = annotations.filter(visibility__in=[models.Visibility.PUBLIC, models.Visibility.PROTECTED])
-        else:
-            annotations = annotations.filter(visibility=models.Visibility.PUBLIC)
-    annotations = list(annotations)
+    annotations = list(trip.get_annotations_visible_to(request.user).all())
+    for annotation in annotations:
+        dest = points[annotation.point_id]['annotations']['SEGMENT' if annotation.segment else 'POINT']
+        content_type_name = models.ContentType.get_name(annotation.content_type)
+        if not dest.has_key(content_type_name):
+            dest[content_type_name] = []
+        dest[content_type_name].append(annotation)
 
-    points = {}
-    for p in trip.point_set.all():
-        points[p.id] = {'id': p.id,
-                        'name': p.name, 'coords': p.coords.coords,
-                        'date_arrived': p.date_arrived, 'date_left': p.date_left, 'visited': p.visited,
-                        'order_rank': p.order_rank,
-                        'annotations': []}
-    for a in annotations:
-        if a.point and not a.segment:
-            points[a.point_id]['annotations'].append(a)
-    points = sorted(points.values(), sort_func)
+    points = sorted(points.values(), key=lambda p: p['order_rank'])
 
-    segments = {}
+    segments = []
     for i in range(len(points) - 1):
-        p1 = points[i]
-        p2 = points[i + 1]
-        segments[p1['id']] = {'id': p1['id'],
-                              'p1_name' : p1['name'], 'p2_name': p2['name'],
-                              'length': distance(p1['coords'], p2['coords']).km,
-                              'order_rank': i,
-                              'annotations': []}
-    for a in annotations:
-        if a.point and a.segment:
-            segments[a.point_id]['annotations'].append(a)
-    segments = sorted(segments.values(), sort_func)
+        p1, p2 = points[i], points[i + 1]
+        place_ids = '%s-%s' % (min(p1['place_id'], p2['place_id']), max(p1['place_id'], p2['place_id']))
+        segments.append({'place_ids': place_ids, 'p1': p1, 'p2': p2, 'length': distance(p1['coords'], p2['coords']).km})
 
-    point_annotation_type_choices, segment_annotation_type_choices = [], []
-    if trip.user == request.user:
-        level = request.user.userprofile.level
-        for content_type in models.ContentType.choices:
-            manager = annotationtypes.get_manager(content_type[0])
-            if level in manager.user_levels:
-                if manager.point_allowed:
-                    point_annotation_type_choices.append(content_type)
-                if manager.segment_allowed:
-                    segment_annotation_type_choices.append(content_type)
+    trip_photos = [a for a in annotations if a.content_type == models.ContentType.EXTERNAL_PHOTOS]
 
-    trip_photos = [a for a in annotations if not a.point and a.content_type == models.ContentType.EXTERNAL_PHOTOS]
-
-    return views.render("trip_details.html", request, {'trip': trip, 'segments': segments, 'points': points,
-                                                       'trip_photos': trip_photos,
-                                                       'point_annotation_type_choices': point_annotation_type_choices,
-                                                       'segment_annotation_type_choices': segment_annotation_type_choices})
+    return views.render("trip_details.html", request, {'trip': trip, 'points': points, 'segments': segments,
+                                                       'points_sorted': sorted(points, key=lambda p: p['place_id']), # XXX: needed until #11008 is fixed in Django
+                                                       'segments_sorted': sorted(segments, key=lambda s: s['place_ids']), # XXX: needed until #11008 is fixed in Django
+                                                       'trip_photos': trip_photos})
 
 def points_GET(request, id):
     trip = shortcuts.get_object_or_404(models.Trip, id=id, user=request.user)
-    points = sorted(list(trip.point_set.all()))
+    points = list(trip.point_set.all())
     return views.render("trip_points.html", request, {'trip': trip, 'points': points})
 
 points_re = re.compile(r"^(old|new)point_(.+)$")
