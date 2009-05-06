@@ -115,6 +115,8 @@ function initTripMap(id, point_data, bind_events)
                 var line = new GPolyline([new GLatLng(p1.lat, p1.lng), new GLatLng(p2.lat, p2.lng)], "#ff0000", 3);
                 if(bind_events) {
                     addListener(line, "#segment-data #place-pair-" + place_id_pair, i);
+                    GEvent.addListener(line, 'mouseover', function() { document.body.style.cursor = 'hand'; });
+                    GEvent.addListener(line, 'mouseout', function() { document.body.style.cursor = 'auto'; });
                 }
                 map.addOverlay(line);
                 addedOverlays.push(place_id_pair);
