@@ -85,6 +85,8 @@ def details(request, id):
 
     annotations = list(trip.get_annotations_visible_to(request.user).all())
     for annotation in annotations:
+        if not annotation.point_id:
+            continue
         dest = points[annotation.point_id]['annotations']['SEGMENT' if annotation.segment else 'POINT']
         content_type_name = models.ContentType.get_name(annotation.content_type)
         if not dest.has_key(content_type_name):
@@ -100,7 +102,7 @@ def details(request, id):
         segments.append({'place_ids': place_ids, 'p1': p1, 'p2': p2, 'length': distance(p1['coords'], p2['coords']).km})
 
     trip_photos = [a for a in annotations if a.content_type == models.ContentType.EXTERNAL_PHOTOS]
-
+    
     return views.render("trip_details.html", request, {'trip': trip, 'points': points, 'segments': segments,
                                                        'points_sorted': sorted(points, key=lambda p: p['place_id']), # XXX: needed until #11008 is fixed in Django
                                                        'segments_sorted': sorted(segments, key=lambda s: s['place_ids']), # XXX: needed until #11008 is fixed in Django
