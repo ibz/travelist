@@ -7,11 +7,11 @@
 {% if trips %}
 <div class="column span-14 prepend-5 append-5 prepend-top last">
 <div>Most recent trips:</div>
-<table id="trip-list" class="data-grid" style="width: 400px">
+<table id="trip-list" class="data-grid" style="width: 100%">
   <thead>
     <td width="40%">Name</td>
-    <td width="30%">Started on</td>
-    <td width="30%" class="lastcolumn">Ended on</td>
+    <td width="30%">Start date</td>
+    <td width="30%" class="lastcolumn">End date</td>
   </thead>
   {% for trip in trips %}
   <tr{% if forloop.first %} class="firstrow"{% endif %}>

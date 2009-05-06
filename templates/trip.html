@@ -18,9 +18,9 @@ $(document).unload(cleanupMap);
   <h2>{{ trip.name }}</h2>
 </div>
 <div id="trip-info" class="column span-7 prepend-top append-bottom">
-  Started on: {{ trip.start_date|date }}<br />
-  Ended on: {{ trip.end_date|date }}<br />
-  Owned by: {% ifequal user.id trip.user_id %}me{% else %}{{ trip.user.username }}{% endifequal %}<br />
+  {% ifequal trip.status "FUTURE" %}Starts on{% else %}Started on{% endifequal %}: {{ trip.start_date|date }}<br />
+  {% ifequal trip.status "PAST" %}Ended on{% else %}Ends on{% endifequal %}: {{ trip.end_date|date }}<br />
+  Owned by: {% ifequal user.id trip.user_id %}me{% else %}<a href="/people/{{ trip.user.username }}/">{{ trip.user.username }}</a>{% endifequal %}<br />
 </div>
 <div class="column span-7 prepend-top append-bottom last right">
   {% ifequal user.id trip.user_id %}

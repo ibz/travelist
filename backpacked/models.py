@@ -1,4 +1,5 @@
 import os
+from datetime import date
 from datetime import datetime
 
 from django.db.models import Q
@@ -254,6 +255,15 @@ class Trip(models.Model):
 
     def __unicode__(self):
         return self.name
+
+    @property
+    def status(self):
+        if date.today() < self.start_date:
+            return 'FUTURE'
+        elif date.today() > self.end_date:
+            return 'PAST'
+        else:
+            return 'CURRENT'
 
     @property
     def visibility_h(self):

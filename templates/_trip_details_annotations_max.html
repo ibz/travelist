@@ -1,0 +1,21 @@
+{% load call %}
+<div class="full-content">
+  <div>
+    <h5>Activities {% ifequal user trip.user %}(<a href="/trips/{{ trip.id }}/annotations/new/?content_type=1&point_id={{ point.id }}&segment={{ segment }}">add</a>){% endifequal %}</h5>
+    <ul class="plain-list">
+      {% call "_trip_details_annotations.html" with annotations=annotation_dict.ACTIVITY %}
+    </ul>
+  </div>
+  <div>
+    <h5>Notes {% ifequal user trip.user %}(<a href="/trips/{{ trip.id }}/annotations/new/?content_type=8&point_id={{ point.id }}&segment={{ segment }}">add</a>){% endifequal %}</h5>
+    <ul class="plain-list">
+      {% call "_trip_details_annotations.html" with annotations=annotation_dict.NOTE %}
+    </ul>
+  </div>
+  <div>
+    <h5>Costs {% ifequal user trip.user %}(<a href="/trips/{{ trip.id }}/annotations/new/?content_type=7&point_id={{ point.id }}&segment={{ segment }}">add</a>){% endifequal %}</h5>
+    <ul class="plain-list">
+      {% call "_trip_details_annotations.html" with annotations=annotation_dict.COST %}
+    </ul>
+  </div>
+</div>

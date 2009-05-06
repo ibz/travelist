@@ -80,9 +80,14 @@ function initTripMap(id, point_data, bind_events)
                     var child = $(children[0]);
                     map.openInfoWindow(latlng, child.find('.short-content')[0], {maxContent: child.find('.full-content')[0]});
                 } else {
-                    var tabs = $.map(children, function(c, i) { return new GInfoWindowTab(ordinal(i + 1), $(c).find('.short-content')[0]); });
-                    var maxTabs = $.map(children, function(c, i) { return new MaxContentTab(ordinal(i + 1), $(c).find('.full-content')[0]); });
-                    map.openInfoWindowTabsMaxTabs(latlng, tabs, maxTabs);
+                    var tabname = function(i) { return i == 0 ? "Start" : i == children.length - 1 ? "End" : ordinal(i + 1); };
+                    var tabs = $.map(children, function(c, i) { return new GInfoWindowTab(tabname(i), $(c).find('.short-content')[0]); });
+                    if($.grep(children, function(c) { return $(c).find('.full-content').length != 0; }).length == 0) { // all the tabs only have short content
+                        map.openInfoWindowTabs(latlng, tabs);
+                    } else {
+                        var maxTabs = $.map(children, function(c, i) { return new MaxContentTab(tabname(i), $(c).find('.full-content')[0]); });
+                        map.openInfoWindowTabsMaxTabs(latlng, tabs, maxTabs);
+                    }
                 }
             });
     }

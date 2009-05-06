@@ -36,33 +36,22 @@ $(function()
       {% call "_trip_details_annotations.html" with annotations=point.annotations.POINT.URL empty='' %}
     </ul>
   </div>
+  {% ifequal user trip.user %}
   <div class="footer">
     <hr />
     <a href="/trips/{{ trip.id }}/annotations/new/?content_type=6&point_id={{ point.id }}&segment=0">add accommodation</a>,
     <a href="/trips/{{ trip.id }}/annotations/new/?content_type=3&point_id={{ point.id }}&segment=0">add photos</a>,
     <a href="/trips/{{ trip.id }}/annotations/new/?content_type=2&point_id={{ point.id }}&segment=0">add link</a>
   </div>
+  {% endifequal %}
 </div>
-<div class="full-content">
-  <div>
-    <h5>Activities (<a href="/trips/{{ trip.id }}/annotations/new/?content_type=1&point_id={{ point.id }}&segment=0">add</a>)</h5>
-    <ul class="plain-list">
-      {% call "_trip_details_annotations.html" with annotations=point.annotations.POINT.ACTIVITY %}
-    </ul>
-  </div>
-  <div>
-    <h5>Notes (<a href="/trips/{{ trip.id }}/annotations/new/?content_type=8&point_id={{ point.id }}&segment=0">add</a>)</h5>
-    <ul class="plain-list">
-      {% call "_trip_details_annotations.html" with annotations=point.annotations.POINT.NOTE %}
-    </ul>
-  </div>
-  <div>
-    <h5>Costs (<a href="/trips/{{ trip.id }}/annotations/new/?content_type=7&point_id={{ point.id }}&segment=0">add</a>)</h5>
-    <ul class="plain-list">
-      {% call "_trip_details_annotations.html" with annotations=point.annotations.POINT.COST %}
-    </ul>
-  </div>
-</div>
+{% ifequal user trip.user %}
+  {% call "_trip_details_annotations_max.html" with annotation_dict=point.annotations.POINT segment=0 %}
+{% else %}
+  {% if point.annotations.POINT.ACTIVITY or point.annotations.POINT.NOTE or point.annotations.POINT.COST %}
+    {% call "_trip_details_annotations_max.html" with annotation_dict=point.annotations.POINT segment=0 %}
+  {% endif %}
+{% endifequal %}
 </div>
 {% endfor %}
 </div>
@@ -90,34 +79,22 @@ $(function()
       {% call "_trip_details_annotations.html" with annotations=segment.p1.annotations.SEGMENT.URL empty='' %}
     </ul>
   </div>
+  {% ifequal user trip.user %}
   <div class="footer">
     <hr />
     <a href="/trips/{{ trip.id }}/annotations/new/?content_type=4&point_id={{ segment.p1.id }}&segment=1">add transportation</a>,
     <a href="/trips/{{ trip.id }}/annotations/new/?content_type=3&point_id={{ segment.p1.id }}&segment=1">add photos</a>,
     <a href="/trips/{{ trip.id }}/annotations/new/?content_type=2&point_id={{ segment.p1.id }}&segment=1">add link</a>
   </div>
+  {% endifequal %}
 </div>
-
-<div class="full-content">
-  <div>
-    <h5>Activities (<a href="/trips/{{ trip.id }}/annotations/new/?content_type=1&point_id={{ segment.p1.id }}&segment=1">add</a>)</h5>
-    <ul class="plain-list">
-      {% call "_trip_details_annotations.html" with annotations=segment.p1.annotations.SEGMENT.ACTIVITY %}
-    </ul>
-  </div>
-  <div>
-    <h5>Notes (<a href="/trips/{{ trip.id }}/annotations/new/?content_type=8&point_id={{ segment.p1.id }}&segment=1">add</a>)</h5>
-    <ul class="plain-list">
-      {% call "_trip_details_annotations.html" with annotations=segment.p1.annotations.SEGMENT.NOTE %}
-    </ul>
-  </div>
-  <div>
-    <h5>Costs (<a href="/trips/{{ trip.id }}/annotations/new/?content_type=7&point_id={{ segment.p1.id }}&segment=1">add</a>)</h5>
-    <ul class="plain-list">
-      {% call "_trip_details_annotations.html" with annotations=segment.p1.annotations.SEGMENT.COST %}
-    </ul>
-  </div>
-</div>
+{% ifequal user trip.user %}
+  {% call "_trip_details_annotations_max.html" with annotation_dict=segment.p1.annotations.SEGMENT segment=1 %}
+{% else %}
+  {% if segment.p1.annotations.SEGMENT.ACTIVITY or segment.p1.annotations.SEGMENT.NOTE or segment.p1.annotations.SEGMENT.COST %}
+    {% call "_trip_details_annotations_max.html" with annotation_dict=segment.p1.annotations.SEGMENT segment=1 %}
+  {% endif %}
+{% endifequal %}
 </div>
 {% endfor %}
 </div>
@@ -136,7 +113,7 @@ $(function()
   {% endifequal %}
   <ul class="plain-list">
     {% for point in points %}
-    <li>{{ point.name }} {% if point.visited %}(visited){% endif %}</li>
+    <li>{{ point.name }} {% if point.visited %}(visit){% endif %}</li>
     {% endfor %}
   </ul>
 </div>
