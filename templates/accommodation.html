@@ -18,18 +18,22 @@
   {% call "_star_rating.html" with entity=accommodation %}
   <div>
     <h4>Comments</h4>
-    <div>
-      <form action="/accommodations/{{ accommodation.id }}/comment/" method="POST">
-        <textarea name="comment_content" style="height: 60px;"></textarea><br />
-        <input type="submit" class="submit button positive" value="Say it!" />
-      </form>
-    </div>
-    <br />
+    {% if not user.is_anonymous %}
+      <div>
+        <form action="/accommodations/{{ accommodation.id }}/comment/" method="POST">
+          <textarea name="comment_content" style="height: 60px;"></textarea><br />
+          <input type="submit" class="submit button positive" value="Say it!" />
+        </form>
+      </div>
+      <br />
+    {% endif %}
     {% for comment in accommodation.accommodationcomment_set.all %}
       <div>
         <a href="/people/{{ comment.user.username }}">{{ comment.user.username }}</a> said on {{ comment.date_added|date }}:
         {{ comment.content|markdown:"safe" }}
       </div>
+    {% empty %}
+      <span>No user comments yet!</span>
     {% endfor %}
   </div>
 </div>

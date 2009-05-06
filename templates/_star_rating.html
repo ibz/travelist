@@ -1,10 +1,13 @@
 <div id="star-rating">
 <h4>User ratings</h4>
-<a href="/{{ entity.url_prefix }}/{{ entity.id }}/rate/?value=3" title="Good"><img src="/media/images/star_green.png" /></a> <span>{{ entity.ratings.3 }}</span>
-<a href="/{{ entity.url_prefix }}/{{ entity.id }}/rate/?value=2" title="Average"><img src="/media/images/star_grey.png" /></a> <span>{{ entity.ratings.2 }}</span>
-<a href="/{{ entity.url_prefix }}/{{ entity.id }}/rate/?value=1" title="Bad"><img src="/media/images/star_red.png" /></a> <span>{{ entity.ratings.1 }}</span>
-{% if not user.is_anonymous %}
-  |
+{% if user.is_anonymous %}
+  <img src="/media/images/star_green.png" title="Good" /> <span>{{ entity.ratings.3 }}</span>
+  <img src="/media/images/star_grey.png" title="Average" /> <span>{{ entity.ratings.2 }}</span>
+  <img src="/media/images/star_red.png" title="Bad" /> <span>{{ entity.ratings.1 }}</span>
+{% else %}
+  <a href="/{{ entity.url_prefix }}/{{ entity.id }}/rate/?value=3" title="Good"><img src="/media/images/star_green.png" /></a> <span>{{ entity.ratings.3 }}</span>
+  <a href="/{{ entity.url_prefix }}/{{ entity.id }}/rate/?value=2" title="Average"><img src="/media/images/star_grey.png" /></a> <span>{{ entity.ratings.2 }}</span>
+  <a href="/{{ entity.url_prefix }}/{{ entity.id }}/rate/?value=1" title="Bad"><img src="/media/images/star_red.png" /></a> <span>{{ entity.ratings.1 }}</span> |
   <span>
     {% if user_rating %}
       Your rating:
