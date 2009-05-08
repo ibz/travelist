@@ -7,7 +7,7 @@
   <h3>{{ place.display_name }}</h3>
   <div>
     {% if place.wiki_content %}
-      {{ place.wiki_content|markdown:"safe" }}
+      {{ place.wiki_content|force_escape|urlize|markdown }}
     {% else %}
       {% if not user.is_anonymous %}
         We don't have a description for this place yet, <a href="/places/{{ place.id }}/edit/">care to help</a>?
