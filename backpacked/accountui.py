@@ -34,14 +34,12 @@ class ProfileForm(ui.ModelForm):
         model = models.UserProfile
         fields = ('name', 'current_location', 'about', 'picture')
 
-    def save(self, commit=True):
-        profile = super(ProfileForm, self).save(commit=False)
+    def save(self):
+        profile = super(ProfileForm, self).save()
         if self.cleaned_data.get('picture'):
             image = Image.open(profile.picture.path)
             image.thumbnail(self.PICTURE_MAX_SIZE, Image.ANTIALIAS)
             image.save(profile.picture_thumbnail_path, quality=85, optimize=True)
-        if commit:
-            profile.save()
         return profile
 
 class RegistrationForm(ui.ModelForm):
