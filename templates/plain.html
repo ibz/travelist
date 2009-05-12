@@ -17,11 +17,10 @@
 {% block htmlhead %}{% endblock %}
 
 <script type="text/javascript">
-var date_format_short = "{{ settings.DATE_FORMAT_SHORT_JS }}";
-var date_format_long = "{{ settings.DATE_FORMAT_LONG_JS }}";
-var visibilities = { {% for v in visibility_choices %}{{ v.0 }}: "{{ v.1 }}"{% if not forloop.last %},{% endif %}{% endfor %} };
-var content_types = { {% for c in content_type_choices %}{{ c.0 }}: "{{ c.1 }}"{% if not forloop.last %},{% endif %}{% endfor %} };
-var content_types_list = [{% for c in content_type_choices %}{{ c.0 }}{% if not forloop.last %},{% endif %}{% endfor %}];
+var DATE_FORMAT_SHORT = "{{ settings.DATE_FORMAT_SHORT_JS }}";
+var DATE_FORMAT_LONG = "{{ settings.DATE_FORMAT_LONG_JS }}";
+
+$.datepicker.setDefaults({dateFormat: DATE_FORMAT_SHORT, firstDay: 1});
 
 {% block script %}
 {% endblock %}

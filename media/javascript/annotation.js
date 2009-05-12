@@ -1,8 +1,3 @@
-function init_annotation_edit()
-{
-    $("#annotation-info-edit #id_date").datepicker({dateFormat: date_format_short});
-}
-
 function init_annotation_edit_transportation(classes, class_mapping, number_mapping, selected_class)
 {
     $("#id_content_means").change(

@@ -14,30 +14,29 @@ function autoCompletePlace(name, id, coords)
                           }});
 }
 
+function _getDateFormat(f)
+{
+    return f == "s" ? DATE_FORMAT_SHORT : f == "l" ? DATE_FORMAT_LONG : f;
+}
+
+function parseDate(format, date)
+{
+    return !date || date == "" ? null : $.datepicker.parseDate(_getDateFormat(format), date);
+}
+
+function formatDate(format, date)
+{
+    return !date ? "" : $.datepicker.formatDate(_getDateFormat(format), date);
+}
+
 function convertDate(from_format, to_format, date)
 {
-    function get_format(f)
-    {
-        if(f == "s")
-        {
-            return date_format_short;
-        }
-        else if(f == "l")
-        {
-            return date_format_long;
-        }
-        else
-        {
-            return f;
-        }
-    }
+    return formatDate(to_format, parseDate(from_format, date));
+}
 
-    if(date == undefined || date == "" || date.toLowerCase() == "none")
-    {
-        return "";
-    }
-
-    return $.datepicker.formatDate(get_format(to_format), $.datepicker.parseDate(get_format(from_format), date));
+function changeDefaultDate(pickerSelector, dateText)
+{
+    $(pickerSelector).datepicker('option', 'defaultDate', parseDate("s", dateText));
 }
 
 function ordinal(n) {

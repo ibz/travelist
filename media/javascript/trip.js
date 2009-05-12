@@ -1,3 +1,5 @@
+var current_trip;
+
 function update_trip_details(trip_id)
 {
     var activity = $("#trip-activity");
@@ -82,16 +84,13 @@ function delete_trip(id)
            });
 }
 
-function init_trip(trip_id, has_points, allow_edit)
+function init_trip(trip, has_points, allow_edit)
 {
-    $("#trip-info-edit > form").ajaxForm({success: function() { edit_trip_saved(trip_id); }});
-    $("#trip-info-edit #id_start_date").datepicker({dateFormat: date_format_short});
-    $("#trip-info-edit #id_end_date").datepicker({dateFormat: date_format_short});
     if(!has_points)
     {
         if(allow_edit)
         {
-            edit_points(trip_id);
+            edit_points(trip.id);
         }
         else
         {
@@ -100,21 +99,23 @@ function init_trip(trip_id, has_points, allow_edit)
     }
     else
     {
-        update_trip_details(trip_id);
+        update_trip_details(trip.id);
     }
+
+    current_trip = trip;
 }
 
 function init_trip_details(point_data)
 {
-    $("#trip-details-tabs > ul").tabs();
+    $("#trip-details-tabs").tabs();
     $(".annotation").hover(function() { $(this).addClass('hover'); }, function() { $(this).removeClass('hover'); });
     initTripMap("map", point_data, true);
 }
 
-function init_trip_new()
+function init_trip_edit()
 {
-    $("form#trip-info #id_start_date").datepicker({dateFormat: date_format_short});
-    $("form#trip-info #id_end_date").datepicker({dateFormat: date_format_short});
+    $("form#trip-info #id_start_date").datepicker({onSelect: function(dateText) { changeDefaultDate("form#trip-info #id_end_date", dateText); }});
+    $("form#trip-info #id_end_date").datepicker();
 }
 
 function add_point(point_id, name)
@@ -126,7 +127,8 @@ function add_point(point_id, name)
     li.find(".point-edit-link").attr('href', "javascript:edit_point(" + id + ");");
     li.find(".point-edit-save").attr('onclick', "javascript:edit_point_save(" + id + ");");
     li.find(".point-edit-cancel").attr('onclick', "javascript:edit_point_cancel(" + id + ");");
-    li.find(".date-arrived,.date-left").datepicker({dateFormat: date_format_short});
+    li.find(".date-arrived,.date-left").datepicker({defaultDate: parseDate("s", current_trip.start_date)});
+    li.find(".date-arrived").datepicker('option', 'onSelect', function(dateText) { changeDefaultDate(li.find(".date-left"), dateText); });
     li.find(".visited").attr({id: "visited-" + id});
     li.find(".visited-label").attr({for: "visited-" + id});
     $("#sort-points").append(li);
@@ -280,7 +282,10 @@ function trip_points_cancel(trip_id)
 
 function init_trip_points(point_data)
 {
-    $("#sort-points").sortable({revert: true, placeholder: "ui-placeholder", update: function(){ refresh_map(); }});
+    $("#sort-points").sortable({revert: true, placeholder: "ui-placeholder",
+                                // Don't know why I need this, but sorting edit-mode points will mess up list after edit ends if I don't have it :)
+                                stop: function() {$('#sort-points > li').attr('style', null); },
+                                update: function(){ refresh_map(); }});
     autoCompletePlace("#new-place-name", "#new-place-id", "#new-place-coords");
     for(var i = 0; i < point_data.length; i++)
     {

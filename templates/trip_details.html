@@ -2,7 +2,6 @@
 <html>
 <head>
 <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
-<script src="{{ MEDIA_URL }}javascript/trip.js" type="text/javascript"></script>
 <script type="text/javascript">
 $(function()
 {
@@ -111,7 +110,7 @@ $(function()
 
 <div id="points">
   {% ifequal user.id trip.user_id %}
-  <a href="javascript:edit_points({{ trip.id }});">edit places</a>
+  <p><a href="javascript:edit_points({{ trip.id }});">edit places</a></p>
   {% endifequal %}
   <ul class="plain-list">
     {% for point in points %}
@@ -123,7 +122,7 @@ $(function()
 {% if show_trip_photos %}
 <div id="photos">
   {% ifequal user.id trip.user_id %}
-    <a href="/trips/{{ trip.id }}/annotations/new/?content_type=3">add photos</a>
+    <p><a href="/trips/{{ trip.id }}/annotations/new/?content_type=3">add photos</a></p>
   {% endifequal %}
   <ul class="plain-list">
     {% call "_trip_details_annotations.html" with annotations=trip_photos %}

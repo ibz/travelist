@@ -38,7 +38,8 @@ a:hover {
 /* Lists */
 
 .plain-list {
- list-style-type: none;
+    list-style-type: none;
+    margin-left: 0px;
 }
 
 .horizontal-list {
@@ -199,6 +200,11 @@ input {
     left: -5px;
 }
 
+#suggest-place #suggest-name,
+#suggest-place #suggest-comments {
+    width: 200px;
+}
+
 /* Point / segment details */
 
 .short-content {
@@ -250,15 +256,38 @@ input {
 
 /* jQuery Tabs & Sortable */
 
-.ui-tabs-panel {
+.ui-tabs {
+    border: 0;
+}
+
+.ui-tabs .ui-tabs-panel {
     border-left: 0;
     border-bottom: 0;
     border-top: 1px solid #5F99CF;
     border-right: 1px solid #5F99CF;
 }
 
+.ui-tabs .ui-widget-header {
+    background: #FFFFFF;
+    border: 0;
+}
+
+.ui-tabs .ui-widget-content {
+    background: #FFFFFF;
+}
+
+.ui-tabs .ui-widget-content a {
+    color: #0187C5;
+}
+
+.ui-tabs.ui-widget {
+    font-size: 1em;
+}
+
 .ui-placeholder {
     background: #E6F7D4;
+    height: 4.5em;
+    margin-bottom: 5px;
 }
 
 .ui-effects-transfer {
