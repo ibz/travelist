@@ -17,7 +17,7 @@ function delete_annotation(trip_id,id)
 {if(!confirm("Are you sure you want to delete this annotation?"))
 {return;}
 $.post("/trips/"+trip_id+"/annotations/"+id+"/delete/",{},function()
-{$("#trip-details-tabs #annotation_"+id).remove();});}
+{window.location="/trips/"+trip_id+"/";});}
 function delete_trip(id)
 {if(!confirm("You will lose all the data associated with this trip and there is no way to undo this operation. Really continue?"))
 {return;}
@@ -75,7 +75,7 @@ function trip_points_save(trip_id)
 {edit_point_save_data(id);}
 var point=points[id];var point_str="id="+point_id;if(point.modified)
 {point_str+=",";point_str+="date_arrived="+point.date_arrived+",";point_str+="date_left="+point.date_left+",";point_str+="visited="+(point.visited?1:0);}
-return point_str;});$.post("/trips/"+trip_id+"/points/",{points:point_strs.join(";")},function(data){update_trip_details(trip_id);});}
+return point_str;});var default_transportation=$("#default_transportation").val();$.post("/trips/"+trip_id+"/points/",{points:point_strs.join(";"),default_transportation:default_transportation||""},function(data){update_trip_details(trip_id);});}
 function trip_points_cancel(trip_id)
 {update_trip_details(trip_id);}
 function init_trip_points(point_data)

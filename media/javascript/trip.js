@@ -67,7 +67,7 @@ function delete_annotation(trip_id, id)
     $.post("/trips/" + trip_id + "/annotations/" + id + "/delete/", {},
            function()
            {
-               $("#trip-details-tabs #annotation_" + id).remove();
+               window.location = "/trips/" + trip_id + "/";
            });
 }
 
@@ -303,9 +303,10 @@ function trip_points_save(trip_id)
                                }
                                return point_str;
                             });
+    var default_transportation = $("#default_transportation").val();
 
     $.post("/trips/" + trip_id + "/points/",
-           {points: point_strs.join(";")},
+           {points: point_strs.join(";"), default_transportation: default_transportation || ""},
            function(data) { update_trip_details(trip_id); });
 }
 

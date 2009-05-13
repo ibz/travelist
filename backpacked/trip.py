@@ -2,6 +2,7 @@ import re
 
 from geopy.distance import distance
 
+from django import forms
 from django import http
 from django import shortcuts
 from django.contrib import auth
@@ -111,7 +112,9 @@ def details(request, id):
 def points_GET(request, id):
     trip = shortcuts.get_object_or_404(models.Trip, id=id, user=request.user)
     points = list(trip.point_set.all())
-    return views.render("trip_points.html", request, {'trip': trip, 'points': points})
+    widget = forms.widgets.Select(choices=annotationtypes.Transportation.Means.choices)
+    return views.render("trip_points.html", request, {'trip': trip, 'points': points,
+                                                      'transportation_select': widget.render('default_transportation', None, {'id': 'default_transportation'})})
 
 points_re = re.compile(r"^(old|new)point_(.+)$")
 def points_POST(request, id):
@@ -150,6 +153,10 @@ def points_POST(request, id):
             point.visited = bool(int(new_point['visited']))
             point.order_rank = i
             point.save()
+            if int(request.POST.get('default_transportation', 0)):
+                transportation = models.Annotation(trip=trip, point=point, segment=True, title="", content_type=models.ContentType.TRANSPORTATION)
+                transportation.content = transportation.manager.clean_content({'means': request.POST['default_transportation']})
+                transportation.save()
     return http.HttpResponse()
 
 @login_required

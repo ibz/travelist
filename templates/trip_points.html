@@ -14,16 +14,17 @@ $(function()
 </head>
 <body>
 <div id="edit-points" class="edit-box">
-{% if points %}
-<h4>Rearrange the points by dragging them with the mouse</h4>
-{% else %}
-<h4>Add all the places you've been through. Include the starting and ending point.</h4>
+
+{% if not points %}
+  <h4>1. Select the main transportation means. Transportation for individual segments can be changed later.</h4>
+  <p><label for="default-transportation">Transportation:</label> {{ transportation_select }}</p>
 {% endif %}
 
-<p>
-<input type="button" class="button positive" value="Save" onclick="javascript:trip_points_save({{ trip.id }});" />
-<input type="button" class="button negative" value="Cancel" onclick="javascript:trip_points_cancel({{ trip.id }});" />
-</p>
+{% if points %}
+  <h4>Rearrange the points by dragging them with the mouse</h4>
+{% else %}
+  <h4>2. Add all the places you've been through. Include the starting and ending point.</h4>
+{% endif %}
 
 <ul id="sort-points" class="sortable-list">
 </ul>
@@ -76,14 +77,22 @@ $(function()
 </p>
 
 <div id="add-place">
-<p>
-<input type="text" id="new-place-name" />
-<input type="hidden" id="new-place-id" />
-<input type="hidden" id="new-place-coords" />
-<input type="button" class="button positive" value="Add" onclick="javascript:add_new_point();" /><br />
-<div id="suggest-place-message">Can't find the place you're looking for? Suggest it <a href="javascript:suggest_place();">here</a>.</div>
-</p>
+  <input type="text" id="new-place-name" />
+  <input type="hidden" id="new-place-id" />
+  <input type="hidden" id="new-place-coords" />
+  <input type="button" class="button positive" value="Add" onclick="javascript:add_new_point();" /><br />
+  <div id="suggest-place-message">Can't find the place you're looking for? Suggest it <a href="javascript:suggest_place();">here</a>.</div>
 </div>
+<hr />
+
+<div>
+  {% if not points %}
+    <h4>3. Save!</h4>
+  {% endif %}
+  <input type="button" class="button positive" value="Save" onclick="javascript:trip_points_save({{ trip.id }});" />
+  <input type="button" class="button negative" value="Cancel" onclick="javascript:trip_points_cancel({{ trip.id }});" />
+</div>
+
 </div>
 </body>
 </html>
