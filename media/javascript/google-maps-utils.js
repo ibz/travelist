@@ -63,7 +63,7 @@ function initTripMap(id, point_data, bind_events)
         return;
     }
 
-    var initialZoom = 16;
+    var initialZoom = 9;
 
     var map = new GMap2(document.getElementById(id));
     map.addControl(new GLargeMapControl());
