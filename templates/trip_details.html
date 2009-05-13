@@ -39,7 +39,7 @@ $(function()
         <a href="javascript:map.getInfoWindow().maximize()">more...</a>
       {% else %}
         {% if point.annotations.POINT.ACTIVITY or point.annotations.POINT.NOTE or point.annotations.POINT.COST %}
-          {% call "_trip_details_annotations_max.html" with annotation_dict=point.annotations.POINT segment=0 %}
+          <a href="javascript:map.getInfoWindow().maximize()">more...</a>
         {% endif %}
       {% endifequal %}
     </p>
@@ -90,8 +90,8 @@ $(function()
       {% ifequal user trip.user %}
         <a href="javascript:map.getInfoWindow().maximize()">more...</a>
       {% else %}
-        {% if point.annotations.POINT.ACTIVITY or point.annotations.POINT.NOTE or point.annotations.POINT.COST %}
-          {% call "_trip_details_annotations_max.html" with annotation_dict=point.annotations.POINT segment=0 %}
+        {% if segment.p1.annotations.SEGMENT.ACTIVITY or segment.p1.annotations.SEGMENT.NOTE or segment.p1.annotations.SEGMENT.COST %}
+          <a href="javascript:map.getInfoWindow().maximize()">more...</a>
         {% endif %}
       {% endifequal %}
     </p>
