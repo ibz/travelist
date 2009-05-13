@@ -118,6 +118,29 @@ function init_trip_edit()
     $("form#trip-info #id_end_date").datepicker();
 }
 
+function fix_point_dates() // enable / disable date editor for points, depending on whether they are terminal points ot not
+{
+    var children = $("#sort-points").children();
+    function terminal(i, date_arrived_enabled, date_left_enabled) {
+        var id = $(children[i]).attr('id');
+        id = parseInt(id.substr(id.indexOf("_") + 1));
+        set_point_data(id, {date_arrived: date_arrived_enabled ? points[id].date_arrived : "",
+                            date_left: date_left_enabled ? points[id].date_left : ""}, true);
+        $(children[i]).find(".date-arrived").attr('disabled', !date_arrived_enabled).val(points[id].date_arrived);
+        $(children[i]).find(".date-left").attr('disabled', !date_left_enabled).val(points[id].date_left);
+    }
+    $.each(children, function(i, val) {
+               if (i == 0) {
+                   terminal(i, false, true);
+               } else if (i == children.length - 1) {
+                   terminal(i, true, false);
+               }
+               else {
+                   $(children[i]).find(".date-arrived,.date-left").attr('disabled', false);
+               }
+           });
+}
+
 function add_point(point_id, name)
 {
     var id = last_id++;
@@ -158,6 +181,7 @@ function add_new_point()
     edit_point(id);
 
     refresh_map();
+    fix_point_dates();
 
     $("#new-place-name").focus();
 }
@@ -193,7 +217,6 @@ function edit_point_save_data(id)
     var date_arrived = edit.find(".date-arrived").val();
     var date_left = edit.find(".date-left").val();
     var visited = edit.find(".visited").attr('checked');
-    set_point_details(id, date_arrived, date_left, visited);
     set_point_data(id, {date_arrived: date_arrived, date_left: date_left, visited: visited}, true);
 }
 
@@ -217,19 +240,6 @@ function edit_point_cancel(id)
     point.find(".point-edit").hide();
 }
 
-function set_point_details(id, date_arrived, date_left, visited)
-{
-    var date_arrived_h = convertDate("s", "l", date_arrived);
-    var date_left_h = convertDate("s", "l", date_left);
-    var details = "";
-    if(date_arrived_h != "" || date_left_h != "")
-    {
-        details = (date_arrived != "" ? date_arrived_h : "?") + " - " + (date_left != "" ? date_left_h : "?");
-    }
-
-    $("#point_" + id).find(".point-details").text(details);
-}
-
 function set_point_data(id, dict, modified)
 {
     if(!(id in points))
@@ -238,12 +248,36 @@ function set_point_data(id, dict, modified)
     }
     $.each(dict, function(k, v) { points[id][k] = v; });
     points[id].modified = modified;
+
+    // update the dates displayed, if necessary
+    if('date_arrived' in dict || 'date_left' in dict)
+    {
+        var li = $("#point_" + id);
+
+        var date_arrived_h = convertDate("s", "l", points[id].date_arrived);
+        var date_left_h = convertDate("s", "l", points[id].date_left);
+
+        if(date_arrived_h != "" || date_left_h != "")
+        {
+            if (date_arrived_h == "" && !(li.prev('li').length == 0))
+            {
+                date_arrived_h = "?";
+            }
+            if (date_left_h == "" && !(li.next('li').length == 0))
+            {
+                date_left_h = "?";
+            }
+        }
+
+        li.find(".point-details").text($.grep([date_arrived_h, date_left_h], function(d) { return d != ""; }).join(" - "));
+    }
 }
 
 function delete_point(id)
 {
     $("#point_" + id).remove();
     refresh_map();
+    fix_point_dates();
 }
 
 function trip_points_save(trip_id)
@@ -285,15 +319,15 @@ function init_trip_points(point_data)
     $("#sort-points").sortable({revert: true, placeholder: "ui-placeholder",
                                 // Don't know why I need this, but sorting edit-mode points will mess up list after edit ends if I don't have it :)
                                 stop: function() {$('#sort-points > li').attr('style', null); },
-                                update: function(){ refresh_map(); }});
+                                update: function(){ refresh_map(); fix_point_dates(); }});
     autoCompletePlace("#new-place-name", "#new-place-id", "#new-place-coords");
     for(var i = 0; i < point_data.length; i++)
     {
       var id = add_point("oldpoint_" + point_data[i].id, point_data[i].name);
-        set_point_details(id, point_data[i].date_arrived, point_data[i].date_left, point_data[i].visited);
         set_point_data(id, point_data[i], false);
     }
     refresh_map();
+    fix_point_dates();
 }
 
 function refresh_map()
