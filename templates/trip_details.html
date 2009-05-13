@@ -6,7 +6,7 @@
 $(function()
 {
   init_trip_details(
-[{% for p in points %}{lat:{{ p.coords.0 }}, lng:{{ p.coords.1 }}, id:{{ p.id }}, name:"{{ p.name }}", place_id:{{ p.place_id }}, visited:{{ p.visited|lower }} }{% if not forloop.last %},{% endif %}{% endfor %}]);
+[{% for p in points %}{lat:{{ p.coords.0 }}, lng:{{ p.coords.1 }}, id:{{ p.id }}, name:"{{ p.name }}", place_id:{{ p.place_id }}, visited:{{ p.visited|lower }}, transportation:[{% for t in p.annotations.SEGMENT.TRANSPORTATION %}'{{ t.manager.name }}'{% if not forloop.last %},{% endif %}{% endfor %}]}{% if not forloop.last %},{% endif %}{% endfor %}]);
   $("#trip-details-tabs").show();
 });
 </script>

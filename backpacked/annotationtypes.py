@@ -201,6 +201,11 @@ class TransportationAnnotationManager(AnnotationManager):
     can_attach_cost = True
 
     @property
+    def name(self):
+        content = deserialize(self.annotation.content)
+        return Transportation.Means.get_name(content['means'])
+
+    @property
     def display_name(self):
         content = deserialize(self.annotation.content)
         return Transportation.Means.get_description(content['means'])
@@ -219,7 +224,7 @@ class TransportationAnnotationManager(AnnotationManager):
         for k in ['means', 'class']:
             if content.has_key(k):
                 try:
-                    content[k] = int(content[k])
+                    content[k] = int(content[k] or 0)
                 except ValueError:
                     del content[k]
         content['comments'] = re.sub("\r", "", content['comments'])

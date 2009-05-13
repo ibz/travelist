@@ -1,3 +1,12 @@
+TRANSPORTATION_ICONS = {'AIRPLANE': "airplane.png",
+                        'BIKE': "bike.png",
+                        'BOAT_X_FERRY': "boat_x_ferry.png",
+                        'BUS': "bus.png",
+                        'CAR': "car.png",
+                        'MOTORCYCLE': "motorcycle.png",
+                        'TRAIN': "train.png",
+                        'WALK': "walk.png"};
+
 GMap2.prototype.openInfoWindowTabsMaxTabs = function(latlng, tabs, maxTabs, opts)
 {
     var tabbedMaxContent = this.getTabbedMaxContent();
@@ -119,6 +128,17 @@ function initTripMap(id, point_data, bind_events)
                     GEvent.addListener(line, 'mouseout', function() { document.body.style.cursor = 'auto'; });
                 }
                 map.addOverlay(line);
+
+                if (p1.transportation.length)
+                {
+                    var icon = new GIcon(G_DEFAULT_ICON, "/media/images/transportation/" + TRANSPORTATION_ICONS[p1.transportation[0]]);
+                    icon.shadow = "";
+                    icon.iconSize = new GSize(24, 24);
+                    var marker = new GMarker(new GLatLng((p1.lat + p2.lat) / 2, (p1.lng + p2.lng) / 2), {icon: icon});
+                    addListener(marker, "#segment-data #place-pair-" + place_id_pair, i);
+                    markers.push(marker);
+                }
+
                 addedOverlays.push(place_id_pair);
             }
         }
