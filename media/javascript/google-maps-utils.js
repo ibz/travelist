@@ -65,7 +65,7 @@ function getMapCenter(map, point_data, initialZoom)
             zoom: Math.min(wZoom, hZoom)};
 }
 
-function initTripMap(id, point_data, bind_events)
+function initTripMap(point_data, bind_events)
 {
     if (!GBrowserIsCompatible())
     {
@@ -74,7 +74,7 @@ function initTripMap(id, point_data, bind_events)
 
     var initialZoom = 9;
 
-    var map = new GMap2(document.getElementById(id));
+    map = new GMap2(document.getElementById('map')); // set global variable map
     map.addControl(new GLargeMapControl());
     map.setCenter(new GLatLng(0, 0), initialZoom);
 
@@ -122,20 +122,24 @@ function initTripMap(id, point_data, bind_events)
             var place_id_pair = segment[0] + "-" + segment[1];
             if($.inArray(place_id_pair, addedOverlays) == -1) {
                 var line = new GPolyline([new GLatLng(p1.lat, p1.lng), new GLatLng(p2.lat, p2.lng)], "#ff0000", 3);
-                if(bind_events) {
+                if(bind_events)
+                {
                     addListener(line, "#segment-data #place-pair-" + place_id_pair, i);
                     GEvent.addListener(line, 'mouseover', function() { document.body.style.cursor = 'hand'; });
                     GEvent.addListener(line, 'mouseout', function() { document.body.style.cursor = 'auto'; });
                 }
                 map.addOverlay(line);
 
-                if (p1.transportation.length)
+                if (p1.transportation && p1.transportation.length)
                 {
                     var icon = new GIcon(G_DEFAULT_ICON, "/media/images/transportation/" + TRANSPORTATION_ICONS[p1.transportation[0]]);
                     icon.shadow = "";
                     icon.iconSize = new GSize(24, 24);
                     var marker = new GMarker(new GLatLng((p1.lat + p2.lat) / 2, (p1.lng + p2.lng) / 2), {icon: icon});
-                    addListener(marker, "#segment-data #place-pair-" + place_id_pair, i);
+                    if(bind_events)
+                    {
+                        addListener(marker, "#segment-data #place-pair-" + place_id_pair, i);
+                    }
                     markers.push(marker);
                 }
 
@@ -147,14 +151,17 @@ function initTripMap(id, point_data, bind_events)
         var p = point_data[i];
         if($.inArray(p.place_id, addedOverlays) == -1) {
             var icon = G_DEFAULT_ICON;
-            if (!p.visited) {
+            if (!p.visited)
+            {
                 icon = new GIcon(G_DEFAULT_ICON, "/media/images/marker_grey.png");
             }
-            if (i == 0 || i == point_data.length - 1) {
+            if (i == 0 || i == point_data.length - 1)
+            {
                 icon = new GIcon(G_DEFAULT_ICON, "/media/images/marker_green.png");
             }
             var marker = new GMarker(new GLatLng(p.lat, p.lng), {title: p.name, icon: icon});
-            if(bind_events) {
+            if(bind_events)
+            {
                 addListener(marker, "#point-data #place-" + p.place_id, i);
             }
             markers.push(marker);

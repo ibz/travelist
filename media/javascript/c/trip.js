@@ -33,7 +33,7 @@ else
 {update_trip_details(trip.id);}
 current_trip=trip;}
 function init_trip_details(point_data)
-{$("#trip-details-tabs").tabs();$(".annotation").hover(function(){$(this).addClass('hover');},function(){$(this).removeClass('hover');});initTripMap("map",point_data,true);}
+{$("#trip-details-tabs").tabs();$(".annotation").hover(function(){$(this).addClass('hover');},function(){$(this).removeClass('hover');});initTripMap(point_data,true);}
 function init_trip_edit()
 {$("form#trip-info #id_start_date").datepicker({onSelect:function(dateText){changeDefaultDate("form#trip-info #id_end_date",dateText);}});$("form#trip-info #id_end_date").datepicker();}
 function fix_point_dates()
@@ -84,4 +84,4 @@ function init_trip_points(point_data)
 refresh_map();fix_point_dates();}
 function refresh_map()
 {var point_data=$.map($("#sort-points").sortable('toArray'),function(id)
-{var p=points[parseInt(id.substr(id.indexOf("_")+1))];return[{lat:p.lat,lng:p.lng,name:p.name,id:p.id,date_arrived:p.date_arrived,date_left:p.date_left,visited:p.visited,place_id:p.place_id}];});initTripMap("map",point_data,false);}
+{var p=points[parseInt(id.substr(id.indexOf("_")+1))];return[{lat:p.lat,lng:p.lng,name:p.name,id:p.id,date_arrived:p.date_arrived,date_left:p.date_left,visited:p.visited,place_id:p.place_id}];});initTripMap(point_data,false);}

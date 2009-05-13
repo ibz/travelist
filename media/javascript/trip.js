@@ -109,7 +109,7 @@ function init_trip_details(point_data)
 {
     $("#trip-details-tabs").tabs();
     $(".annotation").hover(function() { $(this).addClass('hover'); }, function() { $(this).removeClass('hover'); });
-    initTripMap("map", point_data, true);
+    initTripMap(point_data, true);
 }
 
 function init_trip_edit()
@@ -338,5 +338,5 @@ function refresh_map()
                                var p = points[parseInt(id.substr(id.indexOf("_") + 1))];
                                return [{lat:p.lat, lng:p.lng, name:p.name, id:p.id, date_arrived:p.date_arrived, date_left:p.date_left, visited:p.visited, place_id:p.place_id}];
                            });
-    initTripMap("map", point_data, false);
+    initTripMap(point_data, false);
 }

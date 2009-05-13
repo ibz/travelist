@@ -34,6 +34,15 @@ $(function()
       {% call "_trip_details_annotations.html" with annotations=point.annotations.POINT.EXTERNAL_PHOTOS empty='' %}
       {% call "_trip_details_annotations.html" with annotations=point.annotations.POINT.URL empty='' %}
     </ul>
+    <p>
+      {% ifequal user trip.user %}
+        <a href="javascript:map.getInfoWindow().maximize()">more...</a>
+      {% else %}
+        {% if point.annotations.POINT.ACTIVITY or point.annotations.POINT.NOTE or point.annotations.POINT.COST %}
+          {% call "_trip_details_annotations_max.html" with annotation_dict=point.annotations.POINT segment=0 %}
+        {% endif %}
+      {% endifequal %}
+    </p>
   </div>
   {% ifequal user trip.user %}
   <div class="footer">
@@ -77,6 +86,15 @@ $(function()
       {% call "_trip_details_annotations.html" with annotations=segment.p1.annotations.SEGMENT.EXTERNAL_PHOTOS empty='' %}
       {% call "_trip_details_annotations.html" with annotations=segment.p1.annotations.SEGMENT.URL empty='' %}
     </ul>
+    <p>
+      {% ifequal user trip.user %}
+        <a href="javascript:map.getInfoWindow().maximize()">more...</a>
+      {% else %}
+        {% if point.annotations.POINT.ACTIVITY or point.annotations.POINT.NOTE or point.annotations.POINT.COST %}
+          {% call "_trip_details_annotations_max.html" with annotation_dict=point.annotations.POINT segment=0 %}
+        {% endif %}
+      {% endifequal %}
+    </p>
   </div>
   {% ifequal user trip.user %}
   <div class="footer">

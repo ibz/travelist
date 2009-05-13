@@ -228,6 +228,8 @@ input {
 .annotation {
     position: relative;
     width: 190px;
+    margin-top: 5px;
+    margin-bottom: 5px;
 }
 
 .annotation .operations {
