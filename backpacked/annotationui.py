@@ -31,10 +31,10 @@ class EditForm(ui.ModelForm):
 
         self.fields['content'].widget = annotation.manager.widget()
         self.fields['content'].widget.annotation = annotation
-        if annotation.manager.show_content_label:
+        if annotation.manager.content_label is None:
             self.fields['content'].label = annotation.content_type_h
         else:
-            self.fields['content'].label = ""
+            self.fields['content'].label = annotation.manager.content_label
         if not annotation.manager.edit_content_as_file:
             if annotation.manager.has_extended_content:
                 try:

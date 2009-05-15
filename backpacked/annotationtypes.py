@@ -63,7 +63,7 @@ class AnnotationManager(object):
 
     has_extended_content = False
     edit_content_as_file = False
-    show_content_label = True
+    content_label = None
 
     user_levels = models.UserLevel.values
 
@@ -99,7 +99,6 @@ class ActivityAnnotationManager(AnnotationManager):
     content_type = models.ContentType.ACTIVITY
 
     widget = forms.widgets.Textarea
-
     can_attach_cost = True
 
     @property
@@ -127,6 +126,8 @@ class UrlAnnotationManager(AnnotationManager):
 
 class ExternalPhotosAnnotationManager(UrlAnnotationManager):
     content_type = models.ContentType.EXTERNAL_PHOTOS
+
+    content_label = "Link to your photo album"
 
     @property
     def display_name(self):
@@ -191,13 +192,9 @@ class TransportationAnnotationManager(AnnotationManager):
     content_type = models.ContentType.TRANSPORTATION
 
     exclude_fields = ['title']
-
     title_required = False
-
-    show_content_label = False
-
+    content_label = ""
     widget = TransportationWidget
-
     can_attach_cost = True
 
     @property
@@ -231,12 +228,9 @@ class GPSAnnotationManager(AnnotationManager):
     content_type = models.ContentType.GPS
 
     title_required = False
-
     user_levels = [models.UserLevel.PRO]
-
     has_extended_content = True
     edit_content_as_file = True
-
     widget = forms.widgets.FileInput
 
     @property
@@ -318,9 +312,7 @@ class AccommodationAnnotationManager(AnnotationManager):
     content_type = models.ContentType.ACCOMMODATION
 
     exclude_fields = ['title']
-
     title_required = False
-
     can_attach_cost = True
 
     def widget(self):
@@ -370,11 +362,8 @@ class CostAnnotationManager(AnnotationManager):
     content_type = models.ContentType.COST
 
     exclude_fields = ['title']
-
     title_required = False
-
-    show_content_label = False
-
+    content_label = ""
     widget = CostWidget
 
     def render_short(self):
