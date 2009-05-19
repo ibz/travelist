@@ -6,7 +6,7 @@
 $(function()
 {
   init_trip_details(
-[{% for p in points %}{lat:{{ p.coords.0 }}, lng:{{ p.coords.1 }}, id:{{ p.id }}, name:"{{ p.name }}", place_id:{{ p.place_id }}, visited:{{ p.visited|lower }}, transportation:[{% for t in p.annotations.SEGMENT.TRANSPORTATION %}'{{ t.manager.name }}'{% if not forloop.last %},{% endif %}{% endfor %}]}{% if not forloop.last %},{% endif %}{% endfor %}]);
+[{% for p in points %}{lat:{{ p.coords.0 }}, lng:{{ p.coords.1 }}, id:{{ p.id }}, name:"{{ p.name }}", place_id:{{ p.place_id }}, visited:{{ p.visited|lower }}, transportation:[{% for t in p.annotations.SEGMENT.TRANSPORTATION %}{annotation_id: {{ t.id }}, means: {{ t.content }} }{% if not forloop.last %},{% endif %}{% endfor %}]}{% if not forloop.last %},{% endif %}{% endfor %}]);
   $("#trip-details-tabs").show();
 });
 </script>
@@ -72,7 +72,7 @@ $(function()
 <div id="place-pair-{{ place_pair.grouper }}">
 {% for segment in place_pair.list %}
 <div id="segment-{{ segment.p1.id }}">
-<div class="short-content">
+<div class="short-content" data-path="#place-pair-{{ place_pair.grouper }} #segment-{{ segment.p1.id }}">
   <div class="body">
     <h4><a href="/places/{{ segment.p1.place_id }}/">{{ segment.p1.name }}</a> - <a href="/places/{{ segment.p2.place_id }}/">{{ segment.p2.name }}</a></h4>
     <ul class="plain-list">
@@ -99,7 +99,6 @@ $(function()
   {% ifequal user trip.user %}
   <div class="footer">
     <hr />
-    <a href="/trips/{{ trip.id }}/annotations/new/?content_type=4&point_id={{ segment.p1.id }}&segment=1">add transportation</a>,
     <a href="/trips/{{ trip.id }}/annotations/new/?content_type=3&point_id={{ segment.p1.id }}&segment=1">add photos</a>,
     <a href="/trips/{{ trip.id }}/annotations/new/?content_type=2&point_id={{ segment.p1.id }}&segment=1">add link</a>
   </div>

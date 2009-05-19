@@ -60,7 +60,7 @@ class Enum:
 
     @property
     def choices(self):
-        return sorted(self.all.values(), lambda lhs, rhs: cmp(lhs[0], rhs[0]))
+        return sorted(self.all.values(), key=lambda c: c[0])
 
     @property
     def items(self):

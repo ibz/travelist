@@ -85,3 +85,12 @@ refresh_map();fix_point_dates();}
 function refresh_map()
 {var point_data=$.map($("#sort-points").sortable('toArray'),function(id)
 {var p=points[parseInt(id.substr(id.indexOf("_")+1))];return[{lat:p.lat,lng:p.lng,name:p.name,id:p.id,date_arrived:p.date_arrived,date_left:p.date_left,visited:p.visited,place_id:p.place_id}];});initTripMap(point_data,false);}
+function transportation_edit(link,annotation_id)
+{var annotation=$(link).closest(".annotation");var select=document.createElement('select');$(select).html($.map(TRANSPORTATION_CHOICES,function(t){return"<option value=\""+t[0]+"\">"+t[1]+"</option>";}).join(""));$(select).val(annotation.find(".content span").attr('data-id'));annotation.find(".content").empty().append(select);var button=document.createElement('button');$(button).attr({type:'button','class':'positive'}).html("Save");var editLink=annotation.find(".operations a").replaceWith(button);annotation.find(".operations").attr('class','edit-operations');button.onclick=function()
+{function success(data)
+{annotation.find(".edit-operations").attr('class','operations');annotation.find(".operations button").replaceWith(editLink);var id=parseInt(eval(data)[0].fields.content);var transportation=$.grep(TRANSPORTATION_CHOICES,function(t){return t[0]==id;})[0];var content="Transportation: <span data-id=\""+transportation[0]+"\">"+transportation[1]+"</span>";annotation.find(".content").empty().append(content);var marker=transportation_markers[annotation_id];var image=TRANSPORTATION_ICONS[id];marker.setImage(image?"/media/images/transportation/"+image:"");if(image)
+{marker.show();}
+else
+{marker.hide();}
+var annotation_p=$("#segment-data "+annotation.closest(".short-content").attr('data-path')).find("#annotation-"+annotation_id);annotation_p.find(".content").empty().append(content);}
+$.post("/trips/"+current_trip.id+"/annotations/"+annotation_id+"/edit/",{content:TRANSPORTATION_CHOICES[select.selectedIndex][0]},success);};}

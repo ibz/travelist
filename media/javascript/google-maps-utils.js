@@ -1,11 +1,12 @@
-TRANSPORTATION_ICONS = {'AIRPLANE': "airplane.png",
-                        'BIKE': "bike.png",
-                        'BOAT_X_FERRY': "boat_x_ferry.png",
-                        'BUS': "bus.png",
-                        'CAR': "car.png",
-                        'MOTORCYCLE': "motorcycle.png",
-                        'TRAIN': "train.png",
-                        'WALK': "walk.png"};
+TRANSPORTATION_ICONS = {0: null,
+                        1: "airplane.png",
+                        2: "bike.png",
+                        3: "boat_x_ferry.png",
+                        4: "bus.png",
+                        5: "car.png",
+                        6: "motorcycle.png",
+                        7: "train.png",
+                        8: "walk.png"}; // JS global variable
 
 GMap2.prototype.openInfoWindowTabsMaxTabs = function(latlng, tabs, maxTabs, opts)
 {
@@ -65,6 +66,15 @@ function getMapCenter(map, point_data, initialZoom)
             zoom: Math.min(wZoom, hZoom)};
 }
 
+function createTransportationMarker(transportation, latlng)
+{
+    var image = TRANSPORTATION_ICONS[transportation.means];
+    var icon = new GIcon(G_DEFAULT_ICON, image ? "/media/images/transportation/" + image : "");
+    icon.shadow = "";
+    icon.iconSize = new GSize(24, 24);
+    return new GMarker(latlng, {icon: icon, hide: image == null});
+}
+
 function initTripMap(point_data, bind_events)
 {
     if (!GBrowserIsCompatible())
@@ -74,36 +84,47 @@ function initTripMap(point_data, bind_events)
 
     var initialZoom = 9;
 
-    map = new GMap2(document.getElementById('map')); // set global variable map
+    transportation_markers = {}; // JS global variable
+
+    map = new GMap2(document.getElementById('map')); // JS global variable
     map.addControl(new GLargeMapControl());
     map.setCenter(new GLatLng(0, 0), initialZoom);
 
     var mapCenter = getMapCenter(map, point_data, initialZoom);
     map.setCenter(mapCenter.latlng, mapCenter.zoom);
 
-    function addListener(overlay, id, i) {
+    function addListener(overlay, id, i)
+    {
         GEvent.addListener(overlay, 'click',
             function(latlng) {
                 var children = $(id).children().clone(true);
-                if (children.length == 1) {
+                if (children.length == 1)
+                {
                     var child = $(children[0]);
                     map.openInfoWindow(latlng, child.find('.short-content')[0], {maxContent: child.find('.full-content')[0]});
-                } else {
+                }
+                else
+                {
                     function tabname(i, j) { // give friendly name to tabs for Start/End
                         if (i == 0 && point_data[0].place_id == point_data[point_data.length - 1].place_id) {
-                            if(j == 0) {
+                            if(j == 0)
+                            {
                                 return "Start";
                             }
-                            if (j == children.length - 1) {
+                            else if (j == children.length - 1)
+                            {
                                 return "End";
                             }
                         }
                         return ordinal(j + 1);
                     }
                     var tabs = $.map(children, function(c, j) { return new GInfoWindowTab(tabname(i, j), $(c).find('.short-content')[0]); });
-                    if($.grep(children, function(c) { return $(c).find('.full-content').length != 0; }).length == 0) { // all the tabs only have short content
+                    if($.grep(children, function(c) { return $(c).find('.full-content').length != 0; }).length == 0) // all the tabs only have short content
+                    {
                         map.openInfoWindowTabs(latlng, tabs);
-                    } else {
+                    }
+                    else
+                    {
                         var maxTabs = $.map(children, function(c, j) { return new MaxContentTab(tabname(i, j), $(c).find('.full-content')[0]); });
                         map.openInfoWindowTabsMaxTabs(latlng, tabs, maxTabs);
                     }
@@ -130,17 +151,17 @@ function initTripMap(point_data, bind_events)
                 }
                 map.addOverlay(line);
 
-                if (p1.transportation && p1.transportation.length)
+                if (p1.transportation.length != 0)
                 {
-                    var icon = new GIcon(G_DEFAULT_ICON, "/media/images/transportation/" + TRANSPORTATION_ICONS[p1.transportation[0]]);
-                    icon.shadow = "";
-                    icon.iconSize = new GSize(24, 24);
-                    var marker = new GMarker(new GLatLng((p1.lat + p2.lat) / 2, (p1.lng + p2.lng) / 2), {icon: icon});
+                    var transportation = p1.transportation[0];
+                    var marker = createTransportationMarker(transportation, new GLatLng((p1.lat + p2.lat) / 2, (p1.lng + p2.lng) / 2));
                     if(bind_events)
                     {
                         addListener(marker, "#segment-data #place-pair-" + place_id_pair, i);
                     }
+
                     markers.push(marker);
+                    transportation_markers[transportation.annotation_id] = marker;
                 }
 
                 addedOverlays.push(place_id_pair);
@@ -170,9 +191,9 @@ function initTripMap(point_data, bind_events)
     }
 
     setTimeout(function() {
-                   var mgr = new MarkerManager(map);
-                   mgr.addMarkers(markers, 1);
-                   mgr.refresh();
+                   marker_manager = new MarkerManager(map); // JS global variable
+                   marker_manager.addMarkers(markers, 1);
+                   marker_manager.refresh();
                }, 0);
 }
 

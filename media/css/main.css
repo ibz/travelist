@@ -105,6 +105,7 @@ form .errorlist {
 
 /* Buttons */
 
+button.positive,
 input.button.positive {
     color: #FFFFFF;
     background-color: #5F99CF;
@@ -112,6 +113,7 @@ input.button.positive {
     border-width: 1px;
 }
 
+button.negative,
 input.button.negative {
     color: #000000;
     background-color: #F0F0F0;

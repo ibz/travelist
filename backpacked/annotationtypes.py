@@ -59,8 +59,6 @@ class AnnotationManager(object):
 
     exclude_fields = []
 
-    title_required = True
-
     has_extended_content = False
     edit_content_as_file = False
     content_label = None
@@ -68,6 +66,7 @@ class AnnotationManager(object):
     user_levels = models.UserLevel.values
 
     can_attach_cost = False
+    can_delete = True
 
     widget = None
 
@@ -82,6 +81,10 @@ class AnnotationManager(object):
     @property
     def display_name(self):
         return self.annotation.title
+
+    @property
+    def edit_link_url(self):
+        return "/trips/%s/annotations/%s/edit/" % (self.annotation.trip_id, self.annotation.id)
 
     def render_short(self):
         raise NotImplementedError()
@@ -149,85 +152,32 @@ class Transportation:
                         (7, "Train"),
                         (8, "Walk")])
 
-    Class = utils.Enum([(0, "Unspecified"),
-                        (1, "First class"),
-                        (2, "Second class"),
-                        (3, "Third class"),
-                        (4, "First class sleeper"),
-                        (5, "Second class sleeper"),
-                        (6, "Third class sleeper"),
-                        (7, "Economy"),
-                        (8, "Business class"),
-                        (9, "No seat")])
-
-    ClassMapping = {Means.AIRPLANE: [Class.ECONOMY, Class.BUSINESS_CLASS],
-                    Means.BOAT_X_FERRY: [Class.FIRST_CLASS, Class.SECOND_CLASS, Class.THIRD_CLASS,
-                                         Class.FIRST_CLASS_SLEEPER, Class.SECOND_CLASS_SLEEPER, Class.THIRD_CLASS_SLEEPER,
-                                         Class.NO_SEAT],
-                    Means.TRAIN: [Class.FIRST_CLASS, Class.SECOND_CLASS, Class.THIRD_CLASS,
-                                  Class.FIRST_CLASS_SLEEPER, Class.SECOND_CLASS_SLEEPER, Class.THIRD_CLASS_SLEEPER,
-                                  Class.NO_SEAT]}
-
-    NumberMapping = [Means.AIRPLANE, Means.BOAT_X_FERRY, Means.BUS, Means.TRAIN]
-
-class TransportationWidget(CompositeContentWidget):
-    subfields = ['means', 'number', 'class', 'comments']
-
-    def render(self, name, value, attrs=None):
-        value = deserialize(value)
-
-        widgets = [('means', "Means", forms.widgets.Select(choices=Transportation.Means.choices)),
-                   ('number', "Number", forms.widgets.TextInput(attrs={'class': 'text'}), "<span id=\"content_number\">%s</span>"),
-                   ('class', "Class", forms.widgets.Select(), "<span id=\"content_class\">%s</span>"),
-                   ('comments', "Comments", forms.widgets.Textarea())]
-
-        return self.render_set(widgets, name, value, attrs) \
-            + "<script type=\"text/javascript\">init_annotation_edit_transportation(%s, %s, %s, %s);</script>" \
-            % (simplejson.dumps(dict(Transportation.Class.choices)),
-               simplejson.dumps(Transportation.ClassMapping),
-               simplejson.dumps(Transportation.NumberMapping),
-               value.get('class') or "null")
-
 class TransportationAnnotationManager(AnnotationManager):
     content_type = models.ContentType.TRANSPORTATION
 
-    exclude_fields = ['title']
-    title_required = False
-    content_label = ""
-    widget = TransportationWidget
+    exclude_fields = ['title', 'visibility']
+    widget = lambda _: forms.widgets.Select(choices=Transportation.Means.choices)
     can_attach_cost = True
-
-    @property
-    def name(self):
-        content = deserialize(self.annotation.content)
-        return Transportation.Means.get_name(content['means'])
+    can_delete = False
 
     @property
     def display_name(self):
-        content = deserialize(self.annotation.content)
-        return Transportation.Means.get_description(content['means'])
+        return Transportation.Means.get_description(int(self.annotation.content))
+
+    @property
+    def edit_link_url(self):
+        return "#"
+
+    @property
+    def edit_link_click(self):
+        return "javascript:transportation_edit(this, %s);" % self.annotation.id
 
     def render_short(self):
-        content = deserialize(self.annotation.content)
-        str = Transportation.Means.get_description(content['means'])
-        if content.get('number') or content.get('class'):
-            str += "<br /><span>%s %s</span>" % (content.get('number', ""),
-                                                 Transportation.Class.get_description(content['class']) if content.get('class') else "")
-        if content.get('comments'):
-            str += "<br /><span>%s</span>" % content['comments'].replace("\n", "<br />")
-        return str
-
-    def clean_content(self, content):
-        for k in ['means', 'class']:
-            content[k] = int(content.get(k) or 0)
-        content['number'] = content.get('number') or ""
-        content['comments'] = re.sub("\r", "", content.get('comments') or "")
-        return serialize(content)
+        return "Transportation: <span data-id=\"%s\">%s</span>" % (int(self.annotation.content), self.display_name)
 
 class GPSAnnotationManager(AnnotationManager):
     content_type = models.ContentType.GPS
 
-    title_required = False
     user_levels = [models.UserLevel.PRO]
     has_extended_content = True
     edit_content_as_file = True
@@ -312,7 +262,6 @@ class AccommodationAnnotationManager(AnnotationManager):
     content_type = models.ContentType.ACCOMMODATION
 
     exclude_fields = ['title']
-    title_required = False
     can_attach_cost = True
 
     def widget(self):
@@ -362,7 +311,6 @@ class CostAnnotationManager(AnnotationManager):
     content_type = models.ContentType.COST
 
     exclude_fields = ['title']
-    title_required = False
     content_label = ""
     widget = CostWidget
 

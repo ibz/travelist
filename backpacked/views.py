@@ -8,14 +8,19 @@ from backpacked import models
 
 import settings
 
-extra_context = {'settings': settings,
-                 'content_type_choices': models.ContentType.choices,
-                 'visibility_choices': models.Visibility.choices}
+_extra_context = None
+def extra_context():
+    global _extra_context
+    if not _extra_context:
+        from backpacked import annotationtypes
+        _extra_context = {'settings': settings,
+                          'transportation_choices': annotationtypes.Transportation.Means.choices}
+    return _extra_context
 
 def render(template_file, request, context=None):
     if not context:
         context = {}
-    context.update(extra_context)
+    context.update(extra_context())
     return shortcuts.render_to_response(template_file, context, context_instance=template.RequestContext(request))
 
 @require_GET

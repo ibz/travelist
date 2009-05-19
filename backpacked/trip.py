@@ -153,10 +153,9 @@ def points_POST(request, id):
             point.visited = bool(int(new_point['visited']))
             point.order_rank = i
             point.save()
-            if int(request.POST.get('default_transportation', 0)):
-                transportation = models.Annotation(trip=trip, point=point, segment=True, title="", content_type=models.ContentType.TRANSPORTATION)
-                transportation.content = transportation.manager.clean_content({'means': request.POST['default_transportation']})
-                transportation.save()
+            transportation = models.Annotation(trip=trip, point=point, segment=True, title="", content_type=models.ContentType.TRANSPORTATION)
+            transportation.content = request.POST.get('default_transportation', "0")
+            transportation.save()
     return http.HttpResponse()
 
 @login_required

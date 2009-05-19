@@ -22,6 +22,8 @@ var DATE_FORMAT_LONG = "{{ settings.DATE_FORMAT_LONG_JS }}";
 
 $.datepicker.setDefaults({dateFormat: DATE_FORMAT_SHORT, firstDay: 1});
 
+var TRANSPORTATION_CHOICES = [{% for t in transportation_choices %}[{{ t.0 }},"{{ t.1 }}"]{% if not forloop.last %},{% endif %}{% endfor %}];
+
 {% block script %}
 {% endblock %}
 </script>

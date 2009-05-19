@@ -1,4 +1,4 @@
-var current_trip;
+var current_trip; // JS global variable
 
 function update_trip_details(trip_id)
 {
@@ -340,4 +340,59 @@ function refresh_map()
                                return [{lat:p.lat, lng:p.lng, name:p.name, id:p.id, date_arrived:p.date_arrived, date_left:p.date_left, visited:p.visited, place_id:p.place_id}];
                            });
     initTripMap(point_data, false);
+}
+
+function transportation_edit(link, annotation_id)
+{
+    var annotation = $(link).closest(".annotation");
+
+    // select box
+    var select = document.createElement('select');
+    $(select).html($.map(TRANSPORTATION_CHOICES, function(t) { return "<option value=\"" + t[0] + "\">" + t[1] + "</option>"; }).join(""));
+    $(select).val(annotation.find(".content span").attr('data-id'));
+    annotation.find(".content").empty().append(select);
+
+    // save button
+    var button = document.createElement('button');
+    $(button).attr({type: 'button', 'class': 'positive'}).html("Save");
+    var editLink = annotation.find(".operations a").replaceWith(button);
+
+    // class
+    annotation.find(".operations").attr('class', 'edit-operations');
+
+    button.onclick = function()
+    {
+        function success(data)
+        {
+            // redo class
+            annotation.find(".edit-operations").attr('class', 'operations');
+
+            // redo save button
+            annotation.find(".operations button").replaceWith(editLink);
+
+            // redo select box
+            var id = parseInt(eval(data)[0].fields.content);
+            var transportation = $.grep(TRANSPORTATION_CHOICES, function(t) { return t[0] == id; })[0];
+            var content = "Transportation: <span data-id=\"" + transportation[0] + "\">" + transportation[1] + "</span>";
+            annotation.find(".content").empty().append(content);
+
+            // change marker
+            var marker = transportation_markers[annotation_id];
+            var image = TRANSPORTATION_ICONS[id];
+            marker.setImage(image ? "/media/images/transportation/" + image : "");
+            if (image)
+            {
+                marker.show();
+            }
+            else
+            {
+                marker.hide();
+            }
+
+            // need to change the annotation from segment-data too, since that it will be used the next time the balloon is opened
+            var annotation_p = $("#segment-data " + annotation.closest(".short-content").attr('data-path')).find("#annotation-" + annotation_id);
+            annotation_p.find(".content").empty().append(content);
+        }
+        $.post("/trips/" + current_trip.id + "/annotations/" + annotation_id + "/edit/", {content: TRANSPORTATION_CHOICES[select.selectedIndex][0]}, success);
+    };
 }

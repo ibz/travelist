@@ -2,6 +2,7 @@ from django import http
 from django import shortcuts
 from django.contrib import auth
 from django.contrib.auth.decorators import login_required
+from django.core.serializers import serialize
 from django.views.decorators.http import require_GET, require_POST, require_http_methods
 
 from backpacked import annotationtypes
@@ -56,9 +57,15 @@ def edit_POST(request, annotation):
     form = annotationui.EditForm(request.POST, request.FILES, annotation=annotation)
     if form.is_valid():
         form.save()
-        return http.HttpResponseRedirect("/trips/%s/" % annotation.trip.id)
+        if request.is_ajax():
+            return http.HttpResponse(serialize('json', [annotation]))
+        else:
+            return http.HttpResponseRedirect("/trips/%s/" % annotation.trip.id)
     else:
-        return views.render("annotation_edit.html", request, {'annotation': annotation, 'form': form})
+        if request.is_ajax():
+            return http.HttpResponseBadRequest()
+        else:
+            return views.render("annotation_edit.html", request, {'annotation': annotation, 'form': form})
 
 @login_required
 @require_http_methods(["GET", "POST"])
@@ -75,5 +82,7 @@ def edit(request, trip_id, id):
 @require_POST
 def delete(request, trip_id, id):
     annotation = shortcuts.get_object_or_404(models.Annotation, id=id, trip__user=request.user)
+    if not annotation.manager.can_delete:
+        return http.HttpResponseBadRequest()
     annotation.delete()
     return http.HttpResponse()
