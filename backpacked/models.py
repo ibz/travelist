@@ -281,6 +281,12 @@ class Trip(models.Model):
         else:
             return self.annotation_set.filter(visibility=Visibility.PUBLIC)
 
+    @property
+    def transportations(self):
+        return sorted(list(set([(int(t.content), t.manager.display_name)
+                                for t in self.annotation_set.filter(content_type=ContentType.TRANSPORTATION)
+                                if int(t.content)])), key=lambda t: t[0])
+
 class Point(models.Model):
     trip = models.ForeignKey(Trip)
     place = models.ForeignKey(Place, null=True)

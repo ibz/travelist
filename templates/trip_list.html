@@ -6,15 +6,17 @@
 <h3>{% if is_self %}My{% else %}{{ for_user.username }}&apos;s{% endif %} trips</h3>
 <table id="trip-list" class="data-grid prepend-top">
   <thead>
-    <td width="40%">Name</td>
-    <td width="30%">Start date</td>
-    <td width="30%" class="lastcolumn">End date</td>
+    <td width="35%">Name</td>
+    <td width="20%">Start date</td>
+    <td width="20%">End date</td>
+    <td width="25%" class="lastcolumn"></td>
   </thead>
   {% for trip in trips %}
   <tr{% if forloop.first %} class="firstrow"{% endif %}>
     <td class="firstcolumn"><a href="/trips/{{ trip.id }}/">{{ trip.name }}</a></td>
     <td>{{ trip.start_date|date }}</td>
-    <td class="lastcolumn">{{ trip.end_date|date }}</td>
+    <td>{{ trip.end_date|date }}</td>
+    <td class="lastcolumn" style="text-align: center;">{% for t in trip.transportations %}<img width="14" heigth="14" src="/media/images/transportation/{{ t.0 }}.png" title="{{ t.1 }}" />{% endfor %}</td>
   </tr>
   {% endfor %}
 </table>

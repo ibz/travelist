@@ -378,9 +378,8 @@ function transportation_edit(link, annotation_id)
 
             // change marker
             var marker = transportation_markers[annotation_id];
-            var image = TRANSPORTATION_ICONS[id];
-            marker.setImage(image ? "/media/images/transportation/" + image : "");
-            if (image)
+            marker.setImage(id ? "/media/images/transportation/" + id + ".png" : null);
+            if (id)
             {
                 marker.show();
             }

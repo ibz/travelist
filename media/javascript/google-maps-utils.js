@@ -1,13 +1,3 @@
-TRANSPORTATION_ICONS = {0: null,
-                        1: "airplane.png",
-                        2: "bike.png",
-                        3: "boat_x_ferry.png",
-                        4: "bus.png",
-                        5: "car.png",
-                        6: "motorcycle.png",
-                        7: "train.png",
-                        8: "walk.png"}; // JS global variable
-
 GMap2.prototype.openInfoWindowTabsMaxTabs = function(latlng, tabs, maxTabs, opts)
 {
     var tabbedMaxContent = this.getTabbedMaxContent();
@@ -68,11 +58,10 @@ function getMapCenter(map, point_data, initialZoom)
 
 function createTransportationMarker(transportation, latlng)
 {
-    var image = TRANSPORTATION_ICONS[transportation.means];
-    var icon = new GIcon(G_DEFAULT_ICON, image ? "/media/images/transportation/" + image : "");
+    var icon = new GIcon(G_DEFAULT_ICON, transportation.means ? "/media/images/transportation/" + transportation.means + ".png" : null);
     icon.shadow = "";
     icon.iconSize = new GSize(24, 24);
-    return new GMarker(latlng, {icon: icon, hide: image == null});
+    return new GMarker(latlng, {icon: icon, hide: transportation.means == 0});
 }
 
 function initTripMap(point_data, bind_events)
