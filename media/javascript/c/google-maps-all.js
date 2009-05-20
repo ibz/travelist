@@ -79,7 +79,7 @@ else
 var markers=[];for(var i=0,addedOverlays=[];i<point_data.length;i++)
 {if(i+1<point_data.length){var p1=point_data[i];var p2=point_data[i+1];var segment=[Math.min(p1.place_id,p2.place_id),Math.max(p1.place_id,p2.place_id)];var place_id_pair=segment[0]+"-"+segment[1];if($.inArray(place_id_pair,addedOverlays)==-1){var line=new GPolyline([new GLatLng(p1.lat,p1.lng),new GLatLng(p2.lat,p2.lng)],"#ff0000",3);if(bind_events)
 {addListener(line,"#segment-data #place-pair-"+place_id_pair,i);GEvent.addListener(line,'mouseover',function(){document.body.style.cursor='hand';});GEvent.addListener(line,'mouseout',function(){document.body.style.cursor='auto';});}
-map.addOverlay(line);if(p1.transportation.length!=0)
+map.addOverlay(line);if(p1.transportation&&p1.transportation.length!=0)
 {var transportation=p1.transportation[0];var marker=createTransportationMarker(transportation,new GLatLng((p1.lat+p2.lat)/2,(p1.lng+p2.lng)/2));if(bind_events)
 {addListener(marker,"#segment-data #place-pair-"+place_id_pair,i);}
 markers.push(marker);transportation_markers[transportation.annotation_id]=marker;}

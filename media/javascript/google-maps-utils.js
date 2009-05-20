@@ -151,7 +151,7 @@ function initTripMap(point_data, bind_events)
                 }
                 map.addOverlay(line);
 
-                if (p1.transportation.length != 0)
+                if (p1.transportation && p1.transportation.length != 0)
                 {
                     var transportation = p1.transportation[0];
                     var marker = createTransportationMarker(transportation, new GLatLng((p1.lat + p2.lat) / 2, (p1.lng + p2.lng) / 2));
