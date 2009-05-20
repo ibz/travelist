@@ -154,7 +154,7 @@ def points_POST(request, id):
             point.order_rank = i
             point.save()
             transportation = models.Annotation(trip=trip, point=point, segment=True, title="", content_type=models.ContentType.TRANSPORTATION)
-            transportation.content = request.POST.get('default_transportation', "0")
+            transportation.content = request.POST.get('default_transportation') or "0"
             transportation.save()
     return http.HttpResponse()
 
