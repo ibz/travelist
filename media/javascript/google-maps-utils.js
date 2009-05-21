@@ -34,7 +34,7 @@ function getMapCenter(map, point_data, initialZoom)
     var w = Math.abs(maxLng - minLng);
     for(wZoom = initialZoom; wZoom >= 0; wZoom--)
     {
-        if(baseWidth > w * 1.1)
+        if(baseWidth > w * 1.3)
         {
             break;
         }
@@ -45,7 +45,7 @@ function getMapCenter(map, point_data, initialZoom)
     var h = Math.abs(maxLat - minLat);
     for(hZoom = initialZoom; hZoom >= 0; hZoom--)
     {
-        if(baseHeight > h * 1.1)
+        if(baseHeight > h * 1.3)
         {
             break;
         }
