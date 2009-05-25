@@ -1,7 +1,9 @@
 {% extends "page.html" %}
 
+{% load cachedfile %}
+
 {% block htmlhead %}
-<script src="{{ MEDIA_URL }}javascript/notification.js" type="text/javascript"></script>
+<script src="{{ MEDIA_URL }}{% cachedfile "javascript/c/notification.js" %}" type="text/javascript"></script>
 <script type="text/javascript">
 $(notification_list_init);
 </script>

@@ -18,6 +18,10 @@ update_v media/css/c/all.css
 cat media/javascript/lib/google-maps/*.js media/javascript/google-maps-utils.js | scripts/lib/jsmin.py > media/javascript/c/google-maps-all.js
 update_v media/javascript/c/google-maps-all.js
 
+# notification JS
+cat media/javascript/notification.js | scripts/lib/jsmin.py > media/javascript/c/notification.js
+update_v media/javascript/c/notification.js
+
 # trip JS
 cat media/javascript/trip.js | scripts/lib/jsmin.py > media/javascript/c/trip.js
 update_v media/javascript/c/trip.js
