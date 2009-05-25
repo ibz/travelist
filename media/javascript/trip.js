@@ -435,7 +435,7 @@ function add_new_user()
         return;
     }
     var li = document.createElement('li');
-    $(li).append($("#add-links #new-user").text());
+    $(li).append($("#add-links #new-user :selected").text());
     var hidden = document.createElement('input');
     $(hidden).attr({type: 'hidden', 'class': 'user-id'});
     $(hidden).val($("#add-links #new-user").val());

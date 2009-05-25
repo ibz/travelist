@@ -106,7 +106,7 @@ function add_links_cancel()
 function add_new_user()
 {if(!$("#add-links #new-user").val())
 {alert("Select a friend from the list.");return;}
-var li=document.createElement('li');$(li).append($("#add-links #new-user").text());var hidden=document.createElement('input');$(hidden).attr({type:'hidden','class':'user-id'});$(hidden).val($("#add-links #new-user").val());$(li).append(hidden);$("#add-links #users").append(li);}
+var li=document.createElement('li');$(li).append($("#add-links #new-user :selected").text());var hidden=document.createElement('input');$(hidden).attr({type:'hidden','class':'user-id'});$(hidden).val($("#add-links #new-user").val());$(li).append(hidden);$("#add-links #users").append(li);}
 function delete_link(link_id,username)
 {if(!confirm("Are you sure you want to remove "+username+" from your trip?"))
 {return;}
