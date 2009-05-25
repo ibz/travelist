@@ -378,14 +378,17 @@ function transportation_edit(link, annotation_id)
 
             // change marker
             var marker = transportation_markers[annotation_id];
-            marker.setImage(id ? "/media/images/transportation/" + id + ".png" : null);
-            if (id)
+            if (marker)
             {
-                marker.show();
-            }
-            else
-            {
-                marker.hide();
+                marker.setImage(id ? "/media/images/transportation/" + id + ".png" : null);
+                if (id)
+                {
+                    marker.show();
+                }
+                else
+                {
+                    marker.hide();
+                }
             }
 
             // need to change the annotation from segment-data too, since that it will be used the next time the balloon is opened
