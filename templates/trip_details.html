@@ -123,6 +123,9 @@ $(function()
   {% if show_trip_photos %}
   <li><a href="#photos"><span>Photos</span></a></li>
   {% endif %}
+  {% if show_trip_links %}
+  <li><a href="#people"><span>People</span></a></li>
+  {% endif %}
 </ul>
 
 <div id="points">
@@ -146,6 +149,52 @@ $(function()
   </ul>
 </div>
 {% endif %}
+
+{% if show_trip_links %}
+<div id="people">
+  <div id="existing-links">
+    {% ifequal user.id trip.user_id %}
+      <p><a href="javascript:add_links();">add people</a></p>
+    {% endifequal %}
+    {% if trip_links %}
+      <p>Other people who have been on this trip:</p>
+      {% for l in trip_links %}
+        <div align="center">
+          <a href="/people/{{ l.0.user.username }}/"><img class="user-image" src="{{ l.0.user.userprofile.picture_thumbnail_url }}" /></a><br />
+          <a href="/trips/{{ l.0.id }}/">{{ l.0.user.username }}'s trip</a>
+          {% ifequal user.id trip.user_id %}(<a href="javascript:delete_link({{ l.1.id }}, '{{ l.0.user.username }}');" title="Remove">X</a>){% endifequal %}<br />
+          {% if l.1.start_place and l.1.end_place %}(between {{ l.1.start_place.name }} and {{ l.1.end_place.name }}){% endif %}
+        </div>
+      {% endfor %}
+    {% else %}
+      No other people have been on this trip.
+    {% endif %}
+  </div>
+  <div id="add-links" style="display: none;">
+    <h4>1. Add some friends</h4>
+    <p>
+      <ul id="users" class="plain-list"></ul>
+      <select id="new-user">
+        {% for u in trip.user.get_friends %}
+        <option value="{{ u.id }}">{{ u.username }}</option>
+        {% endfor %}
+      </select>
+      <input type="button" class="button positive" value="Add" onclick="javascript:add_new_user();" /><br />
+      Note: in order to add somebody to your trip, they have to be your friend.
+    </p>
+    <p>
+      <h4>2. Click invite</h4>
+      <input type="button" id="invite" class="button positive" value="Invite" onclick="javascript:add_links_invite();" />
+      <input type="button" id="cancel" class="button negative" value="Cancel" onclick="javascript:add_links_cancel();" />
+    </p>
+    <p>
+      <h4>3. Wait. Your friends will show up on the trip's page once they confirm your request.</h4>
+    </p>
+  </div>
+</div>
+</div>
+{% endif %}
+
 </div>
 </body>
 </html>

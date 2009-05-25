@@ -5,7 +5,6 @@ from tempfile import mkdtemp
 
 from django import http
 from django import forms
-from django import template
 from django.utils import html
 from django.utils import simplejson
 

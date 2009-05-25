@@ -6,6 +6,8 @@ from django.db.models import Q
 from django.contrib.auth.models import User
 from django.contrib.gis.db import models
 
+import settings
+
 from backpacked import utils
 from backpacked.utils import cached_property
 
@@ -25,7 +27,7 @@ class AdministrativeDivision(models.Model):
     country = models.ForeignKey(Country)
 
     class Meta:
-        unique_together = (('country', 'code'),)
+        unique_together = ('country', 'code')
 
     def __unicode__(self):
         return "%s (%s)" % (self.name, self.code)
@@ -44,6 +46,9 @@ class Place(models.Model):
 
     def __unicode__(self):
         return self.display_name
+
+    def __cmp__(self, other):
+        return cmp(self.name, other.name)
 
     @property
     def display_name(self):
@@ -174,6 +179,8 @@ class UserProfile(models.Model):
             except ValueError:
                 return "%s.thumbnail" % self.picture.url
             return "%s.thumbnail%s" % (self.picture.url[:dot_index], self.picture.url[dot_index:])
+        else:
+            return "%spp/default.png" % settings.MEDIA_URL
 
 RelationshipStatus = utils.Enum([(0, "Pending"),
                                  (1, "Confirmed")])
@@ -188,6 +195,11 @@ class UserRelationship(models.Model):
                  UserRelationship.objects.get(Q(lhs=self, rhs=other) | Q(lhs=other, rhs=self))
              User.get_confirmed_relationships = lambda self: \
                  UserRelationship.objects.filter(Q(lhs=self) | Q(rhs=self), status=RelationshipStatus.CONFIRMED)
+             def get_friends(self):
+                 relationships = self.get_confirmed_relationships()
+                 friend_ids = [str(r.lhs_id) if r.lhs_id != self.id else str(r.rhs_id) for r in relationships]
+                 return [p.user for p in UserProfile.objects.filter(user__in=friend_ids).select_related('user')]
+             User.get_friends = get_friends
              def get_relationship_status(self, other):
                  is_self = self == other
                  if is_self:
@@ -269,6 +281,10 @@ class Trip(models.Model):
     def visibility_h(self):
         return Visibility.get_description(self.visibility)
 
+    @property
+    def visibility_name(self):
+        return Visibility.get_name(self.visibility)
+
     def is_visible_to(self, user):
         return is_visible(self.visibility, self.user, user)
 
@@ -286,6 +302,19 @@ class Trip(models.Model):
         return sorted(list(set([(int(t.content), t.manager.display_name)
                                 for t in self.annotation_set.filter(content_type=ContentType.TRANSPORTATION)
                                 if int(t.content)])), key=lambda t: t[0])
+
+    def copy(self, user):
+        new_trip = Trip(user=user, name=self.name, start_date=self.start_date, end_date=self.end_date, visibility=Visibility.PUBLIC)
+        new_trip.save()
+        transportations = list(self.annotation_set.filter(content_type=ContentType.TRANSPORTATION))
+        for p in self.point_set.all():
+            new_point = Point(trip=new_trip, place=p.place, name=p.name, coords=p.coords,
+                              date_arrived=p.date_arrived, date_left=p.date_left, visited=p.visited, order_rank=p.order_rank)
+            new_point.save()
+            transportation = Annotation(trip=new_trip, point=new_point, segment=True, title="", content_type=ContentType.TRANSPORTATION, visibility=Visibility.PUBLIC)
+            transportation.content = utils.find(transportations, lambda t: t.point == p).content
+            transportation.save()
+        return new_trip
 
 class Point(models.Model):
     trip = models.ForeignKey(Trip)
@@ -307,6 +336,14 @@ class Point(models.Model):
 
     def __cmp__(self, other):
         return cmp(self.order_rank, other.order_rank)
+
+class TripLink(models.Model):
+    lhs = models.ForeignKey(Trip, related_name="triplink_lhs_set")
+    rhs = models.ForeignKey(Trip, related_name="triplink_rhs_set", null=True)
+    start_place = models.ForeignKey(Place, related_name="triplink_start_place_set", null=True)
+    end_place = models.ForeignKey(Place, related_name="triplink_end_place_set", null=True)
+    status = models.IntegerField(choices=RelationshipStatus.choices)
+    date_confirmed = models.DateTimeField(null=True)
 
 ContentType = utils.Enum({'ACTIVITY': (1, "Activity"),
                           'URL': (2, "URL"),
@@ -365,7 +402,7 @@ class ExtendedAnnotationContent(models.Model):
     date_modified = models.DateTimeField(auto_now=True)
 
 NotificationType = utils.Enum({'FRIEND_REQUEST': (1, "Friend request"),
-                               'TRIP_SHARE_REQUEST': (2, "Trip share request")})
+                               'TRIP_LINK_REQUEST': (2, "Trip link request")})
 
 class Notification(models.Model):
     user = models.ForeignKey(User)

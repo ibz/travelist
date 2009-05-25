@@ -21,15 +21,7 @@ def profile(request, username):
 @login_required
 @require_GET
 def friends(request, username):
-    user = models.User.objects.get(username=username)
-    relationships = user.get_confirmed_relationships()
-    friend_ids = [r.lhs_id != user.id and str(r.lhs_id) or str(r.rhs_id)
-                  for r in relationships]
-    if friend_ids:
-        friends = [p.user for p in models.UserProfile.objects.extra(where=["user_id IN (%s)" % ",".join(friend_ids)]).select_related('user')]
-    else:
-        friends = []
-    return views.render("user_friends.html", request, {'friends': friends})
+    return views.render("user_friends.html", request, {'for_user': models.User.objects.get(username=username)})
 
 @commit_on_success
 @login_required

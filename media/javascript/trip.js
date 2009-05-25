@@ -395,3 +395,60 @@ function transportation_edit(link, annotation_id)
         $.post("/trips/" + current_trip.id + "/annotations/" + annotation_id + "/edit/", {content: TRANSPORTATION_CHOICES[select.selectedIndex][0]}, success);
     };
 }
+
+function add_links()
+{
+    $("#existing-links").hide();
+    $("#add-links #users").empty();
+    $("#add-links").show();
+}
+
+function add_links_invite()
+{
+    var user_ids = $.map($("#add-links #users .user-id"), function (el) { return $(el).val(); }).join(",");
+    if (!user_ids || user_ids == "")
+    {
+        alert("Add at least one friend before clicking invite.");
+        return;
+    }
+    var activity = $("#trip-activity");
+    var buttons = $("#add-links #invite,#add-links #cancel");
+    activity.show();
+    buttons.hide();
+    $.post("/trips/" + current_trip.id + "/links/new/", {user_ids: user_ids}, function() { $("#add-links").hide(); $("#existing-links").show(); buttons.show(); activity.hide(); });
+}
+
+function add_links_cancel()
+{
+    $("#add-links").hide();
+    $("#existing-links").show();
+}
+
+function add_new_user()
+{
+    if (!$("#add-links #new-user").val())
+    {
+        alert("Select a friend from the list.");
+        return;
+    }
+    var li = document.createElement('li');
+    $(li).append($("#add-links #new-user").text());
+    var hidden = document.createElement('input');
+    $(hidden).attr({type: 'hidden', 'class': 'user-id'});
+    $(hidden).val($("#add-links #new-user").val());
+    $(li).append(hidden);
+    $("#add-links #users").append(li);
+}
+
+function delete_link(link_id, username)
+{
+    if(!confirm("Are you sure you want to remove " + username + " from your trip?"))
+    {
+        return;
+    }
+    $.post("/trips/" + current_trip.id + "/links/" + link_id + "/delete/", {},
+           function()
+           {
+               window.location = "/trips/" + current_trip.id + "/";
+           });
+}

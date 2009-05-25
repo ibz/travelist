@@ -1,0 +1,42 @@
+<a href="/people/{{ trip.user.username }}/">{{ trip.user.username }}</a> wants to add you to his trip <a href="/trips/{{ trip.id }}/">{{ trip.name }}</a>.
+<div id="dialog-{{ id }}" class="dialog action-ACCEPT">
+  <form>
+    <p>Do you already have this trip in your trip list?</p>
+    <p>
+      <input type="radio" id="copy-status-copy-{{ id }}" name="copy-status-{{ id }}" value="copy" checked="checked" />
+      <label for="copy-status-copy-{{ id }}">I don't have the trip. <span class="important">Copy it to my trips.</span></label>
+    </p>
+    <p>
+      <input type="radio" id="copy-status-nocopy-{{ id }}" name="copy-status-{{ id }}" value="nocopy" />
+      <label for="copy-status-nocopy-{{ id }}">I have the trip. Don't copy it.</label>
+      <div class="select-trip-{{ id }}">
+        <select class="link-to-trip" disabled="disabled">
+          <option value=""></option>
+          {% for t in linkable_trips %}
+          <option value="{{ t.id }}">{{ t.name }}</option>
+          {% endfor %}
+        </select>
+      </div>
+      <script type="text/javascript">
+          $("input[name='copy-status-{{ id }}']").change(function() { $(".select-trip-{{ id }} select").attr('disabled', $("input[name='copy-status-{{ id }}']:checked").val() == 'copy'); });
+      </script>
+    </p>
+    <p>Have you been with <a href="/people/{{ trip.user.username }}/">{{ trip.user.username }}</a> on the whole trip, or only for part of the trip?</p>
+    <p>
+      <input type="radio" id="link-type-whole-{{ id }}" name="link-type-{{ id }}" value="whole" checked="checked" />
+      <label for="link-type-whole-{{ id }}">We've been together on the whole trip.</label>
+    </p>
+    <p>
+      <input type="radio" id="link-type-part-{{ id }}" name="link-type-{{ id }}" value="part" />
+      <label for="link-type-part-{{ id }}">We've been together only between:</label>
+      <div class="select-places-{{ id }}" >
+        <select class="start-place" disabled="disabled">{% for p in linkable_places %}<option value="{{ p.id }}">{{ p.name }}</option>{% endfor %}</select><br />
+        and<br />
+        <select class="end-place" disabled="disabled">{% for p in linkable_places %}<option value="{{ p.id }}">{{ p.name }}</option>{% endfor %}</select>
+      </div>
+      <script type="text/javascript">
+          $("input[name='link-type-{{ id }}']").change(function() { $(".select-places-{{ id }} select").attr('disabled', $("input[name='link-type-{{ id }}']:checked").val() == 'whole'); });
+      </script>
+    </p>
+  </form>
+</div>

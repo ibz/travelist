@@ -17,7 +17,7 @@ def all(request):
 @login_required
 @require_POST
 def action(request, id):
-    action_id = request.POST['action_id']
+    action_id = int(request.POST['action_id'])
     notification = shortcuts.get_object_or_404(models.Notification, id=id, user=request.user)
-    notification.manager.action(action_id)
+    notification.manager.action(action_id, request.POST)
     return http.HttpResponse()

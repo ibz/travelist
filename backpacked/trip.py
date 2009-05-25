@@ -7,6 +7,8 @@ from django import http
 from django import shortcuts
 from django.contrib import auth
 from django.contrib.auth.decorators import login_required
+from django.db.models import Q
+from django.db.transaction import commit_on_success
 from django.utils import simplejson
 from django.views.decorators.http import require_GET, require_POST, require_http_methods
 
@@ -103,11 +105,16 @@ def details(request, id):
         segments.append({'place_ids': place_ids, 'p1': p1, 'p2': p2, 'length': distance(p1['coords'], p2['coords']).km})
 
     trip_photos = [a for a in annotations if a.content_type == models.ContentType.EXTERNAL_PHOTOS]
-    
+
+    trip_links = [(l.lhs if l.rhs == trip else l.rhs, l)
+                  for l in models.TripLink.objects.filter(Q(lhs=trip) | Q(rhs=trip), status=models.RelationshipStatus.CONFIRMED)]
+    trip_links = [l for l in trip_links if l[0].is_visible_to(request.user)]
+
     return views.render("trip_details.html", request, {'trip': trip, 'points': points, 'segments': segments,
                                                        'points_sorted': sorted(points, key=lambda p: p['place_id']), # XXX: needed until #11008 is fixed in Django
                                                        'segments_sorted': sorted(segments, key=lambda s: s['place_ids']), # XXX: needed until #11008 is fixed in Django
-                                                       'trip_photos': trip_photos, 'show_trip_photos': trip.user == request.user or trip_photos})
+                                                       'trip_photos': trip_photos, 'show_trip_photos': trip.user == request.user or trip_photos,
+                                                       'trip_links': trip_links, 'show_trip_links': trip.user == request.user or trip_links})
 
 def points_GET(request, id):
     trip = shortcuts.get_object_or_404(models.Trip, id=id, user=request.user)
@@ -171,4 +178,50 @@ def points(request, id):
 def delete(request, id):
     trip = shortcuts.get_object_or_404(models.Trip, id=id, user=request.user)
     trip.delete()
+    return http.HttpResponse()
+
+@commit_on_success
+@login_required
+@require_POST
+def new_links(request, id):
+    trip = shortcuts.get_object_or_404(models.Trip, id=id, user=request.user)
+
+    assert trip.visibility == models.Visibility.PUBLIC
+
+    users = models.User.objects.filter(id__in=[int(id) for id in set(request.POST['user_ids'].split(","))])
+    friends = list(trip.user.get_friends())
+    users = [u for u in users if utils.find(friends, lambda f: f == u)] # filter out non-friends
+    notifications = list(models.Notification.objects.filter(user__in=users, type=models.NotificationType.TRIP_LINK_REQUEST))
+    for r in trip.triplink_lhs_set.all(): # filter out already linked or invited
+        if r.rhs:
+            if r.rhs.user in users:
+                users.remove(r.rhs.user)
+        else:
+            notification = utils.find(notifications, lambda n: int(n.content) == r.id)
+            if notification:
+                users.remove(notification.user)
+    for r in trip.triplink_rhs_set.all(): # filter out already linked reverse
+        if r.lhs.user in users:
+            users.remove(r.lhs.user)
+
+    if not users:
+        return http.HttpResponse()
+
+    for user in users:
+        link = models.TripLink(lhs=trip, status=models.RelationshipStatus.PENDING)
+        link.save()
+        notification = models.Notification(user=user, type=models.NotificationType.TRIP_LINK_REQUEST)
+        notification.content = str(link.id)
+        notification.save()
+        notification.manager.send_email()
+
+    return http.HttpResponse()
+
+@login_required
+@require_POST
+def delete_link(request, id, link_id):
+    trip = shortcuts.get_object_or_404(models.Trip, id=id, user=request.user)
+    link = models.TripLink.objects.get(Q(lhs=trip) | Q(rhs=trip), id=link_id)
+    link.delete()
+
     return http.HttpResponse()

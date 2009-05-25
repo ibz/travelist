@@ -7,7 +7,12 @@ a {
     text-decoration: none;
 }
 
-a.important {
+a img {
+    text-decoration: none;
+}
+
+a.important,
+span.important {
     color: red;
 }
 
