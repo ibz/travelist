@@ -3,10 +3,10 @@
 {% block htmlbody %}
 <div class="container">
 <div class="column span-4">
-  <h3><a href="/">backpacked.it</a></h3>
+  <h3><a href="/">backpacked.it</a> (&lambda;)</h3>
 </div>
 <div class="column span-20 header last">
-  <div class="column span-8">
+  <div class="column span-6">
     <ul class="horizontal-list">
       {% if not user.is_anonymous %}
       <li><a href="/trips/{{ user.username }}/">My trips</a></li>
@@ -14,7 +14,7 @@
       {% endif %}
     </ul>
   </div>
-  <div class="column span-12 last right">
+  <div class="column span-14 last right">
     <ul class="horizontal-list">
       {% if not user.is_anonymous %}
       <li>Logged in as <a href="/people/{{ user.username }}/">{{ user.username }}</a></li>
@@ -22,7 +22,8 @@
       {% if user.notification_set.count %}
       <li><a href="/notifications/" class="important">Notifications</a></li>
       {% endif %}
-      <li><a href="/suggestions/new/">Suggestions</a></li>
+      <li><a href="/help/contact/">Contact</a></li>
+      <li><a href="/help/about/">About</a></li>
       <li><a href="/account/logout/">Logout</a></li>
       {% else %}
       <li><a href="/account/login/">Login</a></li>
