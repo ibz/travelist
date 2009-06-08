@@ -66,7 +66,7 @@ You can accept his request by following this link: http://backpacked.it/notifica
                  'requesting_user': models.User.objects.get(id=int(self.notification.content)).username}))
         mail.send_mail(email_subject,
                        email_body,
-                       settings.CUSTOMER_EMAIL,
+                       settings.SERVER_EMAIL,
                        [self.notification.user.email])
 
     def render(self):
@@ -105,7 +105,7 @@ You can accept his request by following this link: http://backpacked.it/notifica
                  'requesting_user': models.TripLink.objects.get(id=int(self.notification.content)).lhs.user.username}))
         mail.send_mail(email_subject,
                        email_body,
-                       settings.CUSTOMER_EMAIL,
+                       settings.SERVER_EMAIL,
                        [self.notification.user.email])
 
     def render(self):

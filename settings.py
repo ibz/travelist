@@ -29,12 +29,11 @@ ADMIN_MEDIA_PREFIX = '/admin-media/'
 
 SECRET_KEY = '@2s!oe3(g2w(sifra4t+=!whk79-b-3p8gr4o!fw#a_x4deht3'
 
-SERVER_EMAIL = "\"backpacked.it\" <contact@backpacked.it>"
-CUSTOMER_EMAIL = "\"backpacked.it\" <contact@backpacked.it>"
+SERVER_EMAIL = "\"backpacked.it\" <noreply@backpacked.it>" # used to send notifications to users and admins (AKA noreply email)
 EMAIL_HOST = "smtp.gmail.com"
 EMAIL_PORT = 587
-EMAIL_HOST_USER = "contact@backpacked.it"
-EMAIL_HOST_PASSWORD = "39L423"
+EMAIL_HOST_USER = "noreply@backpacked.it"
+EMAIL_HOST_PASSWORD = "22W425"
 EMAIL_USE_TLS = True
 EMAIL_SUBJECT_PREFIX = ""
 

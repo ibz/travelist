@@ -30,7 +30,7 @@ class PlaceSuggestionAdmin(admin.ModelAdmin):
             suggestion = models.PlaceSuggestion.objects.get(id=id)
             mail.send_mail("Your place suggestion was accepted",
                            "The place %s was added to our database. You can use it in your own trips from now on." % request.POST.get('name'),
-                           settings.CUSTOMER_EMAIL,
+                           settings.SERVER_EMAIL,
                            [suggestion.user.email])
             return self.delete_view(request, id)
         else:

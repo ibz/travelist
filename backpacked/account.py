@@ -66,7 +66,7 @@ http://backpacked.it/account/confirm-email/?username=%(user)s&key=%(key)s""" % (
                  'key': profile.confirmation_key}))
         mail.send_mail(email_subject,
                        email_body,
-                       settings.CUSTOMER_EMAIL,
+                       settings.SERVER_EMAIL,
                        [user.email])
         return views.render("account_register.html", request, {'created': True})
     else:
