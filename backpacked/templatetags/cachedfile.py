@@ -16,27 +16,17 @@ class CachedFileNode(template.Node):
         if settings.DEBUG:
             return path
 
-        versionfile = "%s.v" % os.path.join(settings.MEDIA_ROOT, path)
-
-        if not os.path.exists(versionfile):
-            return path
-
         version = None
-        f = open(versionfile)
+        f = open("%s.v" % os.path.join(settings.MEDIA_ROOT, path))
         try:
             version = f.readline()
-        except:
-            pass
         finally:
             f.close()
-
-        if not version:
-            return path
+        assert version and len(version) == 8
 
         file, ext = os.path.splitext(path)
-        newpath = "".join([file, ".v-%s" % version, ext])
 
-        return newpath
+        return "".join([file, ".v-%s" % version, ".min", ext])
 
 def do_call(parser, token):
     path = parser.compile_filter(token.contents.split(" ", 1)[1])

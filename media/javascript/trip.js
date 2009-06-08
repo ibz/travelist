@@ -152,8 +152,8 @@ function add_point(point_id, name)
     li.find(".point-edit-cancel").attr('onclick', "javascript:edit_point_cancel(" + id + ");");
     li.find(".date-arrived,.date-left").datepicker({defaultDate: parseDate("s", current_trip.start_date)});
     li.find(".date-arrived").datepicker('option', 'onSelect', function(dateText) { changeDefaultDate(li.find(".date-left"), dateText); });
-    li.find(".visited").attr({id: "visited-" + id});
-    li.find(".visited-label").attr({for: "visited-" + id});
+    li.find(".visited").attr('id', "visited-" + id);
+    li.find(".visited-label").attr('for', "visited-" + id);
     $("#sort-points").append(li);
 
     return id;
