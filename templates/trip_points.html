@@ -2,17 +2,22 @@
 <html>
 <head>
 <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+</head>
+
+<body>
 <script type="text/javascript">
 var last_id = 0;
 var points = {};
-$(function()
-{
-  init_trip_points(
-[{% for p in points %}{id:{{ p.id }}, place_id:{{ p.place_id }}, name:"{{ p.name }}", lat:{{ p.coords.coords.0 }}, lng:{{ p.coords.coords.1 }}, date_arrived:"{{ p.date_arrived.date|default:"" }}", date_left:"{{ p.date_left.date|default:"" }}", visited:{{ p.visited|lower }} }{% if not forloop.last %},{% endif %}{% endfor %}]);
-});
+$(function() { init_trip_points([
+{% for p in points %}
+{id: {{ p.id }}, name: "{{ p.name }}", place_id: {{ p.place_id }},
+ lat: {{ p.coords.coords.0 }}, lng: {{ p.coords.coords.1 }}, visited:{{ p.visited|lower }},
+ date_arrived: "{{ p.date_arrived.date|default:"" }}", date_left: "{{ p.date_left.date|default:"" }}"
+}{% if not forloop.last %},{% endif %}
+{% endfor %}
+]); });
 </script>
-</head>
-<body>
+
 <div id="edit-points" class="edit-box">
 
 {% if not points %}

@@ -2,19 +2,19 @@
 <html>
 <head>
 <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
-<script type="text/javascript">
-$(function()
-{
-  init_trip_details(
-[{% for p in points %}{lat:{{ p.coords.0 }}, lng:{{ p.coords.1 }}, id:{{ p.id }}, name:"{{ p.name }}", place_id:{{ p.place_id }}, visited:{{ p.visited|lower }}, transportation:[{% for t in p.annotations.SEGMENT.TRANSPORTATION %}{annotation_id: {{ t.id }}, means: {{ t.content }} }{% if not forloop.last %},{% endif %}{% endfor %}]}{% if not forloop.last %},{% endif %}{% endfor %}]);
-  $("#trip-details-tabs").show();
-});
-</script>
 </head>
 <body>
-
 {% load call %}
-
+<script type="text/javascript">
+$(function() { init_trip_details([
+{% for p in points %}
+{id: {{ p.id }}, name: "{{ p.name }}", place_id: {{ p.place_id }},
+ lat: {{ p.coords.0 }}, lng: {{ p.coords.1 }}, visited: {{ p.visited|lower }},
+ transportation: [{% for t in p.annotations.SEGMENT.TRANSPORTATION %}{annotation_id: {{ t.id }}, means: {{ t.content }} }{% if not forloop.last %},{% endif %}{% endfor %}]
+}{% if not forloop.last %},{% endif %}
+{% endfor %}
+]); });
+</script>
 <div id="point-data" style="display: none">
 {% regroup points_sorted by place_id as places %}
 {% for place in places %}
@@ -25,14 +25,12 @@ $(function()
   <div class="body">
     <h4><a href="/places/{{ point.place_id }}/">{{ point.name }}</a></h4>
     <ul class="plain-list">
-      <li>
-        {% if point.date_arrived or point.date_left %}
-          {% if point.date_arrived %}{{ point.date_arrived|date }}{% else %}?{% endif %} - {% if point.date_left %}{{ point.date_left|date }}{% else %}?{% endif %}
-        {% endif %}
-      </li>
-      {% call "_trip_details_annotations.html" with annotations=point.annotations.POINT.ACCOMMODATION empty='' %}
-      {% call "_trip_details_annotations.html" with annotations=point.annotations.POINT.EXTERNAL_PHOTOS empty='' %}
-      {% call "_trip_details_annotations.html" with annotations=point.annotations.POINT.URL empty='' %}
+      {% if point.date_arrived or point.date_left %}
+      <li>{% if point.date_arrived %}{{ point.date_arrived|date }}{% else %}?{% endif %} - {% if point.date_left %}{{ point.date_left|date }}{% else %}?{% endif %}</li>
+      {% endif %}
+      {% call "_trip_details_annotations.html" with annotations=point.annotations.POINT.ACCOMMODATION %}
+      {% call "_trip_details_annotations.html" with annotations=point.annotations.POINT.EXTERNAL_PHOTOS %}
+      {% call "_trip_details_annotations.html" with annotations=point.annotations.POINT.URL %}
     </ul>
     <p>
       {% ifequal user trip.user %}
@@ -76,15 +74,13 @@ $(function()
   <div class="body">
     <h4><a href="/places/{{ segment.p1.place_id }}/">{{ segment.p1.name }}</a> - <a href="/places/{{ segment.p2.place_id }}/">{{ segment.p2.name }}</a></h4>
     <ul class="plain-list">
-      <li>
-        {% if segment.p1.date_left or segment.p2.date_arrived %}
-        {% if segment.p1.date_left %}{{ segment.p1.date_left|date }}{% else %}?{% endif %} - {% if segment.p2.date_arrived %}{{ segment.p2.date_arrived|date }}{% else %}?{% endif %}
-        {% endif %}
-      </li>
+      {% if segment.p1.date_left or segment.p2.date_arrived %}
+      <li>{% if segment.p1.date_left %}{{ segment.p1.date_left|date }}{% else %}?{% endif %} - {% if segment.p2.date_arrived %}{{ segment.p2.date_arrived|date }}{% else %}?{% endif %}</li>
+      {% endif %}
       <li>Distance: {{ segment.length|floatformat:2 }} km</li>
-      {% call "_trip_details_annotations.html" with annotations=segment.p1.annotations.SEGMENT.TRANSPORTATION empty='' %}
-      {% call "_trip_details_annotations.html" with annotations=segment.p1.annotations.SEGMENT.EXTERNAL_PHOTOS empty='' %}
-      {% call "_trip_details_annotations.html" with annotations=segment.p1.annotations.SEGMENT.URL empty='' %}
+      {% call "_trip_details_annotations.html" with annotations=segment.p1.annotations.SEGMENT.TRANSPORTATION %}
+      {% call "_trip_details_annotations.html" with annotations=segment.p1.annotations.SEGMENT.EXTERNAL_PHOTOS %}
+      {% call "_trip_details_annotations.html" with annotations=segment.p1.annotations.SEGMENT.URL %}
     </ul>
     <p>
       {% ifequal user trip.user %}
@@ -105,10 +101,10 @@ $(function()
   {% endifequal %}
 </div>
 {% ifequal user trip.user %}
-  {% call "_trip_details_annotations_max.html" with annotation_dict=segment.p1.annotations.SEGMENT segment=1 %}
+  {% call "_trip_details_annotations_max.html" with annotation_dict=segment.p1.annotations.SEGMENT point=segment.p1 segment=1 %}
 {% else %}
   {% if segment.p1.annotations.SEGMENT.ACTIVITY or segment.p1.annotations.SEGMENT.NOTE or segment.p1.annotations.SEGMENT.COST %}
-    {% call "_trip_details_annotations_max.html" with annotation_dict=segment.p1.annotations.SEGMENT segment=1 %}
+    {% call "_trip_details_annotations_max.html" with annotation_dict=segment.p1.annotations.SEGMENT point=segment.p1 segment=1 %}
   {% endif %}
 {% endifequal %}
 </div>
@@ -145,7 +141,7 @@ $(function()
     <p><a href="/trips/{{ trip.id }}/annotations/new/?content_type=3">add photos</a></p>
   {% endifequal %}
   <ul class="plain-list">
-    {% call "_trip_details_annotations.html" with annotations=trip_photos %}
+    {% call "_trip_details_annotations.html" with annotations=trip_photos empty="Nothing yet" %}
   </ul>
 </div>
 {% endif %}
@@ -194,7 +190,6 @@ $(function()
 </div>
 </div>
 {% endif %}
-
 </div>
 </body>
 </html>

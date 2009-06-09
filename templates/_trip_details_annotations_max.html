@@ -3,19 +3,19 @@
   <div>
     <h5>Activities {% ifequal user trip.user %}(<a href="/trips/{{ trip.id }}/annotations/new/?content_type=1&point_id={{ point.id }}&segment={{ segment }}">add</a>){% endifequal %}</h5>
     <ul class="plain-list">
-      {% call "_trip_details_annotations.html" with annotations=annotation_dict.ACTIVITY %}
+      {% call "_trip_details_annotations.html" with annotations=annotation_dict.ACTIVITY empty="Nothing yet" %}
     </ul>
   </div>
   <div>
     <h5>Notes {% ifequal user trip.user %}(<a href="/trips/{{ trip.id }}/annotations/new/?content_type=8&point_id={{ point.id }}&segment={{ segment }}">add</a>){% endifequal %}</h5>
     <ul class="plain-list">
-      {% call "_trip_details_annotations.html" with annotations=annotation_dict.NOTE %}
+      {% call "_trip_details_annotations.html" with annotations=annotation_dict.NOTE empty="Nothing yet" %}
     </ul>
   </div>
   <div>
     <h5>Costs {% ifequal user trip.user %}(<a href="/trips/{{ trip.id }}/annotations/new/?content_type=7&point_id={{ point.id }}&segment={{ segment }}">add</a>){% endifequal %}</h5>
     <ul class="plain-list">
-      {% call "_trip_details_annotations.html" with annotations=annotation_dict.COST %}
+      {% call "_trip_details_annotations.html" with annotations=annotation_dict.COST empty="Nothing yet" %}
     </ul>
   </div>
 </div>

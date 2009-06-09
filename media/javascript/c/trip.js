@@ -4,16 +4,14 @@ function update_trip_details(trip_id)
 {
     var activity = $("#trip-activity");
     activity.show();
-    $("#trip-details").load("/trips/" + trip_id + "/details/", null,
-                            function() { activity.hide(); });
+    $("#trip-details").load("/trips/" + trip_id + "/details/", null, function() { activity.hide(); });
 }
 
 function edit_points(trip_id)
 {
     var activity = $("#trip-activity");
     activity.show();
-    $("#trip-details").empty().load("/trips/" + trip_id + "/points/", null,
-                                    function() { activity.hide(); });
+    $("#trip-details").empty().load("/trips/" + trip_id + "/points/", null, function() { activity.hide(); });
 }
 
 function suggest_place()
@@ -107,7 +105,7 @@ function init_trip(trip, has_points, allow_edit)
 
 function init_trip_details(point_data)
 {
-    $("#trip-details-tabs").tabs();
+    $("#trip-details-tabs").tabs().show();
     $(".annotation").hover(function() { $(this).addClass('hover'); }, function() { $(this).removeClass('hover'); });
     initTripMap(point_data, true);
 }
@@ -324,7 +322,7 @@ function init_trip_points(point_data)
     autoCompletePlace("#new-place-name", "#new-place-id", "#new-place-coords");
     for(var i = 0; i < point_data.length; i++)
     {
-      var id = add_point("oldpoint_" + point_data[i].id, point_data[i].name);
+        var id = add_point("oldpoint_" + point_data[i].id, point_data[i].name);
         set_point_data(id, point_data[i], false);
     }
     refresh_map();

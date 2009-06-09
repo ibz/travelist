@@ -9,5 +9,5 @@
     {% endifequal %}
   </li>
 {% empty %}
-  <li>{{ empty|default_if_none:"Nothing yet" }}</li>
+  {% if empty %}<li>{{ empty }}</li>{% endif %}
 {% endfor %}
