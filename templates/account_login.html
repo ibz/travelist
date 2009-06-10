@@ -2,7 +2,7 @@
 
 {% block htmlbody %}
 <div class="container">
-  <div class="column span-8 prepend-4 append-12 prepend-top last">
+  <div class="column span-8 prepend-top">
     <h1>backpacked.it</h1>
     <h3>your travel plans / your travel history</h3>
     <form method="POST" action="/account/login/">
@@ -15,7 +15,13 @@
         </p>
       </fieldset>
     </form>
-    <a href="/help/about/">About</a> | <a href="/help/contact/">Contact</a>
+  </div>
+  <div class="column span-12 prepend-4 prepend-top last" style="padding-top: 100px;">
+    <p align="center"><span style="font-size: 2em;">if traveling is an important part of your life</span></p>
+    <p align="center"><span style="font-size: 1.2em;">then</span> <span style="font-size: 1.8em;">sharing your trips</span> <span style="font-size: 1.2em;">with others should be</span> <span style="font-size: 1.8em;">trivial</span></p>
+    <p align="center"><span style="font-size: 1.2em;">and</span> <span style="font-size: 1.8em;">remembering them after years</span> <span style="font-size: 1.2em;">is</span> <span style="font-size: 1.8em;">essential</span></p>
+    <p align="center"><span style="font-size: 1.5em;">backpacked.it is meant to help you with that</span></p>
+    <p align="center"><a href="/help/about/">About</a> | <a href="/help/contact/">Contact</a></p>
   </div>
 </div>
 {% endblock %}
