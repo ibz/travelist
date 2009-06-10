@@ -8,14 +8,21 @@ function update_jsmin {
     bzr diff $1 > /dev/null || cat $1 | scripts/lib/jsmin.py > ${1%.*}.min.${1##*.}
 }
 
+function update_cssmin {
+    bzr diff $1 > /dev/null || cat $1 > ${1%.*}.min.${1##*.}
+}
+
 # blueprint CSS
 cp media/css/lib/blueprint/screen.css media/css/c/blueprint-screen.css
+update_cssmin media/css/c/blueprint-screen.css
 update_v media/css/c/blueprint-screen.css
 cp media/css/lib/blueprint/ie.css media/css/c/blueprint-ie.css
+update_cssmin media/css/c/blueprint-ie.css
 update_v media/css/c/blueprint-ie.css
 
 # the rest of CSS
 cat media/css/lib/jquery/*.css media/css/main.css > media/css/c/all.css
+update_cssmin media/css/c/all.css
 update_v media/css/c/all.css
 
 # google maps JS
