@@ -23,7 +23,7 @@ $(function() { init_trip_details([
 <div id="point-{{ point.id }}">
 <div class="short-content">
   <div class="body">
-    <h4><a href="/places/{{ point.place_id }}/">{{ point.name }}</a></h4>
+    <h4><a href="{{ point.place.get_absolute_url }}">{{ point.name }}</a></h4>
     <ul class="plain-list">
       {% if point.date_arrived or point.date_left %}
       <li>{% if point.date_arrived %}{{ point.date_arrived|date }}{% else %}?{% endif %} - {% if point.date_left %}{{ point.date_left|date }}{% else %}?{% endif %}</li>
@@ -72,7 +72,7 @@ $(function() { init_trip_details([
 <div id="segment-{{ segment.p1.id }}">
 <div class="short-content" data-path="#place-pair-{{ place_pair.grouper }} #segment-{{ segment.p1.id }}">
   <div class="body">
-    <h4><a href="/places/{{ segment.p1.place_id }}/">{{ segment.p1.name }}</a> - <a href="/places/{{ segment.p2.place_id }}/">{{ segment.p2.name }}</a></h4>
+    <h4><a href="{{ segment.p1.place.get_absolute_url }}">{{ segment.p1.name }}</a> - <a href="{{ segment.p2.place.get_absolute_url }}">{{ segment.p2.name }}</a></h4>
     <ul class="plain-list">
       {% if segment.p1.date_left or segment.p2.date_arrived %}
       <li>{% if segment.p1.date_left %}{{ segment.p1.date_left|date }}{% else %}?{% endif %} - {% if segment.p2.date_arrived %}{{ segment.p2.date_arrived|date }}{% else %}?{% endif %}</li>
@@ -157,7 +157,7 @@ $(function() { init_trip_details([
       {% for l in trip_links %}
         <div align="center">
           <a href="/people/{{ l.0.user.username }}/"><img class="user-image" src="{{ l.0.user.userprofile.picture_thumbnail_url }}" /></a><br />
-          <a href="/trips/{{ l.0.id }}/">{{ l.0.user.username }}'s trip</a>
+          <a href="{{ l.0.get_absolute_url }}">{{ l.0.user.username }}'s trip</a>
           {% ifequal user.id trip.user_id %}(<a href="javascript:delete_link({{ l.1.id }}, '{{ l.0.user.username }}');" title="Remove">X</a>){% endifequal %}<br />
           {% if l.1.start_place and l.1.end_place %}(between {{ l.1.start_place.name }} and {{ l.1.end_place.name }}){% endif %}
         </div>

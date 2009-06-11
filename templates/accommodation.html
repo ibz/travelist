@@ -4,7 +4,7 @@
 
 {% block content %}
 <div class="column span-14 prepend-5 prepend-top">
-  <h3>{{ accommodation.name }}, <a href="/places/{{ accommodation.place.id }}/">{{ accommodation.place.name }}</a></h3>
+  <h3>{{ accommodation.name }}, <a href="{{ accommodation.place.get_absolute_url }}">{{ accommodation.place.name }}</a></h3>
   <div>
     {% if accommodation.wiki_content %}
       {{ accommodation.wiki_content|force_escape|urlize|markdown }}

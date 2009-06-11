@@ -13,7 +13,7 @@
   </thead>
   {% for trip in trips %}
   <tr{% if forloop.first %} class="firstrow"{% endif %}>
-    <td class="firstcolumn"><a href="/trips/{{ trip.id }}/">{{ trip.name }}</a></td>
+    <td class="firstcolumn"><a href="{{ trip.get_absolute_url }}">{{ trip.name }}</a></td>
     <td>{{ trip.start_date|date }}</td>
     <td>{{ trip.end_date|date }}</td>
     <td class="lastcolumn" style="text-align: center;">{% for t in trip.transportations %}<img width="14" heigth="14" src="/media/images/transportation/{{ t.0 }}.png" title="{{ t.1 }}" />{% endfor %}</td>

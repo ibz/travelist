@@ -29,22 +29,23 @@ urlpatterns = patterns('',
 
     (r"^places/search/$", 'backpacked.place.search'),
     (r"^places/suggest/$", 'backpacked.place.suggest'),
-    (r"^places/(?P<id>\d+)/$", 'backpacked.place.view'),
+    (r"^places/(?P<id>\d+)(-[\w-]+)?/$", 'backpacked.place.view'),
     (r"^places/(?P<id>\d+)/edit/$", 'backpacked.place.edit'),
     (r"^places/(?P<id>\d+)/rate/$", 'backpacked.place.rate'),
     (r"^places/(?P<id>\d+)/comment/$", 'backpacked.place.comment'),
 
-    (r"^accommodations/(?P<id>\d+)/$", 'backpacked.accommodation.view'),
+    (r"^accommodations/(?P<id>\d+)(-[\w-]+)?/$", 'backpacked.accommodation.view'),
     (r"^accommodations/(?P<id>\d+)/edit/$", 'backpacked.accommodation.edit'),
     (r"^accommodations/(?P<id>\d+)/rate/$", 'backpacked.accommodation.rate'),
     (r"^accommodations/(?P<id>\d+)/comment/$", 'backpacked.accommodation.comment'),
 
     (r"^trips/new/$", 'backpacked.trip.new'),
-    (r"^trips/(?P<id>\d+)/$", 'backpacked.trip.view'),
+    (r"^trips/(?P<id>\d+)(-[\w-]+)?/$", 'backpacked.trip.view'),
     (r"^trips/(?P<id>\d+)/details/$", 'backpacked.trip.details'),
     (r"^trips/(?P<id>\d+)/points/$", 'backpacked.trip.points'),
     (r"^trips/(?P<id>\d+)/edit/$", 'backpacked.trip.edit'),
     (r"^trips/(?P<id>\d+)/delete/$", 'backpacked.trip.delete'),
+
     (r"^trips/(?P<username>\w+)/$", 'backpacked.trip.user'),
 
     (r"^trips/(?P<id>\d+)/links/new/$", 'backpacked.trip.new_links'),

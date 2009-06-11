@@ -33,7 +33,7 @@ def new_POST(request, trip):
     form = tripui.EditForm(request.POST, instance=trip)
     if form.is_valid():
         trip = form.save()
-        return http.HttpResponseRedirect("/trips/%s/" % trip.id)
+        return http.HttpResponseRedirect(trip.get_absolute_url())
     else:
         return views.render("trip_edit.html", request, {'trip': trip, 'form': form})
 
@@ -61,7 +61,7 @@ def edit_POST(request, trip):
     form = tripui.EditForm(request.POST, instance=trip)
     if form.is_valid():
         trip = form.save()
-        return http.HttpResponseRedirect("/trips/%s/" % trip.id)
+        return http.HttpResponseRedirect(trip.get_absolute_url())
     else:
         return views.render("trip_edit.html", request, {'trip': trip, 'form': form})
 
@@ -80,29 +80,27 @@ def details(request, id):
     if not trip.is_visible_to(request.user):
         raise http.Http404()
 
-    points = dict([(p.id, {'id': p.id, 'place_id': p.place_id, 'name': p.name, 'coords': p.coords.coords,
-                           'date_arrived': p.date_arrived, 'date_left': p.date_left, 'visited': p.visited,
-                           'order_rank': p.order_rank,
-                           'annotations': {'POINT': {}, 'SEGMENT': {}}})
-                   for p in trip.point_set.all()])
+    points = dict([(p.id, p) for p in trip.point_set.all()])
+    for p in points.values():
+        p.annotations = {'POINT': {}, 'SEGMENT': {}}
 
     annotations = list(trip.get_annotations_visible_to(request.user).all())
     for annotation in annotations:
         if not annotation.point_id:
             continue
-        dest = points[annotation.point_id]['annotations']['SEGMENT' if annotation.segment else 'POINT']
+        dest = points[annotation.point_id].annotations['SEGMENT' if annotation.segment else 'POINT']
         content_type_name = models.ContentType.get_name(annotation.content_type)
         if not dest.has_key(content_type_name):
             dest[content_type_name] = []
         dest[content_type_name].append(annotation)
 
-    points = sorted(points.values(), key=lambda p: p['order_rank'])
+    points = sorted(points.values(), key=lambda p: p.order_rank)
 
     segments = []
     for i in range(len(points) - 1):
         p1, p2 = points[i], points[i + 1]
-        place_ids = '%s-%s' % (min(p1['place_id'], p2['place_id']), max(p1['place_id'], p2['place_id']))
-        segments.append({'place_ids': place_ids, 'p1': p1, 'p2': p2, 'length': distance(p1['coords'], p2['coords']).km})
+        place_ids = '%s-%s' % (min(p1.place_id, p2.place_id), max(p1.place_id, p2.place_id))
+        segments.append({'place_ids': place_ids, 'p1': p1, 'p2': p2, 'length': distance(p1.coords, p2.coords).km})
 
     trip_photos = [a for a in annotations if a.content_type == models.ContentType.EXTERNAL_PHOTOS]
 
@@ -111,7 +109,7 @@ def details(request, id):
     trip_links = [l for l in trip_links if l[0].is_visible_to(request.user)]
 
     return views.render("trip_details.html", request, {'trip': trip, 'points': points, 'segments': segments,
-                                                       'points_sorted': sorted(points, key=lambda p: p['place_id']), # XXX: needed until #11008 is fixed in Django
+                                                       'points_sorted': sorted(points, key=lambda p: p.place_id), # XXX: needed until #11008 is fixed in Django
                                                        'segments_sorted': sorted(segments, key=lambda s: s['place_ids']), # XXX: needed until #11008 is fixed in Django
                                                        'trip_photos': trip_photos, 'show_trip_photos': trip.user == request.user or trip_photos,
                                                        'trip_links': trip_links, 'show_trip_links': trip.user == request.user or trip_links})

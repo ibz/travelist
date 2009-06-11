@@ -9,7 +9,7 @@
       {{ form.as_p }}
       <p>
         <input type="submit" class="submit button positive" value="Save" />
-        <input type="button" class="button negative" value="Cancel" onclick="javascript:window.location='/places/{{ place.id }}/';" />
+        <input type="button" class="button negative" value="Cancel" onclick="javascript:window.location='{{ place.get_absolute_url }}';" />
       </p>
     </fieldset>
   </form>

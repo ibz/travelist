@@ -2,9 +2,16 @@
 {% load markup %}
 {% load call %}
 
+{% block htmlhead %}
+<meta name="ICBM" content="{{ place.coords.coords.0|floatformat:3 }}, {{ place.coords.coords.1|floatformat:3 }}" />
+<meta name="geo.position" content="{{ place.coords.coords.0|floatformat:3 }}; {{ place.coords.coords.1|floatformat:3 }}" />
+<meta name="geo.placename" content="{{ place.display_name }}" />
+{% endblock %}
+
 {% block content %}
 <div class="column span-14 prepend-5 prepend-top">
   <h3>{{ place.display_name }}</h3>
+  <div class="geo">Coordinates: <span class="latitude">{{ place.coords.coords.0|floatformat:2 }}</span>; <span class="longitude">{{ place.coords.coords.1|floatformat:2 }}</span></div>
   <div>
     {% if place.wiki_content %}
       {{ place.wiki_content|force_escape|urlize|markdown }}

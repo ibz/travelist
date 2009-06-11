@@ -276,8 +276,8 @@ class AccommodationAnnotationManager(AnnotationManager):
         return self.accommodation.name
 
     def render_short(self):
-        return "<a href=\"/accommodations/%s/\">%s</a>" % (self.accommodation.id,
-                                                           html.escape(self.accommodation.name))
+        return "<a href=\"%s\">%s</a>" % (self.accommodation.get_absolute_url(),
+                                          html.escape(self.accommodation.name))
 
     def clean_content(self, content):
         try:

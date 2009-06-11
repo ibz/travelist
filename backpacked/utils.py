@@ -1,4 +1,6 @@
 import re
+import sys
+import unicodedata
 from datetime import datetime
 from functools import update_wrapper
 
@@ -91,3 +93,48 @@ def cached_property(func):
     def _del(self):
         del self.__dict__[func.__name__]
     return property(_get, None, _del)
+
+class UnicodeASCIIMap(dict):
+    """
+    Maps a unicode character code to a replacement code or a unicode string.
+    """
+
+    STATIC_MAP = {
+        # characters that don't have a unicode decomposition
+        0xe6: u"ae", # LATIN SMALL LETTER AE
+        0xc6: u"AE", # LATIN CAPITAL LETTER AE
+        0xf0: u"d",  # LATIN SMALL LETTER ETH
+        0xd0: u"D",  # LATIN CAPITAL LETTER ETH
+        0xf8: u"oe", # LATIN SMALL LETTER O WITH STROKE
+        0xd8: u"OE", # LATIN CAPITAL LETTER O WITH STROKE
+        0xfe: u"th", # LATIN SMALL LETTER THORN
+        0xde: u"Th", # LATIN CAPITAL LETTER THORN
+        0xdf: u"ss", # LATIN SMALL LETTER SHARP S
+    }
+
+    def __missing__(self, k):
+        if k in self:
+            return self[k]
+        v = k
+        if k in self.STATIC_MAP:
+            v = self.STATIC_MAP[k]
+        else:
+            de = unicodedata.decomposition(unichr(k))
+            if de:
+                try:
+                    v = int(de.split(None, 1)[0], 16)
+                except (IndexError, ValueError):
+                    pass
+        self[k] = v
+        return v
+UnicodeASCIIMap = UnicodeASCIIMap()
+
+def human_unicode_to_ascii(s):
+    return unicode(s).translate(UnicodeASCIIMap).encode("ascii", "ignore")
+
+title_for_url_filters = [(re.compile(f[0]), f[1]) for f in [(r"[^a-z0-9-\ ]", ""), (r" ", "-"), (r"-+", "-"), (r"(^-)|(-$)", "")]]
+def clean_title_for_url(title):
+    title = human_unicode_to_ascii(title).lower()
+    for filter in title_for_url_filters:
+        title = filter[0].sub(filter[1], title)
+    return title

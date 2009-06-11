@@ -1,4 +1,4 @@
-var current_trip; // JS global variable
+var current_trip; // JS::global-var
 
 function update_trip_details(trip_id)
 {
@@ -65,7 +65,7 @@ function delete_annotation(trip_id, id)
     $.post("/trips/" + trip_id + "/annotations/" + id + "/delete/", {},
            function()
            {
-               window.location = "/trips/" + trip_id + "/";
+               window.location = "/trips/" + trip_id + "/"; // TODO: this URL doesn't include the title
            });
 }
 
@@ -450,6 +450,6 @@ function delete_link(link_id, username)
     $.post("/trips/" + current_trip.id + "/links/" + link_id + "/delete/", {},
            function()
            {
-               window.location = "/trips/" + current_trip.id + "/";
+               window.location = "/trips/" + current_trip.id + "/"; // TODO: this URL doesn't include the title
            });
 }

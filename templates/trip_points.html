@@ -6,8 +6,8 @@
 
 <body>
 <script type="text/javascript">
-var last_id = 0;
-var points = {};
+var last_id = 0; // JS::global-var
+var points = {}; // JS::global-var
 $(function() { init_trip_points([
 {% for p in points %}
 {id: {{ p.id }}, name: "{{ p.name }}", place_id: {{ p.place_id }},

@@ -31,7 +31,7 @@ def edit_POST(request, accommodation):
                                         wiki_content=accommodation.wiki_content,
                                         user=request.user)
         hist.save()
-        return http.HttpResponseRedirect("/accommodations/%s/" % accommodation.id)
+        return http.HttpResponseRedirect(accommodation.get_absolute_url())
     else:
         return views.render("accommodation_edit.html", request, {'accommodation': accommodation, 'form': form})
 
@@ -55,7 +55,7 @@ def rate(request, id):
     rating.value = request.GET['value']
     rating.save()
 
-    return http.HttpResponseRedirect("/accommodations/%s/" % id)
+    return http.HttpResponseRedirect(accommodation.get_absolute_url())
 
 @login_required
 @require_POST
@@ -66,5 +66,4 @@ def comment(request, id):
     comment.content = request.POST['comment_content']
     comment.save()
 
-    return http.HttpResponseRedirect("/accommodations/%s/" % id)
-
+    return http.HttpResponseRedirect(accommodation.get_absolute_url())

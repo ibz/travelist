@@ -73,9 +73,9 @@ function initTripMap(point_data, bind_events)
 
     var initialZoom = 9;
 
-    transportation_markers = {}; // JS global variable
+    transportation_markers = {}; // JS::global-var
 
-    map = new GMap2(document.getElementById('map')); // JS global variable
+    map = new GMap2(document.getElementById('map')); // JS::global-var
     map.addControl(new GLargeMapControl());
     map.setCenter(new GLatLng(0, 0), initialZoom);
 
@@ -180,7 +180,7 @@ function initTripMap(point_data, bind_events)
     }
 
     setTimeout(function() {
-                   marker_manager = new MarkerManager(map); // JS global variable
+                   marker_manager = new MarkerManager(map); // JS::global-var
                    marker_manager.addMarkers(markers, 1);
                    marker_manager.refresh();
                }, 0);

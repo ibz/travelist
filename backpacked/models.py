@@ -50,7 +50,10 @@ class Place(models.Model):
     def __cmp__(self, other):
         return cmp(self.name, other.name)
 
-    @property
+    def get_absolute_url(self):
+        return "/places/%s-%s/" % (self.id, utils.clean_title_for_url(self.display_name))
+
+    @cached_property
     def display_name(self):
         name = self.name
         if self.administrative_division:
@@ -112,6 +115,10 @@ class Accommodation(models.Model):
 
     def __unicode__(self):
         return "%s, %s" % (self.name, self.place.name)
+
+    def get_absolute_url(self):
+        title = utils.clean_title_for_url(self.name)
+        return "/accommodations/%s%s%s/" % (self.id, "-" if title else "", title)
 
     @cached_property
     def ratings(self):
@@ -267,6 +274,10 @@ class Trip(models.Model):
 
     def __unicode__(self):
         return self.name
+
+    def get_absolute_url(self):
+        title = utils.clean_title_for_url(self.name)
+        return "/trips/%s%s%s/" % (self.id, "-" if title else "", title)
 
     @property
     def status(self):

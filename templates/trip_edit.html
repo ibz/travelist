@@ -18,7 +18,11 @@ $(init_trip_edit);
     {{ form.as_p }}
     <p>
       <input type="submit" class="submit button positive" value="Save" />
-      <input type="button" class="button negative" value="Cancel" onclick="javascript:window.location='/trips/{% firstof trip.id user.username %}/';" />
+      {% if trip.id %}
+      <input type="button" class="button negative" value="Cancel" onclick="javascript:window.location='{{ trip.get_absolute_url }}';" />
+      {% else %}
+      <input type="button" class="button negative" value="Cancel" onclick="javascript:window.location='/trips/{{ user.username }}/';" />
+      {% endif %}
     </p>
     </fieldset>
   </form>

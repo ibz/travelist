@@ -13,7 +13,7 @@
 {{ form.as_p }}
 <p>
 <input type="submit" class="submit button positive" value="{% if annotation.id %}Save{% else %}Add{% endif %}" />
-<input type="button" class="button negative" value="Cancel" onclick="javascript:window.location='/trips/{{ annotation.trip_id }}/';" />
+<input type="button" class="button negative" value="Cancel" onclick="javascript:window.location='{{ annotation.trip.get_absolute_url }}';" />
 </p>
 </fieldset>
 </form>

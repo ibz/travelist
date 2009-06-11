@@ -65,7 +65,6 @@ def do_call(parser, token):
                     str_arg = str_arg[:-1]
                     process_arg(k, str(str_arg))
                     str_arg = None
-    print kwargs
     return CallNode(path, *args, **kwargs)
 
 register.tag('call', do_call)
