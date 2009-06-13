@@ -36,13 +36,14 @@ class Place(models.Model):
     url_prefix = 'places'
 
     source = models.IntegerField() # 1 = manual, 2 = geonames
-    code = models.IntegerField()
+    code = models.IntegerField() # external code (geonames ID) TODO: rename to code_external
     name = models.CharField(max_length=100)
     name_ascii = models.CharField(max_length=100)
     country = models.ForeignKey(Country)
     administrative_division = models.ForeignKey(AdministrativeDivision, null=True)
     coords = models.PointField()
     wiki_content = models.TextField(blank=True)
+    date_modified_external = models.DateTimeField(null=True)
 
     def __unicode__(self):
         return self.display_name
@@ -68,6 +69,11 @@ class Place(models.Model):
         ratings = {1: 0, 2: 0, 3: 0}
         ratings.update(dict([(c['value'], c['value__count']) for c in counts]))
         return ratings
+
+class PlaceName(models.Model):
+    place = models.ForeignKey(Place)
+    source = models.IntegerField() # 1 = manual, 2 = geonames
+    name = models.CharField(max_length=200, db_index=True)
 
 class PlaceSuggestion(models.Model):
     user = models.ForeignKey(User)
