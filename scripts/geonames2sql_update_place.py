@@ -11,6 +11,9 @@ f2 = file(sys.argv[2], "w")
 
 try:
     f2.write("BEGIN;\n")
+    f2.write("CREATE TABLE __geonames_update_place(added int, updated int, unchanged int);\n")
+    f2.write("INSERT INTO __geonames_update_place(added, updated, unchanged) VALUES (0, 0, 0);\n")
+    f2.write("\\o /dev/null\n")
     line = f1.readline()
     while line:
         line = line[:-1]
@@ -28,6 +31,9 @@ try:
         date_modified = parts[18]
         f2.write("SELECT update_place(2, %s, '%s', '%s', %s, %s, %s, '%s', '%s');\n" % (code, name, name_ascii, country_id, administrative_division_id, coords, date_modified, names))
         line = f1.readline()
+    f2.write("\\o\n")
+    f2.write("SELECT * FROM __geonames_update_place;\n")
+    f2.write("DROP TABLE __geonames_update_place;\n")
     f2.write("COMMIT;\n")
 finally:
     f1.close()

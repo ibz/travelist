@@ -19,6 +19,7 @@ BEGIN
         FOR r IN SELECT * FROM regexp_split_to_table(p_names, E',') LOOP
             INSERT INTO backpacked_placename (place_id, source, name) VALUES (currval('backpacked_place_id_seq'), p_source, r.regexp_split_to_table);
         END LOOP;
+        UPDATE __geonames_update_place SET added = added + 1;
         RETURN true;
     ELSE
         IF (SELECT p.date_modified_external IS NULL OR p.date_modified_external < p_date_modified_external FROM backpacked_place p WHERE p.id = v_place_id) THEN
@@ -28,9 +29,11 @@ BEGIN
             FOR r IN SELECT * FROM regexp_split_to_table(p_names, E',') LOOP
                 INSERT INTO backpacked_placename (place_id, source, name) VALUES (v_place_id, p_source, r.regexp_split_to_table);
             END LOOP;
+            UPDATE __geonames_update_place SET updated = updated + 1;
             RETURN true;
         END IF;
     END IF;
+    UPDATE __geonames_update_place SET unchanged = unchanged + 1;
     RETURN false;
 END;$_$
 LANGUAGE 'plpgsql';
