@@ -24,18 +24,20 @@ try:
     f2.write("\\o /dev/null\n")
     line = f1.readline()
     while line:
+        line = line.decode("utf-8")
         line = line[:-1]
         parts = line.split("\t")
         code = parts[0]
         name, name_ascii, names = [n.replace("'", "''") for n in [parts[1], parts[2], parts[3]]]
         names = [n for n in [name, name_ascii] if len(n)] + [n for n in names.split(",") if len(n) > 1]
-        names = ",".join(set(names))
+        names = ",".join(set(n.lower() for n in names))
         country_id = countries[parts[8]]
         administrative_division_id = administrative_divisions.get((country_id, parts[10]), "NULL")
         lat, lng = parts[4], parts[5]
         coords = "GeometryFromText('POINT(%s %s)', 4326)" % (lat, lng)
         date_modified = parts[18]
-        f2.write("SELECT update_place(2, %s, '%s', '%s', %s, %s, %s, '%s', '%s');\n" % (code, name, name_ascii, country_id, administrative_division_id, coords, date_modified, names))
+        fcall = "SELECT update_place(2, %s, '%s', '%s', %s, %s, %s, '%s', '%s');\n" % (code, name, name_ascii, country_id, administrative_division_id, coords, date_modified, names)
+        f2.write(fcall.encode("utf-8"))
         line = f1.readline()
     f2.write("\\o\n")
     f2.write("SELECT * FROM __geonames_update_place;\n")
