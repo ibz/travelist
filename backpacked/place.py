@@ -16,7 +16,7 @@ def search(request):
     def render(p):
         return "%s|%s|%s|%s,%s" % (p.display_name, p.id, p.name, p.coords.coords[0], p.coords.coords[1])
     query_terms = [t.strip() for t in request.GET['q'].split(",", 1)]
-    places = models.Place.objects.filter(placename__name__istartswith=query_terms[0])
+    places = models.Place.objects.filter(placename__name__startswith=query_terms[0].lower())
     if len(query_terms) > 1:
         administrative_divisions = models.AdministrativeDivision.objects.filter(name__istartswith=query_terms[1])
         countries = models.Country.objects.filter(name__istartswith=query_terms[1])
