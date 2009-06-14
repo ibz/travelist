@@ -36,7 +36,7 @@ class Place(models.Model):
     url_prefix = 'places'
 
     source = models.IntegerField() # 1 = manual, 2 = geonames
-    code = models.IntegerField() # external code (geonames ID) TODO: rename to code_external
+    external_code = models.IntegerField()
     name = models.CharField(max_length=100)
     name_ascii = models.CharField(max_length=100)
     country = models.ForeignKey(Country)

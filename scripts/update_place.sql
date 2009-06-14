@@ -12,9 +12,9 @@ DECLARE
     v_place_id integer;
     r record;
 BEGIN
-    SELECT INTO v_place_id p.id from backpacked_place p WHERE p.source = p_source AND p.code = p_external_code;
+    SELECT INTO v_place_id id FROM backpacked_place WHERE source = p_source AND external_code = p_external_code;
     IF v_place_id IS NULL THEN
-        INSERT INTO backpacked_place (source, code, name, name_ascii, country_id, administrative_division_id, coords, date_modified_external)
+        INSERT INTO backpacked_place (source, external_code, name, name_ascii, country_id, administrative_division_id, coords, date_modified_external)
             VALUES (p_source, p_external_code, p_name, p_name_ascii, p_country_id, p_administrative_division_id, p_coords, p_date_modified_external);
         FOR r IN SELECT * FROM regexp_split_to_table(p_names, E',') LOOP
             INSERT INTO backpacked_placename (place_id, source, name) VALUES (currval('backpacked_place_id_seq'), p_source, r.regexp_split_to_table);
@@ -22,7 +22,7 @@ BEGIN
         UPDATE __geonames_update_place SET added = added + 1;
         RETURN true;
     ELSE
-        IF (SELECT p.date_modified_external IS NULL OR p.date_modified_external < p_date_modified_external FROM backpacked_place p WHERE p.id = v_place_id) THEN
+        IF (SELECT date_modified_external IS NULL OR date_modified_external < p_date_modified_external FROM backpacked_place WHERE id = v_place_id) THEN
             UPDATE backpacked_place SET name = p_name, name_ascii = p_name_ascii, coords = p_coords, date_modified_external = p_date_modified_external
                 WHERE id = v_place_id;
             DELETE FROM backpacked_placename WHERE place_id = v_place_id;

@@ -1,10 +1,18 @@
 #!/usr/bin/python
 
+import os
 import sys
+
+sys.path.append(os.path.join(os.path.dirname(__file__), ".."))
+
+from backpacked import models
 
 if len(sys.argv) != 3:
     print "Requires input and output file as parameters."
     exit(1)
+
+countries = dict((c.code, c.id) for c in models.Country.objects.all())
+administrative_divisions = dict(((a.country_id, a.code), a.id) for a in models.AdministrativeDivision.objects.all())
 
 f1 = file(sys.argv[1], "r")
 f2 = file(sys.argv[2], "w")
@@ -22,10 +30,8 @@ try:
         name, name_ascii, names = [n.replace("'", "''") for n in [parts[1], parts[2], parts[3]]]
         names = [n for n in [name, name_ascii] if len(n)] + [n for n in names.split(",") if len(n) > 1]
         names = ",".join(set(names))
-        country_code, administrative_division_code = parts[8], parts[10]
-        country_id = "(SELECT id FROM backpacked_country WHERE code = '%s')" % country_code
-        administrative_division_id = "(SELECT id FROM backpacked_administrativedivision WHERE country_id = (SELECT id FROM backpacked_country WHERE code = '%s') AND code = '%s')" \
-            % (country_code, administrative_division_code)
+        country_id = countries[parts[8]]
+        administrative_division_id = administrative_divisions.get((country_id, parts[10]), "NULL")
         lat, lng = parts[4], parts[5]
         coords = "GeometryFromText('POINT(%s %s)', 4326)" % (lat, lng)
         date_modified = parts[18]

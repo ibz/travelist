@@ -11,4 +11,3 @@ if [ -z $2 ]; then
 fi
 
 cat $1 | grep "^[A-Z]" | awk -F "\t" 'BEGIN { print "BEGIN;"; } END { print "COMMIT;"; } { printf("INSERT INTO backpacked_country(code, name) VALUES('"'"'%s'"'"', '"'"'%s'"'"');\n", $1, $5); }' > $2
-
