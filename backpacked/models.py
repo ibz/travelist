@@ -173,7 +173,7 @@ class UserProfile(models.Model):
     current_location = models.ForeignKey(Place, blank=True, null=True)
     about = models.TextField(blank=True)
     picture = models.ImageField(blank=True, upload_to=_get_profile_picture_location)
-    twitter_username = models.CharField(max_length=40, blank=True, null=True, db_index=True)
+    twitter_username = models.CharField(max_length=40, blank=True, null=True, db_index=True, unique=True)
     date_modified = models.DateTimeField(auto_now=True)
 
     def __unicode__(self):
@@ -335,11 +335,12 @@ class Trip(models.Model):
         return new_trip
 
     def add_tweet(self, tweet):
-        annotation = Annotation(trip=self, date=tweet['created_at'], title="", content_type=ContentType.TWEET)
-        annotation.external_id = str(tweet['id'])
-        annotation.content = tweet['text']
-        annotation.visibility = models.Visibility.PUBLIC
-        annotation.save()
+        if Annotation.objects.filter(content_type=ContentType.TWEET, external_id=str(tweet['id'])).count() == 0:
+            annotation = Annotation(trip=self, date=tweet['created_at'], title="", content_type=ContentType.TWEET)
+            annotation.external_id = str(tweet['id'])
+            annotation.content = tweet['text']
+            annotation.visibility = models.Visibility.PUBLIC
+            annotation.save()
 
 class Point(models.Model):
     trip = models.ForeignKey(Trip)
@@ -386,8 +387,8 @@ class Annotation(models.Model):
     segment = models.BooleanField()
     date = models.DateTimeField(null=True, blank=True)
     title = models.CharField(max_length=100)
-    content_type = models.IntegerField(choices=ContentType.choices)
-    external_id = models.CharField(max_length=30, null=True, blank=True)
+    content_type = models.IntegerField(choices=ContentType.choices, db_index=True)
+    external_id = models.CharField(max_length=30, null=True, blank=True, db_index=True)
     content = models.TextField(null=True)
     visibility = models.IntegerField(choices=Visibility.choices, default=Visibility.PUBLIC)
     date_added = models.DateTimeField(auto_now_add=True)
