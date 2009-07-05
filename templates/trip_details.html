@@ -116,6 +116,9 @@ $(function() { init_trip_details([
 <div id="trip-details-tabs" style="display: none;">
 <ul>
   <li><a href="#points"><span>Places</span></a></li>
+  {% if show_trip_notes %}
+  <li><a href="#notes"><span>Notes</span></a></li>
+  {% endif %}
   {% if show_trip_photos %}
   <li><a href="#photos"><span>Photos</span></a></li>
   {% endif %}
@@ -134,6 +137,14 @@ $(function() { init_trip_details([
     {% endfor %}
   </ul>
 </div>
+
+{% if show_trip_notes %}
+<div id="notes">
+  <ul class="plain-list">
+    {% call "_trip_details_annotations.html" with annotations=trip_notes empty="Nothing yet" %}
+  </ul>
+</div>
+{% endif %}
 
 {% if show_trip_photos %}
 <div id="photos">

@@ -3,8 +3,9 @@
     <span class="content">{% autoescape off %}{{ annotation.manager.render_short }}{% endautoescape %}</span>
     {% ifequal user.id trip.user_id %}
     <span class="operations">
-      <a href="{{ annotation.manager.edit_link_url }}" onclick="{{ annotation.manager.edit_link_click }}">edit</a>
-      {% if annotation.manager.can_delete %}| <a href="javascript:delete_annotation({{ trip.id }}, {{ annotation.id }});">delete</a>{% endif %}
+      {% if annotation.manager.can_edit %}<a href="{{ annotation.manager.edit_link_url }}" onclick="{{ annotation.manager.edit_link_click }}">edit</a>{% endif %}
+      {% if annotation.manager.can_edit and annotation.manager.can_delete %}|{% endif %}
+      {% if annotation.manager.can_delete %}<a href="javascript:delete_annotation({{ trip.id }}, {{ annotation.id }});">delete</a>{% endif %}
     </span>
     {% endifequal %}
   </li>

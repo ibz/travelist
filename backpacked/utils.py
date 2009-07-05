@@ -34,6 +34,9 @@ def parse_date(s):
 def format_date_human(value):
     return template.defaultfilters.date(value)
 
+def format_datetime_human(value):
+    return "%s %s" % (template.defaultfilters.date(value), template.defaultfilters.time(value))
+
 class Enum:
     def __init__(self, all):
         """

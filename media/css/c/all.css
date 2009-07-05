@@ -585,7 +585,7 @@ img.user-image {
 /* Trip */
 #map {
     border: 2px solid #5F99CF;
-    width: 700px;
+    width: 630px;
     height: 450px;
 }
 
@@ -595,7 +595,7 @@ img.user-image {
 }
 
 #sort-points li {
-    width: 220px;
+    width: 300px;
 }
 
 #sort-points li .point-view {
@@ -616,7 +616,7 @@ img.user-image {
 #sort-points li .point-edit .operations {
     position: absolute;
     top: 0px;
-    left: 110px;
+    left: 190px;
     width: 100px;
     text-align: right;
     line-height: 2.25em;

@@ -1,12 +1,71 @@
 {% extends "page.html" %}
+
+{% block script %}
+
+function connect_dialog_OK()
+{
+    $("#id_scan_existing_tweets").val($("#connect-dialog input[name='scan-existing-tweets']:checked").val());
+    $("#connect form").submit();
+}
+
+function connect_dialog_Cancel()
+{
+    $("#connect-dialog").dialog('close');
+}
+
+$(function() {
+    $("#account-profile-tabs").tabs().show();
+    $("#connect-dialog").dialog({autoOpen: false, modal: true, buttons: {"OK": connect_dialog_OK, "Cancel": connect_dialog_Cancel}});
+});
+
+function profile_connect_click()
+{
+    if($("#id_twitter_username").val())
+    {
+        $("#connect-dialog").dialog('open');
+    }
+    else
+    {
+        $("#connect form").submit();
+    }
+}
+
+{% endblock %}
+
 {% block content %}
 <div class="column span-10 prepend-7 prepend-top">
+
+<div id="account-profile-tabs" style="display: none">
+<ul>
+  <li><a href="#profile"><span>Profile</span></a></li>
+  <li><a href="#connect"><span>Connect</span></a></li>
+</ul>
+
+<div id="profile">
 <form method="POST" action="" enctype="multipart/form-data">
-<fieldset>
-<legend>Edit profile</legend>
 {{ form.as_p }}
 <p><input type="submit" class="submit button positive" value="Save" /></p>
-</fieldset>
 </form>
+</div>
+
+<div id="connect">
+<form method="POST" action="/account/profile/connect/">
+{{ connect_form.as_p }}
+<p><input type="button" class="button positive" value="Save" onclick="javascript:profile_connect_click();" /></p>
+<div id="connect-dialog">
+  <p>Do you want to scan and import your existing tweets? <a href="/help/twitter/" target="_blank">Read this</a> for help.</p>
+  <p>
+    <input type="radio" id="scan-existing-tweets-1" name="scan-existing-tweets" value="1" checked="checked" />
+    <label for="scan-existing-tweets-1">Yes. Scan and import my existing tweets and any future tweets.</label>
+  </p>
+  <p>
+    <input type="radio" id="scan-existing-tweets-0" name="scan-existing-tweets" value="0" />
+    <label for="scan-existing-tweets-0">No. Scan and import only my future tweets.</label>
+  </p>
+</div>
+</form>
+</div>
+
+</div>
 </div>
 {% endblock %}

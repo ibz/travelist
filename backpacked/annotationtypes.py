@@ -69,6 +69,10 @@ class AnnotationManager(object):
 
     widget = None
 
+    @property
+    def can_edit(self):
+        return self.widget is not None
+
     @classmethod
     def cost_content_types(_):
         return [c for c in models.ContentType.values
@@ -112,7 +116,7 @@ class ActivityAnnotationManager(AnnotationManager):
                                          self.annotation.content.replace("\n", "<br />"))
 
     def clean_content(self, content):
-        return re.sub("\r", "", content)
+        return content.replace("\r", "")
 
 class UrlAnnotationManager(AnnotationManager):
     content_type = models.ContentType.URL
@@ -332,7 +336,7 @@ class CostAnnotationManager(AnnotationManager):
             content['value'] = float(content['value'])
         except ValueError:
             raise forms.util.ValidationError("The value is invalid.")
-        content['comments'] = re.sub("\r", "", content['comments'])
+        content['comments'] = content['comments'].replace("\r", "")
         return serialize(content)
 
 class NoteAnnotationManager(AnnotationManager):
@@ -349,4 +353,20 @@ class NoteAnnotationManager(AnnotationManager):
                                          self.annotation.content.replace("\n", "<br />"))
 
     def clean_content(self, content):
-        return re.sub("\r", "", content)
+        return content.replace("\r", "")
+
+class TweetAnnotationManager(AnnotationManager):
+    content_type = models.ContentType.TWEET
+
+    widget = None
+
+    @property
+    def display_name(self):
+        return self.annotation.content
+
+    def render_short(self):
+        return "<h5>%s</h5><p>%s</p>" % (utils.format_date_human(self.annotation.date),
+                                         html.urlize(self.annotation.content))
+
+    def clean_content(self, content):
+        return content.replace("\r", "").replace("\n", " ")

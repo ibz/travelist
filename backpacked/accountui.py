@@ -42,6 +42,12 @@ class ProfileForm(ui.ModelForm):
             image.save(profile.picture_thumbnail_path, quality=85, optimize=True)
         return profile
 
+class ProfileConnectForm(forms.Form):
+    scan_existing_tweets = forms.CharField(widget=forms.widgets.HiddenInput(), required=False)
+    twitter_username = forms.CharField(max_length=40, widget=forms.widgets.TextInput(attrs={'class': 'text'}),
+                                       required=False,
+                                       help_text="<a href=\"/help/twitter/\" target=\"_blank\" title=\"What's this?\">?</a>")
+
 class RegistrationForm(ui.ModelForm):
     USERNAME_RE = re.compile(r"^[^\d]\w*$")
     USERNAME_BLACKLIST = ["admin", "root"] + \

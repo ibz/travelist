@@ -26,7 +26,7 @@ def new_POST(request, annotation):
     form = annotationui.EditForm(request.POST, request.FILES, annotation=annotation)
     if form.is_valid():
         form.save()
-        return http.HttpResponseRedirect(annotation.trip.get_absolute_url)
+        return http.HttpResponseRedirect(annotation.trip.get_absolute_url())
     else:
         return views.render("annotation_edit.html", request, {'annotation': annotation, 'form': form})
 
@@ -60,7 +60,7 @@ def edit_POST(request, annotation):
         if request.is_ajax():
             return http.HttpResponse(serialize('json', [annotation]))
         else:
-            return http.HttpResponseRedirect(annotation.trip.get_absolute_url)
+            return http.HttpResponseRedirect(annotation.trip.get_absolute_url())
     else:
         if request.is_ajax():
             return http.HttpResponseBadRequest()

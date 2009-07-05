@@ -173,6 +173,7 @@ class UserProfile(models.Model):
     current_location = models.ForeignKey(Place, blank=True, null=True)
     about = models.TextField(blank=True)
     picture = models.ImageField(blank=True, upload_to=_get_profile_picture_location)
+    twitter_username = models.CharField(max_length=40, blank=True, null=True, db_index=True)
     date_modified = models.DateTimeField(auto_now=True)
 
     def __unicode__(self):
@@ -333,6 +334,13 @@ class Trip(models.Model):
             transportation.save()
         return new_trip
 
+    def add_tweet(self, tweet):
+        annotation = Annotation(trip=self, date=tweet['created_at'], title="", content_type=ContentType.TWEET)
+        annotation.external_id = str(tweet['id'])
+        annotation.content = tweet['text']
+        annotation.visibility = models.Visibility.PUBLIC
+        annotation.save()
+
 class Point(models.Model):
     trip = models.ForeignKey(Trip)
     place = models.ForeignKey(Place, null=True)
@@ -369,21 +377,24 @@ ContentType = utils.Enum({'ACTIVITY': (1, "Activity"),
                           'GPS': (5, "GPS"),
                           'ACCOMMODATION': (6, "Accommodation"),
                           'COST': (7, "Cost"),
-                          'NOTE': (8, "Note")})
+                          'NOTE': (8, "Note"),
+                          'TWEET': (9, "Tweet")})
 
 class Annotation(models.Model):
     trip = models.ForeignKey(Trip)
     point = models.ForeignKey(Point, blank=True, null=True)
     segment = models.BooleanField()
-    title = models.CharField(max_length=30)
+    date = models.DateTimeField(null=True, blank=True)
+    title = models.CharField(max_length=100)
     content_type = models.IntegerField(choices=ContentType.choices)
+    external_id = models.CharField(max_length=30, null=True, blank=True)
     content = models.TextField(null=True)
     visibility = models.IntegerField(choices=Visibility.choices, default=Visibility.PUBLIC)
     date_added = models.DateTimeField(auto_now_add=True)
     date_modified = models.DateTimeField(auto_now=True)
 
     class Meta:
-        ordering = ['content_type', 'point', 'segment', 'title']
+        ordering = ['content_type', 'point', 'segment', 'date']
 
     @property
     def manager(self):
@@ -446,3 +457,18 @@ class Suggestion(models.Model):
 
     class Meta:
         ordering = ['-date']
+
+BackgroundTaskType = utils.Enum({'PROCESS_TWEETS': (1, "Process tweets"),
+                                 'PROCESS_TWEETS_REALTIME': (2, "Process tweets realtime")})
+BackgroundTaskFrequency = utils.Enum({'HOURLY': (1, "Hourly")})
+
+class BackgroundTask(models.Model):
+    type = models.IntegerField(choices=BackgroundTaskType.choices)
+    frequency = models.IntegerField(choices=BackgroundTaskFrequency.choices)
+    parameters = models.TextField(null=True)
+    state = models.TextField(null=True)
+
+    @property
+    def manager(self):
+        from backpacked import backgroundtasktypes
+        return backgroundtasktypes.get_manager(self.type)(self)

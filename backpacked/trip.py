@@ -102,8 +102,8 @@ def details(request, id):
         place_ids = '%s-%s' % (min(p1.place_id, p2.place_id), max(p1.place_id, p2.place_id))
         segments.append({'place_ids': place_ids, 'p1': p1, 'p2': p2, 'length': distance(p1.coords, p2.coords).km})
 
+    trip_notes = [a for a in annotations if a.content_type in [models.ContentType.NOTE, models.ContentType.TWEET]]
     trip_photos = [a for a in annotations if a.content_type == models.ContentType.EXTERNAL_PHOTOS]
-
     trip_links = [(l.lhs if l.rhs == trip else l.rhs, l)
                   for l in models.TripLink.objects.filter(Q(lhs=trip) | Q(rhs=trip), status=models.RelationshipStatus.CONFIRMED)]
     trip_links = [l for l in trip_links if l[0].is_visible_to(request.user)]
@@ -111,6 +111,7 @@ def details(request, id):
     return views.render("trip_details.html", request, {'trip': trip, 'points': points, 'segments': segments,
                                                        'points_sorted': sorted(points, key=lambda p: p.place_id), # XXX: needed until #11008 is fixed in Django
                                                        'segments_sorted': sorted(segments, key=lambda s: s['place_ids']), # XXX: needed until #11008 is fixed in Django
+                                                       'trip_notes': trip_notes, 'show_trip_notes': trip.user == request.user or trip_notes,
                                                        'trip_photos': trip_photos, 'show_trip_photos': trip.user == request.user or trip_photos,
                                                        'trip_links': trip_links, 'show_trip_links': trip.user == request.user or trip_links})
 

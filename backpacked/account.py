@@ -93,7 +93,8 @@ def confirm_email(request):
 
 def profile_GET(request):
     form = accountui.ProfileForm(instance=request.user.get_profile())
-    return views.render("account_profile.html", request, {'form': form})
+    connect_form = accountui.ProfileConnectForm({'twitter_username': request.user.get_profile().twitter_username})
+    return views.render("account_profile.html", request, {'form': form, 'connect_form': connect_form})
 
 def profile_POST(request):
     form = accountui.ProfileForm(request.POST, request.FILES, instance=request.user.get_profile())
@@ -101,7 +102,8 @@ def profile_POST(request):
         form.save()
         return http.HttpResponseRedirect("/")
     else:
-        return views.render("account_profile.html", request, {'form': form})
+        connect_form = accountui.ProfileConnectForm({'twitter_username': request.user.get_profile().twitter_username})
+        return views.render("account_profile.html", request, {'form': form, 'connect_form': connect_form})
 
 @login_required
 @require_http_methods(["GET", "POST"])
@@ -110,3 +112,17 @@ def profile(request):
         return profile_GET(request)
     else:
         return profile_POST(request)
+
+@login_required
+@require_POST
+def profile_connect(request):
+    request.user.userprofile.twitter_username = request.POST['twitter_username']
+    request.user.userprofile.save()
+
+    if request.POST.get('scan_existing_tweets') and bool(int(request.POST['scan_existing_tweets'])):
+        if models.BackgroundTask.objects.filter(type=models.BackgroundTaskType.PROCESS_TWEETS, parameters=str(request.user.id)).count() == 0:
+            task = models.BackgroundTask(type=models.BackgroundTaskType.PROCESS_TWEETS, frequency=models.BackgroundTaskFrequency.HOURLY)
+            task.parameters = str(request.user.id)
+            task.save()
+
+    return http.HttpResponseRedirect("/")

@@ -450,6 +450,6 @@ function delete_link(link_id, username)
     $.post("/trips/" + current_trip.id + "/links/" + link_id + "/delete/", {},
            function()
            {
-               window.location = "/trips/" + current_trip.id + "/";
+               window.location = "/trips/" + current_trip.id + "/"; // TODO: this URL doesn't include the title
            });
 }
