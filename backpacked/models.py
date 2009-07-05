@@ -339,7 +339,7 @@ class Trip(models.Model):
             annotation = Annotation(trip=self, date=tweet['created_at'], title="", content_type=ContentType.TWEET)
             annotation.external_id = str(tweet['id'])
             annotation.content = tweet['text']
-            annotation.visibility = models.Visibility.PUBLIC
+            annotation.visibility = Visibility.PUBLIC
             annotation.save()
 
 class Point(models.Model):
