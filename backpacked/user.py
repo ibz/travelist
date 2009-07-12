@@ -1,3 +1,5 @@
+from geopy.distance import distance
+
 from django import http
 from django.contrib.auth.decorators import login_required
 from django.db.models import Count, Avg
@@ -6,7 +8,9 @@ from django.utils import html
 from django.utils import safestring
 from django.views.decorators.http import require_GET, require_POST, require_http_methods
 
+from backpacked import annotationtypes
 from backpacked import models
+from backpacked import utils
 from backpacked import views
 
 @require_GET
@@ -48,3 +52,48 @@ def map(request, username):
     for place in places:
         place.rating = int(place.rating) if place.rating else models.Rating.AVERAGE
     return views.render("user_map.html", request, {'user': user, 'places': places})
+
+@require_GET
+def stats(request, username):
+    user = models.User.objects.get(username=username)
+    trips = list(user.trip_set.all())
+    points = list(models.Point.objects.filter(trip__user=user).select_related('trip').select_related('place').select_related('place__country'))
+    transportations = dict((t.point_id, int(t.content)) for t in models.Annotation.objects.filter(trip__user=user, content_type=models.ContentType.TRANSPORTATION))
+
+    stats = {}
+
+    def add_stat(year, stat, value, init):
+        if not isinstance(year, int) and year is not None:
+            for year in year:
+                add_stat(year, stat, value, init)
+        else:
+            if not year in stats:
+                stats[year] = {}
+            if not stat in stats[year]:
+                stats[year][stat] = init
+            if isinstance(init, list):
+                stats[year][stat].append(value)
+            elif isinstance(init, set):
+                stats[year][stat].add(value)
+            else:
+                stats[year][stat] += value
+            if year is not None:
+                add_stat(None, stat, value, init)
+
+    for trip in trips:
+        add_stat(range(trip.start_date.year, trip.end_date.year + 1), 'trip_count', 1, 0)
+
+    for point in points:
+        if point.visited:
+            year_arrived = point.date_arrived.date().year if point.date_arrived else None
+            add_stat(year_arrived, 'places', point.place, set())
+            add_stat(year_arrived, 'countries', point.place.country, set())
+        next_point = utils.find(points, lambda p: p.trip_id == point.trip_id and p.order_rank > point.order_rank)
+        if next_point:
+            dist = distance(point.coords, next_point.coords).km
+            year_left = point.date_left.date().year if point.date_left else point.trip.date_started.year
+            transportation = annotationtypes.Transportation.Means.get_name(transportations[point.id])
+            add_stat(year_left, 'distance', dist, 0)
+            add_stat(year_left, 'distance_' + transportation, dist, 0)
+
+    return views.render("user_stats.html", request, {'user': user, 'years': sorted(stats.keys()), 'stats': stats.items()})
