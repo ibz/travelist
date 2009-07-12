@@ -92,8 +92,10 @@ def confirm_email(request):
     return views.render("account_confirmed_email.html", request)
 
 def profile_GET(request):
-    form = accountui.ProfileForm(instance=request.user.get_profile())
-    connect_form = accountui.ProfileConnectForm({'twitter_username': request.user.get_profile().twitter_username})
+    profile = request.user.get_profile()
+    form = accountui.ProfileForm(instance=profile)
+    connect_form = accountui.ProfileConnectForm({'twitter_username': profile.twitter_username,
+                                                 'flickr_userid': profile.flickr_userid})
     return views.render("account_profile.html", request, {'form': form, 'connect_form': connect_form})
 
 def profile_POST(request):

@@ -13,14 +13,10 @@ function connect_dialog_Cancel()
     $("#connect-dialog").dialog('close');
 }
 
-$(function() {
-    $("#account-profile-tabs").tabs().show();
-    $("#connect-dialog").dialog({autoOpen: false, modal: true, buttons: {"OK": connect_dialog_OK, "Cancel": connect_dialog_Cancel}});
-});
-
 function profile_connect_click()
 {
-    if($("#id_twitter_username").val())
+    var twitter_username = $("#id_twitter_username").val();
+    if(twitter_username && twitter_username != old_twitter_username)
     {
         $("#connect-dialog").dialog('open');
     }
@@ -29,6 +25,12 @@ function profile_connect_click()
         $("#connect form").submit();
     }
 }
+
+$(function() {
+    $("#account-profile-tabs").tabs().show();
+    $("#connect-dialog").dialog({autoOpen: false, modal: true, buttons: {"OK": connect_dialog_OK, "Cancel": connect_dialog_Cancel}});
+    old_twitter_username = $("#id_twitter_username").val(); // JS::global-var
+});
 
 {% endblock %}
 
