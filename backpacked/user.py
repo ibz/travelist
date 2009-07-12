@@ -91,7 +91,7 @@ def stats(request, username):
         next_point = utils.find(points, lambda p: p.trip_id == point.trip_id and p.order_rank > point.order_rank)
         if next_point:
             dist = distance(point.coords, next_point.coords).km
-            year_left = point.date_left.date().year if point.date_left else point.trip.date_started.year
+            year_left = point.date_left.date().year if point.date_left else point.trip.start_date.year
             transportation = annotationtypes.Transportation.Means.get_name(transportations[point.id])
             add_stat(year_left, 'distance', dist, 0)
             add_stat(year_left, 'distance_' + transportation, dist, 0)
