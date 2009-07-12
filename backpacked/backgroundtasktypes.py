@@ -112,7 +112,7 @@ class ProcessFlickrRealtimeManager(BackgroundTaskManager):
                 user_id = trip.user.userprofile.flickr_userid
                 if not user_id:
                     return
-                photos = flickr.flickr_photos_search(user_id=user_id, tags="backpacked:trip=%s" % trip_id)
+                photos = flickr.flickr_photos_search(user_id=user_id, tags="travelist:trip=%s" % trip_id)
                 for photo in photos:
                     add_flickr_photo(trip, photo)
             except models.Trip.DoesNotExist:
