@@ -9,10 +9,10 @@
   <div class="column span-6">
     <ul class="horizontal-list">
       {% if not user.is_anonymous %}
-      <li><a href="/trips/{{ user.username }}/">My trips</a></li>
-      <li><a href="/people/{{ user.username }}/map/">My world</a></li>
-      <li><a href="/people/{{ user.username }}/stats/">My stats</a></li>
-      <li><a href="/people/{{ user.username }}/friends/">My friends</a></li>
+      <li><a href="/trips/{{ user.username }}/">Trips</a></li>
+      <li><a href="/people/{{ user.username }}/map/">World</a></li>
+      <li><a href="/people/{{ user.username }}/stats/">Stats</a></li>
+      <li><a href="/people/{{ user.username }}/friends/">Friends</a></li>
       {% endif %}
     </ul>
   </div>
