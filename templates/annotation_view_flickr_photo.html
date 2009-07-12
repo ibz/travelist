@@ -1,0 +1,11 @@
+{% extends "page.html" %}
+
+{% block content %}
+<div class="container">
+<div class="column span-16 prepend-4 prepend-top last" align="center">
+<h3>{{ annotation.title }}, <a href="{{ trip.get_absolute_url }}">{{ trip.name }}</a></h3>
+{{ current }} of {{ count }} | <a href="{{ prev.url }}">Previous</a> <a href="{{ next.url }}">Next</a><br />
+<a href="{{ photo.url }}"><img src="{{ photo.normal }}" /></a>
+</div>
+</div>
+{% endblock %}

@@ -8,6 +8,7 @@ import urllib
 import urllib2
 
 from django.core import mail
+
 from django.utils import simplejson
 
 import settings

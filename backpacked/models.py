@@ -173,7 +173,8 @@ class UserProfile(models.Model):
     current_location = models.ForeignKey(Place, blank=True, null=True)
     about = models.TextField(blank=True)
     picture = models.ImageField(blank=True, upload_to=_get_profile_picture_location)
-    twitter_username = models.CharField(max_length=40, blank=True, null=True, db_index=True, unique=True)
+    twitter_username = models.CharField(max_length=40, blank=True, null=True, db_index=True)
+    flickr_userid = models.CharField(max_length=40, blank=True, null=True, db_index=True)
     date_modified = models.DateTimeField(auto_now=True)
 
     def __unicode__(self):
@@ -334,14 +335,6 @@ class Trip(models.Model):
             transportation.save()
         return new_trip
 
-    def add_tweet(self, tweet):
-        if Annotation.objects.filter(content_type=ContentType.TWEET, external_id=str(tweet['id'])).count() == 0:
-            annotation = Annotation(trip=self, date=tweet['created_at'], title="", content_type=ContentType.TWEET)
-            annotation.external_id = str(tweet['id'])
-            annotation.content = tweet['text']
-            annotation.visibility = Visibility.PUBLIC
-            annotation.save()
-
 class Point(models.Model):
     trip = models.ForeignKey(Trip)
     place = models.ForeignKey(Place, null=True)
@@ -379,7 +372,8 @@ ContentType = utils.Enum({'ACTIVITY': (1, "Activity"),
                           'ACCOMMODATION': (6, "Accommodation"),
                           'COST': (7, "Cost"),
                           'NOTE': (8, "Note"),
-                          'TWEET': (9, "Tweet")})
+                          'TWEET': (9, "Tweet"),
+                          'FLICKR_PHOTO': (10, "Flickr photo")})
 
 class Annotation(models.Model):
     trip = models.ForeignKey(Trip)
@@ -460,7 +454,9 @@ class Suggestion(models.Model):
         ordering = ['-date']
 
 BackgroundTaskType = utils.Enum({'PROCESS_TWEETS': (1, "Process tweets"),
-                                 'PROCESS_TWEETS_REALTIME': (2, "Process tweets realtime")})
+                                 'PROCESS_TWITTER_REALTIME': (2, "Process tweets realtime"),
+                                 'PROCESS_FLICKR_REALTIME': (3, "Process Flickr realtime")})
+
 BackgroundTaskFrequency = utils.Enum({'HOURLY': (1, "Hourly")})
 
 class BackgroundTask(models.Model):

@@ -117,6 +117,7 @@ def profile(request):
 @require_POST
 def profile_connect(request):
     request.user.userprofile.twitter_username = request.POST['twitter_username']
+    request.user.userprofile.flickr_userid = request.POST['flickr_userid']
     request.user.userprofile.save()
 
     if request.POST.get('scan_existing_tweets') and bool(int(request.POST['scan_existing_tweets'])):

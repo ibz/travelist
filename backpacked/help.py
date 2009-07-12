@@ -3,7 +3,7 @@ from django.views.decorators.http import require_GET, require_POST, require_http
 
 from backpacked import views
 
-available_sections = ['about', 'contact', 'twitter']
+available_sections = ['about', 'contact', 'twitter', 'flickr', 'faq']
 
 @require_GET
 def view(request, section):

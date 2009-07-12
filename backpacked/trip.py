@@ -103,7 +103,7 @@ def details(request, id):
         segments.append({'place_ids': place_ids, 'p1': p1, 'p2': p2, 'length': distance(p1.coords, p2.coords).km})
 
     trip_notes = [a for a in annotations if a.content_type in [models.ContentType.NOTE, models.ContentType.TWEET]]
-    trip_photos = [a for a in annotations if a.content_type == models.ContentType.EXTERNAL_PHOTOS]
+    trip_photos = [a for a in annotations if a.content_type in [models.ContentType.EXTERNAL_PHOTOS, models.ContentType.FLICKR_PHOTO]]
     trip_links = [(l.lhs if l.rhs == trip else l.rhs, l)
                   for l in models.TripLink.objects.filter(Q(lhs=trip) | Q(rhs=trip), status=models.RelationshipStatus.CONFIRMED)]
     trip_links = [l for l in trip_links if l[0].is_visible_to(request.user)]

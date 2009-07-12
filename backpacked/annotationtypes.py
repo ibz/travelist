@@ -370,3 +370,29 @@ class TweetAnnotationManager(AnnotationManager):
 
     def clean_content(self, content):
         return content.replace("\r", "").replace("\n", " ")
+
+class FlickrPhotoAnnotationManager(AnnotationManager):
+    content_type = models.ContentType.FLICKR_PHOTO
+
+    widget = None
+
+    def render_short(self):
+        content = simplejson.loads(self.annotation.content)
+        return "<h5>%(title)s</h5><p><a href=\"%(url)s\"><img src=\"%(src)s\" title=\"%(title)s\" /></p></a>" \
+            % {'src': content['thumbnail'], 'title': self.annotation.title, 'url': self.annotation.url}
+
+    def render(self, request):
+        content = simplejson.loads(self.annotation.content)
+        trip = self.annotation.trip
+        all_flickr_photos = list(trip.get_annotations_visible_to(request.user).filter(content_type=models.ContentType.FLICKR_PHOTO))
+        count = len(all_flickr_photos)
+        for current in range(count):
+            if all_flickr_photos[current] == self.annotation:
+                break
+        prev = all_flickr_photos[current - 1]
+        next = all_flickr_photos[(current + 1) % count]
+        current += 1 # make it 1-based
+        return views.render("annotation_view_flickr_photo.html", request,
+                            {'trip': trip, 'annotation': self.annotation, 'photo': content,
+                             'current': current, 'count': count,
+                             'prev': prev, 'next': next})
