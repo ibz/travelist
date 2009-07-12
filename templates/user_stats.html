@@ -20,19 +20,21 @@ $(function() {
 {% for stat in stats %}
 {% with stat.0|default:"Overall" as year %}
 <div id="{{ year }}">
-  Number of trips: {{ stat.1.trip_count }}<br />
-  Visited places: {% for place in stat.1.places %}<a href="{{ place.get_absolute_url }}">{{ place.name }}</a>{% if not forloop.last %}, {% endif %}{% endfor %}<br />
-  Visited countries: {% for country in stat.1.countries %}{{ country.name }}{% if not forloop.last %}, {% endif %}{% endfor %}<br />
-  Total distance traveled: {{ stat.1.distance|floatformat:2 }} km<br />
-  {% if stat.1.distance_AIRPLANE %}Distance traveled by airplane: {{ stat.1.distance_AIRPLANE|floatformat:2 }} km<br />{% endif %}
-  {% if stat.1.distance_BIKE %}Distance traveled by bike: {{ stat.1.distance_AIRPLANE|floatformat:2 }} km<br />{% endif %}
-  {% if stat.1.distance_BOAT_X_FERRY %}Distance traveled by boat / ferry: {{ stat.1.distance_BOAT_X_FERRY|floatformat:2 }} km<br />{% endif %}
-  {% if stat.1.distance_BUS %}Distance traveled by bus: {{ stat.1.distance_BUS|floatformat:2 }} km<br />{% endif %}
-  {% if stat.1.distance_CAR %}Distance traveled by car: {{ stat.1.distance_CAR|floatformat:2 }} km<br />{% endif %}
-  {% if stat.1.distance_MOTORCYCLE %}Distance traveled by motorcycle: {{ stat.1.distance_MOTORCYCLE|floatformat:2 }} km<br />{% endif %}
-  {% if stat.1.distance_TRAIN %}Distance traveled by train: {{ stat.1.distance_TRAIN|floatformat:2 }} km<br />{% endif %}
-  {% if stat.1.distance_WALK %}Distance traveled by walking: {{ stat.1.distance_WALK|floatformat:2 }} km<br />{% endif %}
-  {% if stat.1.distance_UNSPECIFIED %}Distance traveled by other means: {{ stat.1.distance_UNSPECIFIED|floatformat:2 }} km<br />{% endif %}
+  <p>Number of trips: {{ stat.1.trip_count }}</p>
+  <p>Visited places: {% for place in stat.1.places %}<a href="{{ place.get_absolute_url }}">{{ place.name }}</a>{% if not forloop.last %}, {% endif %}{% endfor %}</p>
+  <p>Visited countries: {% for country in stat.1.countries %}{{ country.name }}{% if not forloop.last %}, {% endif %}{% endfor %}</p>
+  <p>
+    {% if stat.1.distance_AIRPLANE %}Distance traveled by airplane: {{ stat.1.distance_AIRPLANE|floatformat:2 }} km<br />{% endif %}
+    {% if stat.1.distance_BIKE %}Distance traveled by bike: {{ stat.1.distance_AIRPLANE|floatformat:2 }} km<br />{% endif %}
+    {% if stat.1.distance_BOAT_X_FERRY %}Distance traveled by boat / ferry: {{ stat.1.distance_BOAT_X_FERRY|floatformat:2 }} km<br />{% endif %}
+    {% if stat.1.distance_BUS %}Distance traveled by bus: {{ stat.1.distance_BUS|floatformat:2 }} km<br />{% endif %}
+    {% if stat.1.distance_CAR %}Distance traveled by car: {{ stat.1.distance_CAR|floatformat:2 }} km<br />{% endif %}
+    {% if stat.1.distance_MOTORCYCLE %}Distance traveled by motorcycle: {{ stat.1.distance_MOTORCYCLE|floatformat:2 }} km<br />{% endif %}
+    {% if stat.1.distance_TRAIN %}Distance traveled by train: {{ stat.1.distance_TRAIN|floatformat:2 }} km<br />{% endif %}
+    {% if stat.1.distance_WALK %}Distance traveled by walking: {{ stat.1.distance_WALK|floatformat:2 }} km<br />{% endif %}
+    {% if stat.1.distance_UNSPECIFIED %}Distance traveled by other means: {{ stat.1.distance_UNSPECIFIED|floatformat:2 }} km<br />{% endif %}
+  </p>
+  <p>Total distance traveled: {{ stat.1.distance|floatformat:2 }} km</p>
 </div>
 {% endwith %}
 {% endfor %}

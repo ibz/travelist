@@ -21,6 +21,9 @@ class Country(models.Model):
     def __unicode__(self):
         return "%s (%s)" % (self.name, self.code)
 
+    def __cmp__(self, other):
+        return cmp(self.name, other.name)
+
 class AdministrativeDivision(models.Model):
     code = models.CharField(max_length=20)
     name = models.CharField(max_length=100)

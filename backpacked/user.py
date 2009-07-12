@@ -96,4 +96,8 @@ def stats(request, username):
             add_stat(year_left, 'distance', dist, 0)
             add_stat(year_left, 'distance_' + transportation, dist, 0)
 
+    for year_stats in stats.values():
+        year_stats['places'] = sorted(year_stats.get('places', []))
+        year_stats['countries'] = sorted(year_stats.get('countries', []))
+
     return views.render("user_stats.html", request, {'user': user, 'years': sorted(stats.keys()), 'stats': stats.items()})
