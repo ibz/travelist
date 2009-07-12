@@ -14,7 +14,8 @@ def extra_context():
     if not _extra_context:
         from backpacked import annotationtypes
         _extra_context = {'settings': settings,
-                          'transportation_choices': annotationtypes.Transportation.Means.choices}
+                          'TRANSPORTATION_CHOICES': annotationtypes.Transportation.Means.choices,
+                          'RATINGS': dict((item, getattr(models.Rating, item)) for item in models.Rating.items)}
     return _extra_context
 
 def render(template_file, request, context=None):

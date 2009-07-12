@@ -1,6 +1,6 @@
 from django import http
 from django.contrib.auth.decorators import login_required
-from django.db.models import Count
+from django.db.models import Count, Avg
 from django.db.transaction import commit_on_success
 from django.utils import html
 from django.utils import safestring
@@ -14,10 +14,8 @@ def profile(request, username):
     profile = models.UserProfile.objects.filter(user__username=username).select_related('user').get()
     for_user = profile.user
     is_self, is_friend, is_friend_pending = for_user.get_relationship_status(request.user)
-    trips = models.Trip.objects.for_user(owner=for_user, viewer=request.user)
     return views.render("user_profile.html", request, {'for_user': for_user, 'is_self': is_self,
-                                                       'is_friend': is_friend, 'is_friend_pending': is_friend_pending,
-                                                       'trip_count': trips.count(), 'trips': trips[0:5]})
+                                                       'is_friend': is_friend, 'is_friend_pending': is_friend_pending})
 
 @login_required
 @require_GET
@@ -46,5 +44,7 @@ def relationship(request, username):
 @require_GET
 def map(request, username):
     user = models.User.objects.get(username=username)
-    places = models.Place.objects.filter(point__trip__user=user, point__visited=True).annotate(visit_count=Count('point'))
-    return views.render("user_map.html", request, {'places': places})
+    places = list(models.Place.objects.filter(point__trip__user=user, point__visited=True).annotate(visit_count=Count('point')).annotate(rating=Avg('placerating__value')))
+    for place in places:
+        place.rating = int(place.rating) if place.rating else models.Rating.AVERAGE
+    return views.render("user_map.html", request, {'user': user, 'places': places})

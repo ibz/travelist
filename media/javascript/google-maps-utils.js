@@ -207,7 +207,15 @@ function initUserMap(point_data)
     {
         var p = point_data[i];
         var visit_count_text = "visited " + p.visit_count + " time" + (p.visit_count == 1 ? "" : "s");
-        var marker = new GMarker(new GLatLng(p.lat, p.lng), {title: p.name + ", " + visit_count_text, icon: G_DEFAULT_ICON});
+        var rating_text = "rating: ";
+        var icon;
+        switch (p.rating)
+        {
+            case RATINGS.BAD: icon = G_DEFAULT_ICON; rating_text += "Bad"; break;
+            case RATINGS.AVERAGE: icon = new GIcon(G_DEFAULT_ICON, "/media/images/marker_grey.png"); rating_text += "Average"; break;
+            case RATINGS.GOOD: icon = new GIcon(G_DEFAULT_ICON, "/media/images/marker_green.png"); rating_text += "Good"; break;
+        }
+        var marker = new GMarker(new GLatLng(p.lat, p.lng), {title: p.name + ", " + visit_count_text + ", " + rating_text, icon: icon});
         markers.push(marker);
     }
 

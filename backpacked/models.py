@@ -32,6 +32,10 @@ class AdministrativeDivision(models.Model):
     def __unicode__(self):
         return "%s (%s)" % (self.name, self.code)
 
+Rating = utils.Enum([(1, "Bad"),
+                     (2, "Average"),
+                     (3, "Good")])
+
 class Place(models.Model):
     url_prefix = 'places'
 
@@ -66,8 +70,8 @@ class Place(models.Model):
     @cached_property
     def ratings(self):
         counts = PlaceRating.objects.filter(place=self).values('value').annotate(models.Count('value'))
-        ratings = {1: 0, 2: 0, 3: 0}
-        ratings.update(dict([(c['value'], c['value__count']) for c in counts]))
+        ratings = dict((r, 0) for r in Rating.items)
+        ratings.update(dict([(Rating.get_name(c['value']), c['value__count']) for c in counts]))
         return ratings
 
 class PlaceName(models.Model):
@@ -129,8 +133,8 @@ class Accommodation(models.Model):
     @cached_property
     def ratings(self):
         counts = AccommodationRating.objects.filter(accommodation=self).values('value').annotate(models.Count('value'))
-        ratings = {1: 0, 2: 0, 3: 0}
-        ratings.update(dict([(c['value'], c['value__count']) for c in counts]))
+        ratings = dict((r, 0) for r in Rating.items)
+        ratings.update(dict([(Rating.get_name(c['value']), c['value__count']) for c in counts]))
         return ratings
 
 class AccommodationHist(models.Model):
