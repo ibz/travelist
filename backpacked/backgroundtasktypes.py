@@ -118,4 +118,4 @@ class ProcessFlickrRealtimeManager(BackgroundTaskManager):
             except models.Trip.DoesNotExist:
                 pass
 
-        flickr.track("backpackedit", "trip", process_tag)
+        flickr.track("travelist", "trip", process_tag)
