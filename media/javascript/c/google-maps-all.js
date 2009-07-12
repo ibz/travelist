@@ -1347,6 +1347,38 @@ function initTripMap(point_data, bind_events)
                }, 0);
 }
 
+function initUserMap(point_data)
+{
+    if (!GBrowserIsCompatible())
+    {
+        return;
+    }
+
+    var initialZoom = 9;
+
+    var map = new GMap2(document.getElementById('map'));
+    map.addControl(new GLargeMapControl());
+    map.setCenter(new GLatLng(0, 0), initialZoom);
+
+    var mapCenter = getMapCenter(map, point_data, initialZoom);
+    map.setCenter(mapCenter.latlng, mapCenter.zoom);
+
+    var markers = [];
+    for(var i = 0; i < point_data.length; i++)
+    {
+        var p = point_data[i];
+        var visit_count_text = "visited " + p.visit_count + " time" + (p.visit_count == 1 ? "" : "s");
+        var marker = new GMarker(new GLatLng(p.lat, p.lng), {title: p.name + ", " + visit_count_text, icon: G_DEFAULT_ICON});
+        markers.push(marker);
+    }
+
+    setTimeout(function() {
+                   var marker_manager = new MarkerManager(map);
+                   marker_manager.addMarkers(markers, 1);
+                   marker_manager.refresh();
+               }, 0);
+}
+
 function cleanupMap()
 {
     GUnload();

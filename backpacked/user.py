@@ -1,5 +1,6 @@
 from django import http
 from django.contrib.auth.decorators import login_required
+from django.db.models import Count
 from django.db.transaction import commit_on_success
 from django.utils import html
 from django.utils import safestring
@@ -41,3 +42,9 @@ def relationship(request, username):
     notification.save()
     notification.manager.send_email()
     return http.HttpResponseRedirect("/people/%s/" % other_user.username)
+
+@require_GET
+def map(request, username):
+    user = models.User.objects.get(username=username)
+    places = models.Place.objects.filter(point__trip__user=user, point__visited=True).annotate(visit_count=Count('point'))
+    return views.render("user_map.html", request, {'places': places})

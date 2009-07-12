@@ -10,6 +10,7 @@
     </div>
     <div>{% if for_user.userprofile.about %}{{ for_user.userprofile.about }}{% endif %}</div>
     <div><a href="/trips/{{ for_user.username }}/">{{ trip_count }} trips</a></div>
+    <div><a href="/people/{{ for_user.username }}/map/">map</a></div>
   </div>
   <div class="column span-2 small last">
     {% if not user.is_anonymous %}

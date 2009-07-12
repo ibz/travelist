@@ -27,6 +27,7 @@ urlpatterns = patterns('',
     (r"^people/(?P<username>\w+)/$", 'backpacked.user.profile'),
     (r"^people/(?P<username>\w+)/friends/$", 'backpacked.user.friends'),
     (r"^people/(?P<username>\w+)/relationship/$", 'backpacked.user.relationship'),
+    (r"^people/(?P<username>\w+)/map/$", 'backpacked.user.map'),
 
     (r"^places/search/$", 'backpacked.place.search'),
     (r"^places/suggest/$", 'backpacked.place.suggest'),
