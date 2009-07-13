@@ -17,7 +17,7 @@ $(function() { initUserMap([
 
 {% block content %}
 <div class="column span-14 prepend-5 prepend-top">
-<h3><a href="/people/{{ user.username }}/">{{ user.username }}</a>'s world</h3>
+<h3><a href="/people/{{ for_user.username }}/">{{ for_user.username }}</a>'s world</h3>
 <div class="column span-16 prepend-top last"><div id="map"></div></div>
 </div>
 {% endblock %}

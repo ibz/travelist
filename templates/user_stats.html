@@ -8,7 +8,7 @@ $(function() {
 
 {% block content %}
 <div class="column span-14 prepend-5 prepend-top">
-<h3><a href="/people/{{ user.username }}/">{{ user.username }}</a>'s stats</h3>
+<h3><a href="/people/{{ for_user.username }}/">{{ for_user.username }}</a>'s stats</h3>
 <div id="stats-tabs" style="display: none">
 <ul>
   {% for year in years %}

@@ -51,7 +51,7 @@ def map(request, username):
     places = list(models.Place.objects.filter(point__trip__user=user, point__visited=True).annotate(visit_count=Count('point')).annotate(rating=Avg('placerating__value')))
     for place in places:
         place.rating = int(place.rating) if place.rating else models.Rating.AVERAGE
-    return views.render("user_map.html", request, {'user': user, 'places': places})
+    return views.render("user_map.html", request, {'for_user': user, 'places': places})
 
 @require_GET
 def stats(request, username):
@@ -100,6 +100,6 @@ def stats(request, username):
         year_stats['places'] = sorted(year_stats.get('places', []))
         year_stats['countries'] = sorted(year_stats.get('countries', []))
 
-    return views.render("user_stats.html", request, {'user': user,
+    return views.render("user_stats.html", request, {'for_user': user,
                                                      'years': [None] + list(sorted(set(stats.keys()) - set([None]), reverse=True)),
                                                      'stats': stats.items()})
