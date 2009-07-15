@@ -28,6 +28,7 @@ class PlaceNameAdmin(admin.ModelAdmin):
     list_display = ('name', 'place')
     ordering = ('place__name', 'name')
     search_fields = ['name', 'place__name']
+    raw_id_fields = ['place']
 admin.site.register(models.PlaceName, PlaceNameAdmin)
 
 class PlaceSuggestionAdmin(admin.ModelAdmin):
