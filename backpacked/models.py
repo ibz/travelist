@@ -39,10 +39,13 @@ Rating = utils.Enum([(1, "Bad"),
                      (2, "Average"),
                      (3, "Good")])
 
+Source = utils.Enum([(1, "Manual"),
+                     (2, "Geonames")])
+
 class Place(models.Model):
     url_prefix = 'places'
 
-    source = models.IntegerField() # 1 = manual, 2 = geonames
+    source = models.IntegerField(choices=Source.choices)
     external_code = models.IntegerField()
     name = models.CharField(max_length=100)
     name_ascii = models.CharField(max_length=100)
@@ -50,13 +53,17 @@ class Place(models.Model):
     administrative_division = models.ForeignKey(AdministrativeDivision, null=True)
     coords = models.PointField()
     wiki_content = models.TextField(blank=True)
-    date_modified_external = models.DateTimeField(null=True)
+    date_modified_external = models.DateTimeField(blank=True, null=True)
 
     def __unicode__(self):
         return self.display_name
 
     def __cmp__(self, other):
         return cmp(self.name, other.name)
+
+    @property
+    def source_h(self):
+        return Source.get_description(self.source)
 
     def get_absolute_url(self):
         return "/places/%s-%s/" % (self.id, utils.clean_title_for_url(self.display_name))
@@ -79,7 +86,7 @@ class Place(models.Model):
 
 class PlaceName(models.Model):
     place = models.ForeignKey(Place)
-    source = models.IntegerField() # 1 = manual, 2 = geonames
+    source = models.IntegerField(choices=Source.choices)
     name = models.CharField(max_length=200, db_index=True)
 
 class PlaceSuggestion(models.Model):
@@ -476,3 +483,12 @@ class BackgroundTask(models.Model):
     def manager(self):
         from backpacked import backgroundtasktypes
         return backgroundtasktypes.get_manager(self.type)(self)
+
+    @property
+    def type_h(self):
+        return BackgroundTaskType.get_description(self.type)
+
+    @property
+    def frequency_h(self):
+        return BackgroundTaskFrequency.get_description(self.frequency)
+
