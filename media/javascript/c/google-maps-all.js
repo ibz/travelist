@@ -1168,53 +1168,14 @@ GMap2.prototype.openInfoWindowTabsMaxTabs = function(latlng, tabs, maxTabs, opts
     this.openInfoWindowTabs(latlng, tabs, opts);
 };
 
-function getMapCenter(map, point_data, initialZoom)
+function centerMap(map, point_data)
 {
-    var baseWidth = Math.abs(map.getBounds().getNorthEast().x) * 2;
-    var baseHeight = Math.abs(map.getBounds().getNorthEast().y) * 2;
-
-    var minLat = 99999999;
-    var minLng = 99999999;
-    var maxLat = -99999999;
-    var maxLng = -99999999;
-
-    var i;
-
-    for(i = 0; i < point_data.length; i++)
+    var bounds = new GLatLngBounds();
+    for(var i = 0; i < point_data.length; i++)
     {
-        var lat = point_data[i].lat;
-        var lng = point_data[i].lng;
-
-        if(lat < minLat) minLat = lat;
-        if(lat > maxLat) maxLat = lat;
-        if(lng < minLng) minLng = lng;
-        if(lng > maxLng) maxLng = lng;
+        bounds.extend(new GLatLng(point_data[i].lat, point_data[i].lng));
     }
-
-    var wZoom;
-    var w = Math.abs(maxLng - minLng);
-    for(wZoom = initialZoom; wZoom >= 0; wZoom--)
-    {
-        if(baseWidth > w * 2)
-        {
-            break;
-        }
-        baseWidth *= 2;
-    }
-
-    var hZoom;
-    var h = Math.abs(maxLat - minLat);
-    for(hZoom = initialZoom; hZoom >= 0; hZoom--)
-    {
-        if(baseHeight > h * 2)
-        {
-            break;
-        }
-        baseHeight *= 2;
-    }
-
-    return {latlng: new GLatLng((minLat + maxLat) / 2, (minLng + maxLng) / 2),
-            zoom: Math.min(wZoom, hZoom)};
+    map.setCenter(bounds.getCenter(), map.getBoundsZoomLevel(bounds));
 }
 
 function createTransportationMarker(transportation, latlng)
@@ -1240,8 +1201,7 @@ function initTripMap(point_data, bind_events)
     map.addControl(new GLargeMapControl());
     map.setCenter(new GLatLng(0, 0), initialZoom);
 
-    var mapCenter = getMapCenter(map, point_data, initialZoom);
-    map.setCenter(mapCenter.latlng, mapCenter.zoom);
+    centerMap(map, point_data);
 
     function addListener(overlay, id, i)
     {
@@ -1360,8 +1320,7 @@ function initUserMap(point_data)
     map.addControl(new GLargeMapControl());
     map.setCenter(new GLatLng(0, 0), initialZoom);
 
-    var mapCenter = getMapCenter(map, point_data, initialZoom);
-    map.setCenter(mapCenter.latlng, mapCenter.zoom);
+    centerMap(map, point_data);
 
     var markers = [];
     for(var i = 0; i < point_data.length; i++)
