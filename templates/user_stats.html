@@ -23,6 +23,11 @@ $(function() {
   <p>Number of trips: {{ stat.1.trip_count }}</p>
   <p>Visited places: {% for place in stat.1.places %}<a href="{{ place.get_absolute_url }}">{{ place.name }}</a>{% if not forloop.last %}, {% endif %}{% endfor %}</p>
   <p>Visited countries: {% for country in stat.1.countries %}{{ country.name }}{% if not forloop.last %}, {% endif %}{% endfor %}</p>
+  {% with stat.1.extreme_places as p %}
+  {% if p %}
+  <p>Extremes: N - <a href="{{ p.N.get_absolute_url }}">{{ p.N.name }}</a>; S - <a href="{{ p.S.get_absolute_url }}">{{ p.S.name }}</a>; E - <a href="{{ p.E.get_absolute_url }}">{{ p.E.name }}</a>; W - <a href="{{ p.W.get_absolute_url }}">{{ p.W.name }}</a></p>
+  {% endif %}
+  {% endwith %}
   <p>
     {% if stat.1.distance_AIRPLANE %}Distance traveled by airplane: {{ stat.1.distance_AIRPLANE|floatformat:2 }} km<br />{% endif %}
     {% if stat.1.distance_BIKE %}Distance traveled by bike: {{ stat.1.distance_AIRPLANE|floatformat:2 }} km<br />{% endif %}

@@ -77,28 +77,42 @@ def stats(request, username):
                 stats[year][stat].add(value)
             else:
                 stats[year][stat] += value
-            if year is not None:
-                add_stat(None, stat, value, init)
 
     for trip in trips:
         add_stat(range(trip.start_date.year, trip.end_date.year + 1), 'trip_count', 1, 0)
+	add_stat(None, 'trip_count', 1, 0)
 
+    extreme_N, extreme_S, extreme_E, extreme_W = None, None, None, None
     for point in points:
         if point.visited:
             year_arrived = point.date_arrived.date().year if point.date_arrived else point.trip.start_date.year
             add_stat(year_arrived, 'places', point.place, set())
+	    add_stat(None, 'places', point.place, set())
             add_stat(year_arrived, 'countries', point.place.country, set())
+	    add_stat(None, 'countries', point.place.country, set())
+            if extreme_N is None or point.coords.coords[0] > extreme_N.coords.coords[0]:
+                extreme_N = point.place
+            if extreme_S is None or point.coords.coords[0] < extreme_S.coords.coords[0]:
+                extreme_S = point.place
+            if extreme_E is None or point.coords.coords[1] > extreme_E.coords.coords[1]:
+                extreme_E = point.place
+            if extreme_W is None or point.coords.coords[1] < extreme_W.coords.coords[1]:
+                extreme_W = point.place
         next_point = utils.find(points, lambda p: p.trip_id == point.trip_id and p.order_rank > point.order_rank)
         if next_point:
             dist = distance(point.coords, next_point.coords).km
             year_left = point.date_left.date().year if point.date_left else point.trip.start_date.year
             transportation = annotationtypes.Transportation.Means.get_name(transportations[point.id])
             add_stat(year_left, 'distance', dist, 0)
+	    add_stat(None, 'distance', dist, 0)
             add_stat(year_left, 'distance_' + transportation, dist, 0)
+	    add_stat(None, 'distance_' + transportation, dist, 0)
 
     for year_stats in stats.values():
         year_stats['places'] = sorted(year_stats.get('places', []))
         year_stats['countries'] = sorted(year_stats.get('countries', []))
+
+    stats[None]['extreme_places'] = {'N': extreme_N, 'S': extreme_S, 'E': extreme_E, 'W': extreme_W}
 
     return views.render("user_stats.html", request, {'for_user': user,
                                                      'years': [None] + list(sorted(set(stats.keys()) - set([None]), reverse=True)),
