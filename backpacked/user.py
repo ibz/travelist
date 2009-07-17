@@ -85,7 +85,7 @@ def stats(request, username):
 
     for point in points:
         if point.visited:
-            year_arrived = point.date_arrived.date().year if point.date_arrived else None
+            year_arrived = point.date_arrived.date().year if point.date_arrived else point.trip.start_date.year
             add_stat(year_arrived, 'places', point.place, set())
             add_stat(year_arrived, 'countries', point.place.country, set())
         next_point = utils.find(points, lambda p: p.trip_id == point.trip_id and p.order_rank > point.order_rank)
