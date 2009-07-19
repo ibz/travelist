@@ -1,10 +1,7 @@
 import time
 
-from django.utils import simplejson
-
 from backpacked import models
 from backpacked import utils
-from backpacked.lib import flickr
 from backpacked.lib import twitter
 
 def get_manager(type):
@@ -90,32 +87,3 @@ class ProcessTwitterRealtimeManager(BackgroundTaskManager):
                 pass
 
         twitter.track("#trip", process_tweet)
-
-def add_flickr_photo(trip, photo):
-    if models.Annotation.objects.filter(content_type=models.ContentType.FLICKR_PHOTO, external_id=str(photo['id'])).count() == 0:
-        details = flickr.flickr_photos_getInfo(photo['id'])
-        urls = flickr.flickr_photos_getSizes(photo['id'])
-        annotation = models.Annotation(trip=trip, date=details['date'], title=details['title'], content_type=models.ContentType.FLICKR_PHOTO)
-        annotation.external_id = str(photo['id'])
-        annotation.content = simplejson.dumps({'url': details['url'], 'thumbnail': urls['Thumbnail'], 'normal': urls['Medium']})
-        annotation.visibility = models.Visibility.PUBLIC
-        annotation.save()
-
-class ProcessFlickrRealtimeManager(BackgroundTaskManager):
-    type = models.BackgroundTaskType.PROCESS_FLICKR_REALTIME
-
-    def run(self):
-        def process_tag(value):
-            trip_id = int(value)
-            try:
-                trip = models.Trip.objects.get(id=trip_id)
-                user_id = trip.user.userprofile.flickr_userid
-                if not user_id:
-                    return
-                photos = flickr.flickr_photos_search(user_id=user_id, tags="travelist:trip=%s" % trip_id)
-                for photo in photos:
-                    add_flickr_photo(trip, photo)
-            except models.Trip.DoesNotExist:
-                pass
-
-        flickr.track("travelist", "trip", process_tag)
