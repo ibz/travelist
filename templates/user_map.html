@@ -10,7 +10,7 @@
 {% block script %}
 $(function() { initUserMap([
 {% for p in places %}
-{name: "{{ p.name }}", lat: {{ p.coords.0 }}, lng: {{ p.coords.1 }}, visit_count: {{ p.visit_count }}, rating: {{ p.rating }} }{% if not forloop.last %},{% endif %}
+{url: "{{ p.get_absolute_url }}", name: "{{ p.name }}", lat: {{ p.coords.0 }}, lng: {{ p.coords.1 }}, visit_count: {{ p.visit_count }}, rating: {{ p.rating }} }{% if not forloop.last %},{% endif %}
 {% endfor %}
 ]); });
 {% endblock %}

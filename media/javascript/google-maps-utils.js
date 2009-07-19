@@ -161,6 +161,14 @@ function initUserMap(point_data)
 
     centerMap(map, point_data);
 
+    function addListener(marker, p)
+    {
+        GEvent.addListener(marker, 'click',
+            function(latlng) {
+                map.openInfoWindow(latlng, "<a href=\"" + p.url + "\">" + p.name + "</a>");
+            });
+    }
+
     var markers = [];
     for(var i = 0; i < point_data.length; i++)
     {
@@ -175,6 +183,7 @@ function initUserMap(point_data)
             case RATINGS.GOOD: icon = new GIcon(G_DEFAULT_ICON, "/media/images/marker_green.png"); rating_text += "Good"; break;
         }
         var marker = new GMarker(new GLatLng(p.lat, p.lng), {title: p.name + ", " + visit_count_text + ", " + rating_text, icon: icon});
+        addListener(marker, p);
         markers.push(marker);
     }
 
