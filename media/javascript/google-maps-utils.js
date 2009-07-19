@@ -185,6 +185,26 @@ function initUserMap(point_data)
                }, 0);
 }
 
+function initPlaceMap(lat, lng, name)
+{
+    if (!GBrowserIsCompatible())
+    {
+        return;
+    }
+
+    var map = new GMap2(document.getElementById('place-map'));
+    map.addControl(new GLargeMapControl());
+    map.setCenter(new GLatLng(lat, lng), 4);
+
+    var marker = new GMarker(new GLatLng(lat, lng), {title: name});
+
+    setTimeout(function() {
+                   var marker_manager = new MarkerManager(map);
+                   marker_manager.addMarkers([marker], 1);
+                   marker_manager.refresh();
+               }, 0);
+}
+
 function cleanupMap()
 {
     GUnload();

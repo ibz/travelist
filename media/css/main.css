@@ -252,6 +252,13 @@ input {
     text-align: right;
 }
 
+/* Place */
+#place-map {
+    border: 2px solid #5F99CF;
+    width: 300px;
+    height: 300px;
+}
+
 /* Star rating */
 
 #star-rating {
