@@ -16,7 +16,7 @@
         Arrived in {{ point.name }}{% if point.date_arrived %} on {{ point.date_arrived|date }}{% endif %}.
         Left {{ point.name }} by {{ point.transportation_h }}{% if point.date_left %} on {{ point.date_left|date }}{% endif %}.
       {% else %}
-        Passed through {{ point.name }}{% if point.date_arrived %} on {{ point.date_arrived|date }}{% endif %}
+        Passed through {{ point.name }}{% if point.date_arrived %} on {{ point.date_arrived|date }}{% endif %}{% ifchanged %} (left by {{ point.transportation_h }}){% endifchanged %}.
       {% endif %}
     {% endifequal %}
     {% endwith %}

@@ -373,6 +373,7 @@ class Point(models.Model):
     def transportation(self):
         return int(self.annotation_set.filter(content_type=ContentType.TRANSPORTATION)[0].content)
 
+    @cached_property
     def transportation_h(self):
         import annotationtypes
         return annotationtypes.Transportation.Means.get_description(self.transportation())
