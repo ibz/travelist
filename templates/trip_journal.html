@@ -1,0 +1,27 @@
+{% extends "page.html" %}
+
+{% block content %}
+<div class="column span-15 prepend-5 prepend-top">
+<h3><a href="{{ trip.get_absolute_url }}">{{ trip.name }}</a>, trip journal</h3>
+{% for point in trip.point_set.all %}
+<p>
+  {% ifequal point.order_rank 0 %}
+    Left {{ point.name }} by {{ point.transportation_h }} on {% firstof point.date_left|date trip.start_date|date %}.
+  {% else %}
+    {% with point.order_rank|add:1 as rank %}
+    {% ifequal rank trip.point_set.count %}
+      Arrived in {{ point.name }} on {% firstof point.date_arrived|date trip.end_date|date %}.
+    {% else %}
+      {% if point.visited %}
+        Arrived in {{ point.name }}{% if point.date_arrived %} on {{ point.date_arrived|date }}{% endif %}.
+        Left {{ point.name }} by {{ point.transportation_h }}{% if point.date_left %} on {{ point.date_left|date }}{% endif %}.
+      {% else %}
+        Passed through {{ point.name }}{% if point.date_arrived %} on {{ point.date_arrived|date }}{% endif %}
+      {% endif %}
+    {% endifequal %}
+    {% endwith %}
+  {% endifequal %}
+</p>
+{% endfor %}
+</div>
+{% endblock %}

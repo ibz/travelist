@@ -48,6 +48,7 @@ urlpatterns = patterns('',
     (r"^trips/(?P<id>\d+)/points/$", 'backpacked.trip.points'),
     (r"^trips/(?P<id>\d+)/edit/$", 'backpacked.trip.edit'),
     (r"^trips/(?P<id>\d+)/delete/$", 'backpacked.trip.delete'),
+    (r"^trips/(?P<id>\d+)/journal/$", 'backpacked.trip.journal'),
 
     (r"^trips/(?P<username>\w+)/$", 'backpacked.trip.user'),
 

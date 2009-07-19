@@ -27,6 +27,7 @@ $(document).unload(cleanupMap);
   <a href="/trips/{{ trip.id }}/edit/">edit trip</a><br />
   <a href="javascript:delete_trip({{ trip.id }});">delete trip</a><br />
   {% endifequal %}
+  <a href="/trips/{{ trip.id }}/journal/">trip journal</a>
 </div>
 <hr />
 <div id="trip-activity" style="display: none;"><img src="{{ MEDIA_URL }}images/ajax.gif" /></div>

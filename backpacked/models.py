@@ -370,6 +370,13 @@ class Point(models.Model):
     def __cmp__(self, other):
         return cmp(self.order_rank, other.order_rank)
 
+    def transportation(self):
+        return int(self.annotation_set.filter(content_type=ContentType.TRANSPORTATION)[0].content)
+
+    def transportation_h(self):
+        import annotationtypes
+        return annotationtypes.Transportation.Means.get_description(self.transportation())
+
 class TripLink(models.Model):
     lhs = models.ForeignKey(Trip, related_name="triplink_lhs_set")
     rhs = models.ForeignKey(Trip, related_name="triplink_rhs_set", null=True)
