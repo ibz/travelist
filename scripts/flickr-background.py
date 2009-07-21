@@ -21,6 +21,7 @@ def add_flickr_photo(trip, photo):
         annotation.save()
 
 def process_tag(value):
+    print "Found: ", value
     trip_id = int(value)
     try:
         trip = models.Trip.objects.get(id=trip_id)

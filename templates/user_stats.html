@@ -25,10 +25,12 @@ $(function() {
   <p>Visited countries: {% for country in stat.1.countries %}{{ country.name }}{% if not forloop.last %}, {% endif %}{% endfor %}</p>
   {% with stat.1.extreme_places as p %}
   {% if p %}
-    <p>Northernmost place: <a href="{{ p.N.get_absolute_url }}">{{ p.N.name }}</a></p>
-    <p>Southernmost place: <a href="{{ p.S.get_absolute_url }}">{{ p.S.name }}</a></p>
-    <p>Easternmost place: <a href="{{ p.E.get_absolute_url }}">{{ p.E.name }}</a></p>
-    <p>Westernmost place: <a href="{{ p.W.get_absolute_url }}">{{ p.W.name }}</a></p>
+    <p>
+      Northernmost place: <a href="{{ p.N.get_absolute_url }}">{{ p.N.name }}</a><br />
+      Southernmost place: <a href="{{ p.S.get_absolute_url }}">{{ p.S.name }}</a><br />
+      Easternmost place: <a href="{{ p.E.get_absolute_url }}">{{ p.E.name }}</a><br />
+      Westernmost place: <a href="{{ p.W.get_absolute_url }}">{{ p.W.name }}</a>
+    </p>
   {% endif %}
   {% endwith %}
   <p>
