@@ -26,14 +26,6 @@ class BackgroundTaskManager(object):
     def finish(self):
         self.task.delete()
 
-def add_tweet(trip, tweet):
-    if models.Annotation.objects.filter(content_type=models.ContentType.TWEET, external_id=str(tweet['id'])).count() == 0:
-        annotation = models.Annotation(trip=trip, date=tweet['created_at'], title="", content_type=models.ContentType.TWEET)
-        annotation.external_id = str(tweet['id'])
-        annotation.content = annotation.manager.clean_content(tweet['text'])
-        annotation.visibility = models.Visibility.PUBLIC
-        annotation.save()
-
 class ProcessTweetsManager(BackgroundTaskManager):
     type = models.BackgroundTaskType.PROCESS_TWEETS
 
@@ -67,23 +59,12 @@ class ProcessTweetsManager(BackgroundTaskManager):
                     return
                 trip = utils.find(trips, lambda t: t.start_date <= date.date() <= t.end_date)
                 if trip:
-                    add_tweet(trip, tweet)
+                    if models.Annotation.objects.filter(content_type=models.ContentType.TWEET, external_id=str(tweet['id'])).count() == 0:
+                        annotation = models.Annotation(trip=trip, date=tweet['created_at'], title="", content_type=models.ContentType.TWEET)
+                        annotation.external_id = str(tweet['id'])
+                        annotation.content = annotation.manager.clean_content(tweet['text'])
+                        annotation.save()
             self.save_state(tweets[-1]['id'])
             limit -= 1
             page += 1
             time.sleep(1)
-
-class ProcessTwitterRealtimeManager(BackgroundTaskManager):
-    type = models.BackgroundTaskType.PROCESS_TWITTER_REALTIME
-
-    def run(self):
-        def process_tweet(tweet):
-            try:
-                twitter_username, date = tweet['user']['screen_name'], tweet['created_at']
-                user = models.User.objects.get(userprofile__twitter_username=twitter_username)
-                trip = profile.user.trip_set.filter(start_date__lte=date, end_date__gte=date)[0]
-                add_tweet(trip, tweet)
-            except models.User.DoesNotExist, IndexError:
-                pass
-
-        twitter.track("#trip", process_tweet)

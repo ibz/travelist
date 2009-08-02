@@ -475,10 +475,7 @@ class Suggestion(models.Model):
     class Meta:
         ordering = ['-date']
 
-BackgroundTaskType = utils.Enum({'PROCESS_TWEETS': (1, "Process tweets"),
-                                 'PROCESS_TWITTER_REALTIME': (2, "Process tweets realtime"),
-                                 'PROCESS_FLICKR_REALTIME': (3, "Process Flickr realtime")})
-
+BackgroundTaskType = utils.Enum({'PROCESS_TWEETS': (1, "Process tweets")})
 BackgroundTaskFrequency = utils.Enum({'HOURLY': (1, "Hourly")})
 
 class BackgroundTask(models.Model):
