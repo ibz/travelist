@@ -1,7 +1,7 @@
 from django import forms
 
-from backpacked import models
-from backpacked import ui
+from travelist import models
+from travelist import ui
 
 class EditForm(ui.ModelForm):
     name = forms.fields.CharField(widget=forms.widgets.TextInput(attrs={'class': 'title'}))

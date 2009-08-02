@@ -8,9 +8,9 @@ from django import forms
 from django.utils import html
 from django.utils import simplejson
 
-from backpacked import models
-from backpacked import utils
-from backpacked import views
+from travelist import models
+from travelist import utils
+from travelist import views
 
 import settings
 

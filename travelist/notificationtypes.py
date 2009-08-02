@@ -3,8 +3,8 @@ from datetime import datetime
 from django.core import mail
 from django.template import loader, Context
 
-from backpacked import models
-from backpacked import utils
+from travelist import models
+from travelist import utils
 
 import settings
 
@@ -59,8 +59,8 @@ class FriendRequestNotificationManager(NotificationManager):
         email_subject = "Friend request"
         email_body = (
 """Hello, %(user)s.
-%(requesting_user)s wants to add you as a friend on backpacked.it.
-You can accept his request by following this link: http://backpacked.it/notifications/
+%(requesting_user)s wants to add you as a friend on traveli.st.
+You can accept his request by following this link: http://traveli.st/notifications/
 """ % (
                 {'user': self.notification.user.username,
                  'requesting_user': models.User.objects.get(id=int(self.notification.content)).username}))
@@ -98,8 +98,8 @@ class TripShareRequestNotificationManager(NotificationManager):
         email_subject = "Trip share request"
         email_body = (
 """Hello, %(user)s.
-%(requesting_user)s wants to add you to one of his trips on backpacked.it.
-You can accept his request by following this link: http://backpacked.it/notifications/
+%(requesting_user)s wants to add you to one of his trips on traveli.st.
+You can accept his request by following this link: http://traveli.st/notifications/
 """ % (
                 {'user': self.notification.user.username,
                  'requesting_user': models.TripLink.objects.get(id=int(self.notification.content)).lhs.user.username}))

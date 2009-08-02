@@ -4,8 +4,8 @@ from django.contrib.auth.decorators import login_required
 from django.db.transaction import commit_on_success
 from django.views.decorators.http import require_GET, require_POST, require_http_methods
 
-from backpacked import models
-from backpacked import views
+from travelist import models
+from travelist import views
 
 @login_required
 @require_GET

@@ -5,9 +5,9 @@ from django.core import mail
 from django.db.models import Q
 from django.views.decorators.http import require_GET, require_POST, require_http_methods
 
-from backpacked import models
-from backpacked import placeui
-from backpacked import views
+from travelist import models
+from travelist import placeui
+from travelist import views
 
 import settings
 

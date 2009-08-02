@@ -7,7 +7,7 @@ from xml.dom import minidom
 
 from django.core import mail
 
-from backpacked import utils
+from travelist import utils
 
 import settings
 

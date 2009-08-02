@@ -5,7 +5,7 @@ import sys
 
 sys.path.append(os.path.join(os.path.dirname(__file__), ".."))
 
-from backpacked import models
+from travelist import models
 
 if len(sys.argv) != 3:
     print "Requires input and output file as parameters."

@@ -8,8 +8,8 @@ from django.contrib.gis.db import models
 
 import settings
 
-from backpacked import utils
-from backpacked.utils import cached_property
+from travelist import utils
+from travelist.utils import cached_property
 
 class Country(models.Model):
     code = models.CharField(max_length=2)
@@ -415,7 +415,7 @@ class Annotation(models.Model):
 
     @property
     def manager(self):
-        from backpacked import annotationtypes
+        from travelist import annotationtypes
         return annotationtypes.get_manager(self.content_type)(self)
 
     def __unicode__(self):
@@ -460,7 +460,7 @@ class Notification(models.Model):
 
     @property
     def manager(self):
-        from backpacked import notificationtypes
+        from travelist import notificationtypes
         return notificationtypes.get_manager(self.type)(self)
 
 SuggestionType = utils.Enum([(1, "Report issue"),
@@ -489,7 +489,7 @@ class BackgroundTask(models.Model):
 
     @property
     def manager(self):
-        from backpacked import backgroundtasktypes
+        from travelist import backgroundtasktypes
         return backgroundtasktypes.get_manager(self.type)(self)
 
     @property

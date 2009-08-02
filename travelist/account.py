@@ -12,10 +12,10 @@ from django.db.models import Q
 from django.db.transaction import commit_on_success
 from django.views.decorators.http import require_GET, require_POST, require_http_methods
 
-from backpacked import accountui
-from backpacked import models
-from backpacked import utils
-from backpacked import views
+from travelist import accountui
+from travelist import models
+from travelist import utils
+from travelist import views
 
 import settings
 
@@ -59,9 +59,9 @@ def register_POST(request):
 
         email_subject = "Email address confirmation"
         email_body = (
-"""Hello %(user)s and thanks for signing up for a backpacked.it account!
+"""Hello %(user)s and thanks for signing up for a traveli.st account!
 To confirm your email address click this link:
-http://backpacked.it/account/confirm-email/?username=%(user)s&key=%(key)s""" % (
+http://traveli.st/account/confirm-email/?username=%(user)s&key=%(key)s""" % (
                 {'user': user.username,
                  'key': profile.confirmation_key}))
         mail.send_mail(email_subject,

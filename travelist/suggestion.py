@@ -3,9 +3,9 @@ from django.contrib.auth.decorators import login_required
 from django.core import mail
 from django.views.decorators.http import require_GET, require_POST, require_http_methods
 
-from backpacked import models
-from backpacked import suggestionui
-from backpacked import views
+from travelist import models
+from travelist import suggestionui
+from travelist import views
 
 def new_GET(request, suggestion):
     form = suggestionui.EditForm(instance=suggestion)

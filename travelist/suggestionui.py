@@ -1,5 +1,5 @@
-from backpacked import models
-from backpacked import ui
+from travelist import models
+from travelist import ui
 
 class EditForm(ui.ModelForm):
     class Meta:

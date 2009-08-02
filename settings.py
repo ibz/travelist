@@ -7,8 +7,8 @@ ADMINS = [("Ionut Bizau", "ionut@bizau.ro")]
 MANAGERS = ADMINS
 
 DATABASE_ENGINE = 'postgresql_psycopg2'
-DATABASE_NAME = 'backpacked.it'
-DATABASE_USER = 'backpacked.it'
+DATABASE_NAME = 'travelist'
+DATABASE_USER = 'travelist'
 DATABASE_PASSWORD = ''
 DATABASE_HOST = 'localhost'
 DATABASE_PORT = '5432'
@@ -29,10 +29,10 @@ ADMIN_MEDIA_PREFIX = '/admin-media/'
 
 SECRET_KEY = '@2s!oe3(g2w(sifra4t+=!whk79-b-3p8gr4o!fw#a_x4deht3'
 
-SERVER_EMAIL = "\"backpacked.it\" <noreply@backpacked.it>" # used to send notifications to users and admins (AKA noreply email)
+SERVER_EMAIL = "\"traveli.st\" <noreply@traveli.st>" # used to send notifications to users and admins (AKA noreply email)
 EMAIL_HOST = "smtp.gmail.com"
 EMAIL_PORT = 587
-EMAIL_HOST_USER = "noreply@backpacked.it"
+EMAIL_HOST_USER = "noreply@traveli.st"
 EMAIL_HOST_PASSWORD = "22W425"
 EMAIL_USE_TLS = True
 EMAIL_SUBJECT_PREFIX = ""
@@ -45,7 +45,7 @@ FLICKR_KEY_SECRET = ""
 
 APPEND_SLASH = True
 
-AUTH_PROFILE_MODULE = 'backpacked.UserProfile'
+AUTH_PROFILE_MODULE = 'travelist.UserProfile'
 
 TEMPLATE_LOADERS = (
     'django.template.loaders.filesystem.load_template_source',
@@ -73,7 +73,7 @@ TEMPLATE_DIRS = [
 ]
 
 INSTALLED_APPS = (
-    'backpacked',
+    'travelist',
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',

@@ -2,8 +2,8 @@ import re
 
 from django import forms
 
-from backpacked import models
-from backpacked import ui
+from travelist import models
+from travelist import ui
 
 import settings
 

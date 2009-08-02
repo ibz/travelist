@@ -1,8 +1,8 @@
 from django.contrib import admin
 from django.core import mail
 
-from backpacked import models
-from backpacked import placeui
+from travelist import models
+from travelist import placeui
 
 import settings
 

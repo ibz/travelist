@@ -7,8 +7,8 @@ sys.path.append(os.path.join(os.path.dirname(__file__), ".."))
 
 from django.utils import simplejson
 
-from backpacked import models
-from backpacked.lib import flickr
+from travelist import models
+from travelist.lib import flickr
 
 def add_flickr_photo(trip, photo):
     if models.Annotation.objects.filter(content_type=models.ContentType.FLICKR_PHOTO, external_id=str(photo['id'])).count() == 0:

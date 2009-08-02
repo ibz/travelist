@@ -3,8 +3,8 @@ from django import shortcuts
 from django import template
 from django.views.decorators.http import require_GET, require_POST, require_http_methods
 
-from backpacked import accountui
-from backpacked import models
+from travelist import accountui
+from travelist import models
 
 import settings
 
@@ -12,7 +12,7 @@ _extra_context = None
 def extra_context():
     global _extra_context
     if not _extra_context:
-        from backpacked import annotationtypes
+        from travelist import annotationtypes
         _extra_context = {'settings': settings,
                           'TRANSPORTATION_CHOICES': annotationtypes.Transportation.Means.choices,
                           'RATINGS': dict((item, getattr(models.Rating, item)) for item in models.Rating.items)}

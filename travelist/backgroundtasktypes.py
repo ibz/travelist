@@ -1,8 +1,8 @@
 import time
 
-from backpacked import models
-from backpacked import utils
-from backpacked.lib import twitter
+from travelist import models
+from travelist import utils
+from travelist.lib import twitter
 
 def get_manager(type):
     return BackgroundTaskManager.all[type]

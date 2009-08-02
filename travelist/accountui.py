@@ -5,9 +5,9 @@ from PIL import Image
 from django import forms
 from django.contrib import auth
 
-from backpacked import models
-from backpacked import placeui
-from backpacked import ui
+from travelist import models
+from travelist import placeui
+from travelist import ui
 
 class LoginForm(ui.Form):
     username = forms.fields.CharField(required=False, widget=forms.widgets.TextInput(attrs={'class': 'text'}))

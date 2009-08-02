@@ -8,10 +8,10 @@ from django.utils import html
 from django.utils import safestring
 from django.views.decorators.http import require_GET, require_POST, require_http_methods
 
-from backpacked import annotationtypes
-from backpacked import models
-from backpacked import utils
-from backpacked import views
+from travelist import annotationtypes
+from travelist import models
+from travelist import utils
+from travelist import views
 
 @require_GET
 def profile(request, username):

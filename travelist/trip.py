@@ -12,11 +12,11 @@ from django.db.transaction import commit_on_success
 from django.utils import simplejson
 from django.views.decorators.http import require_GET, require_POST, require_http_methods
 
-from backpacked import annotationtypes
-from backpacked import tripui
-from backpacked import models
-from backpacked import utils
-from backpacked import views
+from travelist import annotationtypes
+from travelist import tripui
+from travelist import models
+from travelist import utils
+from travelist import views
 
 @require_GET
 def user(request, username):

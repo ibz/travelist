@@ -1,7 +1,7 @@
 from django import forms
 
-from backpacked import models
-from backpacked import ui
+from travelist import models
+from travelist import ui
 
 class PlaceInput(forms.widgets.Widget):
     def render(self, name, value, attrs=None):

@@ -8,7 +8,7 @@ sys.path.append(os.path.join(os.path.dirname(__file__), ".."))
 
 from django.core import mail
 
-from backpacked import models
+from travelist import models
 
 try:
     task = models.BackgroundTask.objects.filter(frequency=models.BackgroundTaskFrequency.HOURLY).order_by('id')[0]

@@ -3,9 +3,9 @@ from django import shortcuts
 from django.contrib.auth.decorators import login_required
 from django.views.decorators.http import require_GET, require_POST, require_http_methods
 
-from backpacked import accommodationui
-from backpacked import models
-from backpacked import views
+from travelist import accommodationui
+from travelist import models
+from travelist import views
 
 @require_GET
 def view(request, id):
