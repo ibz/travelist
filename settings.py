@@ -33,7 +33,7 @@ SERVER_EMAIL = "\"traveli.st\" <noreply@traveli.st>" # used to send notification
 EMAIL_HOST = "smtp.gmail.com"
 EMAIL_PORT = 587
 EMAIL_HOST_USER = "noreply@traveli.st"
-EMAIL_HOST_PASSWORD = "22W425"
+EMAIL_HOST_PASSWORD = "7F6983"
 EMAIL_USE_TLS = True
 EMAIL_SUBJECT_PREFIX = ""
 
