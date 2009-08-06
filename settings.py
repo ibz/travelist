@@ -29,11 +29,11 @@ ADMIN_MEDIA_PREFIX = '/admin-media/'
 
 SECRET_KEY = '@2s!oe3(g2w(sifra4t+=!whk79-b-3p8gr4o!fw#a_x4deht3'
 
-SERVER_EMAIL = "\"traveli.st\" <noreply@traveli.st>" # used to send notifications to users and admins (AKA noreply email)
+SERVER_EMAIL = "\"traveli.st\" <contact@traveli.st>" # used to send notifications to users and admins
 EMAIL_HOST = "smtp.gmail.com"
 EMAIL_PORT = 587
-EMAIL_HOST_USER = "noreply@traveli.st"
-EMAIL_HOST_PASSWORD = "7F6983"
+EMAIL_HOST_USER = "contact@traveli.st"
+EMAIL_HOST_PASSWORD = "c064882305d8"
 EMAIL_USE_TLS = True
 EMAIL_SUBJECT_PREFIX = ""
 
