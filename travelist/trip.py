@@ -227,6 +227,6 @@ def delete_link(request, id, link_id):
 
 @require_GET
 def journal(request, id):
-    trip = shortcuts.get_object_or_404(models.Trip, id=id, user=request.user)
+    trip = shortcuts.get_object_or_404(models.Trip, id=id)
 
     return views.render("trip_journal.html", request, {'trip': trip})
