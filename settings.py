@@ -24,7 +24,7 @@ LANGUAGE_CODE = 'en-us'
 USE_I18N = True
 
 MEDIA_ROOT = os.path.join(os.path.dirname(__file__), "media")
-MEDIA_URL = '/media/'
+MEDIA_URL = 'http://traveli.st/media/'
 ADMIN_MEDIA_PREFIX = '/admin-media/'
 
 SECRET_KEY = '@2s!oe3(g2w(sifra4t+=!whk79-b-3p8gr4o!fw#a_x4deht3'
