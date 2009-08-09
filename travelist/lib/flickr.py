@@ -58,7 +58,7 @@ def track(namespace, predicate, callback):
                 if value['last_added'] > last_added_max:
                     last_added_max = value['last_added']
             time.sleep(60)
-        except:
+        except Exception:
             traceback.print_exc()
             time.sleep(wait_time)
             wait_time *= 2

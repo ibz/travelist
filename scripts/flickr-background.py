@@ -2,6 +2,7 @@
 
 import os
 import sys
+import traceback
 
 sys.path.append(os.path.join(os.path.dirname(__file__), ".."))
 
@@ -21,17 +22,23 @@ def add_flickr_photo(trip, photo):
         annotation.save()
 
 def process_tag(value):
-    print "Found: ", value
-    trip_id = int(value)
     try:
+        trip_id = int(value)
         trip = models.Trip.objects.get(id=trip_id)
+    except ValueError, models.Trip.DoesNotExist:
+        return
+    except Exception:
+        traceback.print_exc()
+        raise
+    try:
         user_id = trip.user.userprofile.flickr_userid
         if not user_id:
             return
         photos = flickr.flickr_photos_search(user_id=user_id, tags="travelist:trip=%s" % trip_id)
         for photo in photos:
             add_flickr_photo(trip, photo)
-    except models.Trip.DoesNotExist:
-        pass
+    except Exception:
+        traceback.print_exc()
+        raise
 
 flickr.track("travelist", "trip", process_tag)

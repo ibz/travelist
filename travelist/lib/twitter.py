@@ -52,7 +52,7 @@ def track(keyword, callback):
                 if line:
                     status = cleanup_status(simplejson.loads(line))
                     callback(status)
-        except:
+        except Exception:
             time.sleep(wait_time)
             wait_time *= 2
             if wait_time > 5 * 60:
