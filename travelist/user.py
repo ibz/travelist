@@ -60,7 +60,7 @@ def stats(request, username):
     points = list(models.Point.objects.filter(trip__user=user).select_related('trip').select_related('place').select_related('place__country'))
     transportations = dict((t.point_id, int(t.content)) for t in models.Annotation.objects.filter(trip__user=user, content_type=models.ContentType.TRANSPORTATION))
 
-    stats = {}
+    stats = {None: {}}
 
     def add_stat(year, stat, value, init):
         if not isinstance(year, int) and year is not None:
