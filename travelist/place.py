@@ -89,11 +89,18 @@ def rate(request, id):
 
 @login_required
 @require_POST
-def comment(request, id):
-    place = shortcuts.get_object_or_404(models.Place, id=id)
+def comment_new(request, place_id):
+    place = shortcuts.get_object_or_404(models.Place, id=place_id)
 
     comment = models.PlaceComment(place=place, user=request.user)
     comment.content = request.POST['comment_content']
     comment.save()
 
     return http.HttpResponseRedirect(place.get_absolute_url())
+
+@login_required
+@require_POST
+def comment_delete(request, place_id, id):
+    comment = shortcuts.get_object_or_404(models.PlaceComment, id=id, user=request.user)
+    comment.delete()
+    return http.HttpResponse()

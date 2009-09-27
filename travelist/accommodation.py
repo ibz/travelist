@@ -59,11 +59,18 @@ def rate(request, id):
 
 @login_required
 @require_POST
-def comment(request, id):
-    accommodation = shortcuts.get_object_or_404(models.Accommodation, id=id)
+def comment_new(request, accommodation_id):
+    accommodation = shortcuts.get_object_or_404(models.Accommodation, id=accommodation_id)
 
     comment = models.AccommodationComment(accommodation=accommodation, user=request.user)
     comment.content = request.POST['comment_content']
     comment.save()
 
     return http.HttpResponseRedirect(accommodation.get_absolute_url())
+
+@login_required
+@require_POST
+def comment_delete(request, accommodation_id, id):
+    comment = shortcuts.get_object_or_404(models.AccommodationComment, id=id, user=request.user)
+    comment.delete()
+    return http.HttpResponse()
