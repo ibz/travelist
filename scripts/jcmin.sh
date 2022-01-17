@@ -5,7 +5,7 @@ function update_v {
 }
 
 function update_jsmin {
-    bzr diff $1 > /dev/null || cat $1 | scripts/lib/jsmin.py > ${1%.*}.min.${1##*.}
+    bzr diff $1 > /dev/null || cat $1 | scripts/vendor/jsmin.py > ${1%.*}.min.${1##*.}
 }
 
 function update_cssmin {
@@ -13,20 +13,20 @@ function update_cssmin {
 }
 
 # blueprint CSS
-cp media/css/lib/blueprint/screen.css media/css/c/blueprint-screen.css
+cp media/css/vendor/blueprint/screen.css media/css/c/blueprint-screen.css
 update_cssmin media/css/c/blueprint-screen.css
 update_v media/css/c/blueprint-screen.css
-cp media/css/lib/blueprint/ie.css media/css/c/blueprint-ie.css
+cp media/css/vendor/blueprint/ie.css media/css/c/blueprint-ie.css
 update_cssmin media/css/c/blueprint-ie.css
 update_v media/css/c/blueprint-ie.css
 
 # the rest of CSS
-cat media/css/lib/jquery/*.css media/css/main.css > media/css/c/all.css
+cat media/css/vendor/jquery/*.css media/css/main.css > media/css/c/all.css
 update_cssmin media/css/c/all.css
 update_v media/css/c/all.css
 
 # google maps JS
-cat media/javascript/lib/google-maps/*.js media/javascript/google-maps-utils.js > media/javascript/c/google-maps-all.js
+cat media/javascript/vendor/google-maps/*.js media/javascript/google-maps-utils.js > media/javascript/c/google-maps-all.js
 update_jsmin media/javascript/c/google-maps-all.js
 update_v media/javascript/c/google-maps-all.js
 
@@ -41,6 +41,6 @@ update_jsmin media/javascript/c/trip.js
 update_v media/javascript/c/trip.js
 
 # the rest of JS
-cat `for f in media/javascript/lib/jquery/*.js; do if [ ! -L $f ]; then echo $f; fi; done` media/javascript/utils.js > media/javascript/c/all.js
+cat `for f in media/javascript/vendor/jquery/*.js; do if [ ! -L $f ]; then echo $f; fi; done` media/javascript/utils.js > media/javascript/c/all.js
 update_jsmin media/javascript/c/all.js
 update_v media/javascript/c/all.js
